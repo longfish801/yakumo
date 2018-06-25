@@ -1,0 +1,237 @@
+#! washscr BLtxt文書へ整形
+
+## slice 空白行区切り
+#-judge BLエスケープ#除外判定
+
+# call 箇条書き
+#-judge 箇条書き#判定
+#-combi 箇条書き#整形
+
+# reprex 各種置換
+
+// 見出し、小見出し
+^■(.+)$	【＝見出し：2】$1
+^□(.+)$	【＝見出し：3】$1
+^▼(.+)$	【＝小見出し】$1
+
+// リンク
+【リンク：([^：]+)：([^】]+)】	【｜リンク：$2】$1【リンク｜】
+【リンク：([^】]+)】	【｜リンク：$1】$1【リンク｜】
+^(http:\/\/|https:\/\/){1}[\w\.\-\/:\#\?\=\&\;\%\~\+]+$	【｜リンク：$0】$0【リンク｜】
+（((http:\/\/|https:\/\/){1}[\w\.\-\/:\#\?\=\&\;\%\~\+]+)）	（【｜リンク：$1】$1【リンク｜】）
+
+// 文範囲タグ
+【(強調|最強調|ぼかし|訂正|傍点|縦中横)：([^】]+)】	【｜$1】$2【$1｜】
+【備考：([^：]+)：([^】]+)】	【｜備考：$2】$1【備考｜】
+【ルビ：([^：]+)：([^】]+)】	【｜ルビ：$2】$1【ルビ｜】
+
+## between BLエスケープ
+#-bgn ＃.*
+#-end ＃.*
+#-divhandle include
+
+# replace エスケープ
+#-first BLエスケープ#区切り行退避
+#-last BLエスケープ#区切り行回復
+￥	￥￥
+【	￥【
+】	￥】
+：	￥：
+
+## between 表
+#-bgn ^-{5,} 表 -{5,}$
+#-divhandle delete
+
+# call 表
+#-combi 表#整形
+
+## between コラム
+#-bgn ^-{5,}$
+#-divhandle delete
+
+# call コラムを整形
+#-combi コラム#整形
+
+## between タグ付きコラム
+#-bgn ^-{5,} \S+ -{5,}$
+#-divhandle include
+
+# call タグ付きコラムを整形
+#-combi コラム#タグ付きコラム整形
+
+## map BLエスケープ
+# args
+	List<String> lines
+# closure 除外判定
+	if (config.'slice#空白行区切り'.idx == 0) config.inRange = false;
+	if (lines.size() == 0) return false;
+	if (!config.inRange){
+		if (lines.first().startsWith('＃') && !lines.last().startsWith('＃')) config.inRange = true;
+	} else {
+		if (lines.last().startsWith('＃')) config.inRange = false;
+	}
+	return (lines.last().startsWith('＃'))? config.inRange : !config.inRange;
+# closure 区切り行退避
+	config.'replace#エスケープ'.topLine = ((lines.first() == '＃')? null : lines.first().substring(1));
+	config.'replace#エスケープ'.btmLine = ((lines.last() == '＃')? null : lines.last().substring(1));
+	return lines.subList(1, lines.size() - 1);
+# closure 区切り行回復
+	if (config.'replace#エスケープ'.topLine != null) lines.add(0, config.'replace#エスケープ'.topLine);
+	if (config.'replace#エスケープ'.btmLine != null) lines.add(config.'replace#エスケープ'.btmLine);
+	return lines;
+
+## map 箇条書き
+# dec
+	// 項目リストのクラスです
+	class ItemList {
+		Item upper = null;
+		List<Item> items = [];
+		String indent = '';
+		
+		ItemList leftShift(Item item){
+			items << item;
+			item.upperList = this;
+			return this;
+		}
+		
+		List toList(){
+			List list = [];
+			switch (items.first().sign){
+				case '・':
+					list << '【－箇条書き：順序なし】'; break;
+				case '～':
+					list << '【－箇条書き：順序あり】'; break;
+				case '－':
+					list << '【－箇条書き：対象】'; break;
+				case '→':
+					list << '【－箇条書き：説明】'; break;
+			}
+			items.each { list << it.toList() }
+			switch (items.first().sign){
+				case '・':
+				case '→':
+				case '～':
+				case '－':
+					list << '【箇条書き－】'; break;
+			}
+			return list;
+		}
+	}
+	// 項目のクラスです
+	class Item {
+		String sign = '';
+		String indent = '';
+		List<String> lines = [];
+		ItemList upperList = null;
+		ItemList lowerList = null;
+		
+		Item leftShift(ItemList itemList){
+			lowerList = itemList;
+			itemList.upper = this;
+			return this;
+		}
+		
+		List toList(){
+			List list = [];
+			switch (sign){
+				case '・':
+				case '～':
+					list << '【－項目】'; break;
+				case '－':
+					list << '【－対象】'; break;
+				case '→':
+					list << '【－説明】'; break;
+			}
+			lines.each { list << it }
+			if (sign == '－') list << '【対象－】';
+			if (lowerList != null) list << lowerList.toList();
+			switch (sign){
+				case '・':
+				case '～':
+					list << '【項目－】'; break;
+				case '→':
+					list << '【説明－】'; break;
+			}
+			return list;
+		}
+	}
+# args
+	List<String> lines
+# closure 判定
+	if (lines.size() == 0) return false;
+	return (lines.first() ==~ /^[・～－].+$/)? true : false;
+# closure 整形
+	Closure itemizeLine = { String line, ItemList curList ->
+		// 箇条書きの行か否か、正規表現で判定します
+		def matcher = (line =~ /^([ 　\t]*)([・～－→])(.+)$/);
+		if (matcher.matches()){
+			Item item = new Item(indent: matcher.group(1), sign: matcher.group(2));
+			item.lines << matcher.group(3);
+			if (curList.indent.length() < item.indent.length()){
+				// インデントが増えているならば、下位の箇条書きとみなします
+				ItemList subList = new ItemList(indent: item.indent);
+				subList << item;
+				curList.items.last() << subList;
+				return subList;
+			} else if (curList.indent.length() > item.indent.length()){
+				// インデントが減っているならば、インデントの高さが一致する上位の箇条書きを探します
+				Closure scanUpper;
+				scanUpper = { String indent, ItemList itemList ->
+					if (itemList == null) return null;
+					if (itemList.indent.length() == indent.length()) return itemList;
+					return scanUpper(indent, itemList.upper?.upperList);
+				}
+				ItemList subList = scanUpper(item.indent, curList.upper.upperList);
+				if (subList == null) throw new Exception("インデントの高さが一致する箇条書きがありません。item=${item.toString()}");
+				subList << item;
+				return subList;
+			} else {
+				// インデントが同じ深さならば、同じ項目リストに属すとみなします
+				curList << item;
+			}
+		} else {
+			curList.items.last().lines << line.replaceFirst(/^[ \t　]*(.+)$/, '$1');
+		}
+		return curList;
+	}
+	ItemList topList = new ItemList();
+	ItemList curList = topList;
+	lines.each { curList = itemizeLine(it, curList) }
+	return topList.toList().flatten();
+
+## map 表
+# dec
+	import org.apache.commons.lang3.StringUtils;
+# args
+	List<String> lines
+# closure 整形
+	List newLines = [ '【－表】' ];
+	lines.each { String line ->
+		newLines << '【－行】';
+		List cells = (line =~ /^\|.+\|$/)? line.replaceFirst(/^\|\s*(.+)\s*\|$/, '$1').split(/\s*\|\s*/) : line.split(/\s+/);
+		cells.each { String cell ->
+			cell = StringUtils.trim(cell);
+			newLines << ((cell.startsWith('*'))? "【＝見出しセル】${cell.substring(1)}" : "【＝セル】${cell}");
+		}
+		newLines << '【行－】';
+	}
+	newLines << '【表－】';
+	return newLines;
+
+## map コラム
+# args
+	List<String> lines
+# closure 整形
+	return [ '【－コラム】', *lines, '【コラム－】' ];
+# closure タグ付きコラム整形
+	String type = lines.first().replaceFirst(/^\-{5,} (\S+) \-{5,}$/, /$1/);
+	String name = '';
+	int idx = type.indexOf('：');
+	if (idx > 1){
+		name = type.substring(idx + 1);
+		type = type.substring(0, idx);
+	}
+	lines[0] = (name.isEmpty())? "【－${type}】" : "【－${type}：${name}】";
+	lines.pop();
+	lines << "【${type}－】";
+	return lines;

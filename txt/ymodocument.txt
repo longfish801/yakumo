@@ -1,0 +1,94 @@
+
+【＃タイトル】YmoDocument
+
+■YmoDocumentとは
+
+　【リンク：YmoDocument：/yakumo/groovydoc/io/github/longfish801/yakumo/YmoDocument.html】は、特定のフォルダ直下に存在するテキストファイルの一括変換を実現します。
+
+■サンプル
+
+　本ドキュメントも YmoDocumentで生成しています。
+　本ドキュメントを生成するサンプルスクリプト（【リンク：ymodocumentSample/sample.groovy】）を以下に示します。
+
+----- コード -----
+@GrabResolver(name = 'longfish801 github repositry', root = 'https://longfish801.github.io/maven/')
+@Grab('io.github.longfish801:yakumo:0.1.00')
+@GrabExclude('org.codehaus.groovy:groovy-all')
+
+import io.github.longfish801.yakumo.YmoDocument;
+import io.github.longfish801.yakumo.YmoConvertException;
+
+try {
+	new YmoDocument(new File('..').getCanonicalFile()).run('_html');
+} catch (YmoConvertException exc){
+	println "変換に失敗しました。exc=${exc}";
+}
+----- コード -----
+
+■変換対象
+
+　テキストファイル（拡張子txt）を変換対象とします。
+　複数のファイル、あるいは複数のテキストファイルが格納されたフォルダを指定します。
+　サブフォルダ内のファイルは変換対象としません。
+
+　変換対象のファイルに共通する親フォルダを、変換対象フォルダと呼びます。
+　変換対象フォルダの直下に、変換名と同じ名前のフォルダを作成します。
+　そこに、以下のように変換に必要なファイルを格納します。
+
+----- 整形済 -----
+変換対象フォルダ
+　├変換対象テキストファイル１（拡張子txt）
+　├変換対象テキストファイル２（拡張子txt）
+　├ …
+　├変換対象テキストファイルｎ（拡張子txt）
+　└設定フォルダ（変換名）
+　　　├変換スクリプト（ymoscript.groovy）
+　　　├Washスクリプト格納フォルダ（washscr）
+　　　│　├Washスクリプト１（拡張子tpac）
+　　　│　├Washスクリプト２（拡張子tpac）
+　　　│　├ …
+　　　│　└Washスクリプトｎ（拡張子tpac）
+　　　├クロージャマップ格納フォルダ（clmap）
+　　　│　├クロージャマップ１（拡張子tpac）
+　　　│　├クロージャマップ２（拡張子tpac）
+　　　│　├ …
+　　　│　└クロージャマップｎ（拡張子tpac）
+　　　├テンプレート格納フォルダ（template）
+　　　│　├テンプレート１
+　　　│　├テンプレート２
+　　　│　├ …
+　　　│　└テンプレートｎ
+　　　├メタ定義格納フォルダ（meta）
+　　　│　├メタ定義ファイル１（拡張子txt）
+　　　│　├メタ定義ファイル２（拡張子txt）
+　　　│　├ …
+　　　│　└メタ定義ファイルｎ（拡張子txt）
+　　　└固定ファイル格納フォルダ（asset）
+　　　　　├固定ファイル１
+　　　　　├固定ファイル２
+　　　　　├ …
+　　　　　└固定ファイルｎ
+----- 整形済 -----
+
+　出力フォルダや、固定ファイルのコピー方法などは変換スクリプトにて設定します。
+　変換スクリプトには以下のバインド変数を使用できます。
+
+－ymoDocument
+　　→YmoDocumentインスタンスです。
+－engine
+　　→ConvertEngineインスタンスです。
+－assetHandler
+　　→AssetHandlerインスタンスです。
+－conversionName
+　　→変換名です。
+－targetDir
+　　→変換対象フォルダです。
+－conversionDir
+　　→設定フォルダです。
+
+　適用するテンプレートは以下のとおり決定します。
+
+・変換対象のファイルと名前が一致するテンプレート（拡張子は除きます）。
+・変換名と名前が一致するテンプレート（デフォルト）。
+
+以上

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bltxt>
+  <para lnum="2" snum="1">
+    <line lnum="2">
+      <text>ここが</text>
+      <inline tag="傍点" lnum="2" snum="1">
+        <text>重要</text>
+      </inline>
+      <text>です。</text>
+    </line>
+    <line lnum="3">
+      <inline tag="強調" lnum="3" snum="1">
+        <text>とても</text>
+        <inline tag="ルビ" lnum="3" snum="1">
+          <attrs>
+            <attr>インポータント</attr>
+          </attrs>
+          <text>重要</text>
+        </inline>
+        <text>ですよ。</text>
+      </inline>
+    </line>
+  </para>
+</bltxt>

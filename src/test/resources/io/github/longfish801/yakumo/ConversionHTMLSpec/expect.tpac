@@ -1,0 +1,177 @@
+#! dec expect
+## html
+# basic
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>円周率について</title>
+<link href="_asset/style.css" rel="stylesheet">
+<script src="_asset/script.js"></script>
+</head>
+<body>
+
+<header class="container">
+<h1>円周率について <small>著名な語呂合わせ</small></h1>
+<div class="author">山田太郎</div>
+<nav class="list-group">
+<a href="#id2_1" class="list-group-item">カレーの作り方</a>
+<a href="#id3_2" class="list-group-item">　材料の準備</a>
+</nav>
+</header>
+
+<article class="container">
+<h2><a name="id2_1"></a>カレーの作り方</h2>
+
+<h3><a name="id3_2"></a>材料の準備</h3>
+
+<p>　XML<sup><a id="f1" href="#t1">*1</a></sup>をHTML<sup><a id="f2" href="#t2">*2</a></sup>に変換します。</p>
+<aside>
+<dl class="note">
+<dt><a name="t1" href="#f1">[*1]</a></dt>
+<dd>　eXtensible Markup Languageの略です。</dd>
+<dt><a name="t2" href="#f2">[*2]</a></dt>
+<dd>　Hyper Text Markup Languageの略です。</dd>
+</dl>
+</aside>
+</article>
+
+<footer class="container">
+<a href="index.html">戻る</a>
+</footer>
+
+</body>
+</html>
+
+## block
+# head
+<h2><a name="id2_1"></a>カレーの作り方</h2>
+<h3><a name="id3_2"></a>材料の準備</h3>
+
+# head sub
+<h4>巨大数の歴史</h4>
+<h2><a name="id2_1"></a>カレーの作り方</h2>
+<h3>巨大数の歴史</h3>
+<h2><a name="id2_2"></a>カレーの作り方</h2>
+<h3><a name="id3_3"></a>材料の準備</h3>
+<h4>巨大数の歴史</h4>
+
+# figure
+<figure><img src="img.png" alt="サンプル" class="img-responsive center-block"><figcaption>これはイメージです。</figcaption></figure>
+
+# paragraph
+<p>　おいしいカレーを作るには&quot;隠し味&quot;が大切です。<br/>
+　隠し味にもいろいろなものがあります。</p>
+<p>　一般家庭で良く使われる&lt;隠し味&gt;を試してみましょう。</p>
+
+# table
+<aside class="panel panel-default">
+<header class="panel-heading">各県の名産</header>
+<table class="table">
+<tr><th>No.</th><th>産物</th><th>産地</th></tr>
+<tr><td>1</td><td>みかん</td><td>愛媛</td></tr>
+<tr><td>2</td><td>茶</td><td>静岡</td></tr>
+</table>
+</aside>
+
+## block column
+# basic
+<aside class="panel panel-primary">
+<div class="panel-body">
+<p>　日本人の四割は血液型がＯ型です。</p>
+</div>
+</aside>
+
+# basic title
+<aside class="panel panel-primary">
+<header class="panel-heading">８月３１日は</header>
+<div class="panel-body">
+<p>　８月３１日は野菜の日です。<br/>
+　野菜を食べましょう。</p>
+</div>
+</aside>
+
+# attention
+<aside class="panel panel-warning">
+<header class="panel-heading">中火とは</header>
+<div class="panel-body">
+<p>　中火とは、フライパンの底に炎の先端がちょうど届くくらいの状態を指します。</p>
+</div>
+</aside>
+
+# blockquote
+<blockquote>
+<p>　山路を登りながら、こう考えた。<br/>
+　智に働けば角が立つ。情に棹させば流される。意地を通せば窮屈だ。とかくに人の世は住みにくい。</p>
+<footer>夏目漱石『草枕』</footer>
+</blockquote>
+
+# code
+<pre class="code">
+println &quot;Hello, World!&quot;;
+println &quot;This is sample code of how to hello to all of the world, which is executed &quot; + Date().format(&quot;yyyy-MM-dd'T'HH:mm:ss.SSSZ&quot;);
+</pre>
+
+# pre
+<pre>ルートフォルダ
+　├ binフォルダ
+　│　└ 実行ファイル
+　└ confフォルダ</pre>
+
+# raw
+墨付きカッコが【強調：そのまま】表示されます。
+<strong>HTMLタグのエスケープもしません。</strong>
+
+## block list
+# basic
+<ul>
+<li>じゃがいも</li>
+<li>ニンジン</li>
+<li>玉ねぎ<br/>
+<ul>
+<li class="dd">→刻むときは注意。<br/>
+　涙がでます。</li>
+</ul></li>
+<li>カレー粉<br/>
+<ol>
+<li>ジャワカレー</li>
+<li>バーモンドカレー</li>
+</ol></li>
+</ul>
+
+# dl
+<dl>
+<dt>ターメリック</dt>
+<dd>香辛料の一種です。</dd>
+</dl>
+
+## inline
+# link
+<p>　詳しくは<a href="https://www.google.co.jp/">ネット検索</a>してください。</p>
+
+# em
+<p>　必ず最後に<em>確認ボタン</em>をクリックしてください。</p>
+
+# strong
+<p>　間違えて<strong>自爆スイッチ</strong>を押さないでください。</p>
+
+# dot
+<p>　ここが<span class="dot">重要</span>です。</p>
+
+# small
+<p>　もちろん本当<span class="small">かもしれない</span>ですよ。</p>
+
+# strike
+<p>　富士山の標高は<s>３７７７メートル</s>３７７６メートルです。</p>
+
+# verinhori
+<p>　シェイクスピア全集の第10巻に記述されています。</p>
+
+# note
+<p>　『乱れからくり』の作者は泡坂妻夫<span class="note">[※泡は特殊文字]</span>です。</p>
+
+# ruby
+<p>　<ruby>出納<rp>［</rp><rt>すいとう</rt><rp>］</rp></ruby>係は言った。</p>
+

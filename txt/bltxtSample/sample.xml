@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bltxt>
+  <meta tag="タイトル" lnum="2" snum="1">
+    <para lnum="2" snum="1">
+      <line lnum="2">
+        <text>BLtxt記法について</text>
+      </line>
+    </para>
+  </meta>
+  <para lnum="4" snum="2">
+    <line lnum="4">
+      <text>　テキストをXMLのような階層のある構造へ変換するための記法です。</text>
+    </line>
+    <line lnum="5">
+      <text>　タグ付けのために隅付き括弧（【、】）を使います。</text>
+    </line>
+  </para>
+  <para lnum="7" snum="3">
+    <line lnum="7">
+      <text>　以下は文範囲タグのサンプルです。</text>
+    </line>
+  </para>
+  <block tag="囲み記事" lnum="9" snum="1">
+    <para lnum="9" snum="4">
+      <line lnum="10">
+        <text>　海の日、山の日に続いて</text>
+        <inline tag="強調" lnum="10" snum="1">
+          <text>空の日</text>
+        </inline>
+        <text>という祝日はどうだろう。</text>
+      </line>
+    </para>
+  </block>
+</bltxt>

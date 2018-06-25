@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bltxt>
+  <block tag="見出し" lnum="2" snum="1">
+    <attrs>
+      <attr>2</attr>
+    </attrs>
+    <para lnum="2" snum="1">
+      <line lnum="2">
+        <text>大きなことはできませんが</text>
+      </line>
+    </para>
+  </block>
+  <block tag="見出し" lnum="3" snum="2">
+    <attrs>
+      <attr>3</attr>
+    </attrs>
+    <para lnum="3" snum="2">
+      <line lnum="3">
+        <text>小さなことから</text>
+      </line>
+    </para>
+  </block>
+  <block tag="見出し" lnum="5" snum="3">
+    <attrs>
+      <attr>3</attr>
+    </attrs>
+    <para lnum="5" snum="3">
+      <line lnum="5">
+        <text>コツコツと</text>
+      </line>
+    </para>
+  </block>
+  <para lnum="5" snum="4">
+    <line lnum="6">
+      <text>それが大事です。</text>
+    </line>
+  </para>
+  <para lnum="8" snum="5">
+    <line lnum="8">
+      <text>この画像を見てください。</text>
+    </line>
+  </para>
+  <block tag="画像" lnum="9" snum="1">
+    <attrs>
+      <attr>howto.jpg</attr>
+    </attrs>
+  </block>
+  <para lnum="11" snum="6">
+    <line lnum="11">
+      <text>次の本に載っています。</text>
+    </line>
+  </para>
+  <block tag="書影" lnum="12" snum="1">
+    <attrs>
+      <attr>999-1234567890</attr>
+    </attrs>
+  </block>
+  <para lnum="12" snum="7">
+    <line lnum="13">
+      <text>とてもためになります。</text>
+    </line>
+  </para>
+</bltxt>

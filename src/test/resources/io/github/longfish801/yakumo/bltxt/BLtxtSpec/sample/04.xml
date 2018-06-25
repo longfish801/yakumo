@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bltxt>
+  <block tag="見出し" lnum="1" snum="1">
+    <para lnum="1" snum="1">
+      <line lnum="1">
+        <text>トランプの遊び方</text>
+      </line>
+    </para>
+  </block>
+  <para lnum="3" snum="2">
+    <line lnum="3">
+      <text>以下の画像を参照してください。</text>
+    </line>
+  </para>
+  <block tag="画像" lnum="4" snum="1">
+    <attrs>
+      <attr>howto.jpg</attr>
+    </attrs>
+  </block>
+</bltxt>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bltxt>
+  <block tag="囲み記事" lnum="1" snum="1">
+    <para lnum="1" snum="1">
+      <line lnum="2">
+        <text>富士山麓オウム鳴く。</text>
+      </line>
+    </para>
+  </block>
+  <para lnum="5" snum="2">
+    <line lnum="5">
+      <text>以下の記事を参照してください。</text>
+    </line>
+  </para>
+  <block tag="囲み記事" lnum="6" snum="2">
+    <para lnum="6" snum="3">
+      <line lnum="7">
+        <text>一夜一夜に人見ごろ。</text>
+      </line>
+    </para>
+  </block>
+  <block tag="囲み記事" lnum="10" snum="3">
+    <para lnum="10" snum="4">
+      <line lnum="11">
+        <text>とりなくこえす。</text>
+      </line>
+    </para>
+  </block>
+  <para lnum="12" snum="5">
+    <line lnum="13">
+      <text>ゆめさませ。</text>
+    </line>
+  </para>
+  <para lnum="15" snum="6">
+    <line lnum="15">
+      <text>次の文章を読んでください。</text>
+    </line>
+  </para>
+  <block tag="囲み記事" lnum="16" snum="4">
+    <para lnum="16" snum="7">
+      <line lnum="17">
+        <text>我が辞書に不可能の文字はない。</text>
+      </line>
+    </para>
+  </block>
+  <para lnum="18" snum="8">
+    <line lnum="19">
+      <text>ナポレオンの言葉です。</text>
+    </line>
+  </para>
+  <block tag="囲み記事" lnum="21" snum="5">
+    <para lnum="21" snum="9">
+      <line lnum="22">
+        <text>生か死か。</text>
+      </line>
+    </para>
+    <para lnum="24" snum="10">
+      <line lnum="24">
+        <text>それが問題だ。</text>
+      </line>
+    </para>
+  </block>
+</bltxt>
