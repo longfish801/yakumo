@@ -7,7 +7,7 @@ package io.github.longfish801.yakumo.clmap;
 
 import groovy.util.logging.Slf4j;
 import io.github.longfish801.shared.lang.ArgmentChecker;
-import io.github.longfish801.shared.util.TextUtil;
+import io.github.longfish801.yakumo.util.TextUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.control.CompilationFailedException;
 

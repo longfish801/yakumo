@@ -9,7 +9,6 @@ import groovy.text.SimpleTemplateEngine;
 import groovy.text.Template;
 import groovy.util.logging.Slf4j;
 import io.github.longfish801.shared.lang.ArgmentChecker;
-import io.github.longfish801.shared.lang.ExistResource;
 import io.github.longfish801.shared.util.ClassConfig;
 import io.github.longfish801.yakumo.bltxt.BLtxt;
 import io.github.longfish801.yakumo.clmap.Clmap;
@@ -26,8 +25,6 @@ import org.apache.commons.io.FilenameUtils;
 class ConvertEngine {
 	/** 設定値 */
 	static ClassConfig config = ClassConfig.newInstance(ConvertEngine.class);
-	/** ExistResource */
-	static ExistResource existResource = new ExistResource(ConvertEngine.class);
 	/** WashScr文書 */
 	WashScr washscr = null;
 	/** クロージャマップ */

@@ -7,7 +7,7 @@ package io.github.longfish801.yakumo.tpac.element;
 
 import groovy.util.logging.Slf4j;
 import io.github.longfish801.shared.lang.ArgmentChecker;
-import io.github.longfish801.shared.util.ClassSlurper;
+import io.github.longfish801.shared.lang.ExchangeResource;
 
 /**
  * TPAC文書の要素の属性です。
@@ -17,7 +17,7 @@ import io.github.longfish801.shared.util.ClassSlurper;
 @Slf4j('LOG')
 class TpacAttrs<K, V> extends LinkedHashMap {
 	/** ConfigObject */
-	protected static final ConfigObject constants = ClassSlurper.getConfig(TpacAttrs.class);
+	protected static final ConfigObject constants = ExchangeResource.config(TpacAttrs.class);
 	
 	/** {@inheritDoc} */
 	V put(K key, V value){

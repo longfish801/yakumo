@@ -6,8 +6,8 @@
 package io.github.longfish801.yakumo;
 
 import groovy.util.logging.Slf4j;
-import io.github.longfish801.shared.lang.ExistResource;
-import io.github.longfish801.shared.util.ClassDirectory;
+import io.github.longfish801.shared.lang.ExchangeResource;
+import io.github.longfish801.shared.lang.PackageDirectory;
 import io.github.longfish801.yakumo.tpac.Tpac;
 import io.github.longfish801.yakumo.washscr.WashScr;
 import spock.lang.Specification;
@@ -21,16 +21,14 @@ import spock.lang.Unroll;
  */
 @Slf4j('LOG')
 class ConversionBaseSpec extends Specification {
-	/** ExistResource */
-	private static final ExistResource existResource = new ExistResource(ConversionBaseSpec.class);
 	/** ファイル入出力のテスト用フォルダ */
-	private static final File testDir = new ClassDirectory('src/test/resources').getDeepDir(ConversionBaseSpec.class);
+	private static final File testDir = PackageDirectory.deepDir(new File('src/test/resources'), ConversionBaseSpec.class);
 	/** 変換対象のテキスト */
 	private static final Tpac tpacTarget = new Tpac(new File(testDir, 'target.tpac'));
 	/** 変換結果として期待するテキスト */
 	private static final Tpac tpacExpect = new Tpac(new File(testDir, 'expect.tpac'));
 	/** WashScr */
-	private static final WashScr washscr = new WashScr(existResource.get('_bltxt/washscr/bltxt.tpac'));
+	private static final WashScr washscr = new WashScr(ExchangeResource.url(ConversionBaseSpec.class, '_bltxt/washscr/bltxt.tpac'));
 	
 	@Timeout(10)
 	@Unroll

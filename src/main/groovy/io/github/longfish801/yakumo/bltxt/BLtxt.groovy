@@ -15,7 +15,7 @@ import io.github.longfish801.yakumo.parser.BLtxtParser;
 import io.github.longfish801.yakumo.parser.ParseException;
 import io.github.longfish801.yakumo.parser.TokenMgrError;
 import io.github.longfish801.shared.lang.ArgmentChecker;
-import io.github.longfish801.shared.util.ClassSlurper;
+import io.github.longfish801.shared.lang.ExchangeResource;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -27,7 +27,7 @@ import java.util.regex.Matcher;
 @Slf4j('LOG')
 class BLtxt {
 	/** ConfigObject */
-	protected static final ConfigObject constants = ClassSlurper.getConfig(BLtxt.class);
+	protected static final ConfigObject constants = ExchangeResource.config(BLtxt.class);
 	/** ルート要素 */
 	BLRoot root = null;
 	/** 解析内容の書込み */

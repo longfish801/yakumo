@@ -6,7 +6,7 @@
 package io.github.longfish801.yakumo;
 
 import groovy.util.logging.Slf4j;
-import io.github.longfish801.shared.util.ClassDirectory;
+import io.github.longfish801.shared.lang.PackageDirectory;
 import spock.lang.Specification;
 import spock.lang.Timeout;
 import spock.lang.Unroll;
@@ -19,7 +19,7 @@ import spock.lang.Unroll;
 @Slf4j('LOG')
 class YmoScriptSpec extends Specification {
 	/** ファイル入出力のテスト用フォルダ */
-	private static final File testDir = new ClassDirectory('src/test/resources').getDeepDir(YmoScriptSpec.class);
+	private static final File testDir = PackageDirectory.deepDir(new File('src/test/resources'), YmoScriptSpec.class);
 	
 	@Timeout(10)
 	def '文字列を変換し、結果を返します'(){

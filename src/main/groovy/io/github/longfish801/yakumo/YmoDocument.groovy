@@ -7,8 +7,8 @@ package io.github.longfish801.yakumo;
 
 import groovy.util.logging.Slf4j;
 import io.github.longfish801.shared.lang.ArgmentChecker;
-import io.github.longfish801.shared.util.ClassSlurper;
-import io.github.longfish801.shared.util.TextUtil;
+import io.github.longfish801.shared.lang.ExchangeResource;
+import io.github.longfish801.yakumo.util.FileFinder;
 import org.apache.commons.io.FilenameUtils;
 
 /**
@@ -19,7 +19,9 @@ import org.apache.commons.io.FilenameUtils;
 @Slf4j('LOG')
 class YmoDocument extends YmoScript {
 	/** ConfigObject */
-	protected static final ConfigObject constants = ClassSlurper.getConfig(YmoDocument.class);
+	protected static final ConfigObject constants = ExchangeResource.config(YmoDocument.class);
+	/** GroovyShell */
+	static GroovyShell shell = new GroovyShell(YmoScript.class.classLoader);
 	/** 変換対象フォルダ */
 	File targetDir = null;
 	
@@ -60,11 +62,12 @@ class YmoDocument extends YmoScript {
 		ArgmentChecker.checkNotEmptyList('変換対象フォルダリスト', conversionDirs as List);
 		(conversionDirs as List).each { File conversionDir ->
 			if (!conversionDir.isDirectory()) LOG.warn('変換対象フォルダが存在しません。conversionDir={}', conversionDir.path);
-			engine.configureWashscr(find(new File(conversionDir, constants.washscr.dirName), constants.washscr.includePattern, constants.washscr.excludePattern).values() as List);
-			engine.configureClmap(find(new File(conversionDir, constants.clmap.dirName), constants.clmap.includePattern, constants.clmap.excludePattern).values() as List);
-			engine.configureTemplate(find(new File(conversionDir, constants.template.dirName), constants.template.includePattern, constants.template.excludePattern));
-			engine.configureMeta(find(new File(conversionDir, constants.meta.dirName), constants.meta.includePattern, constants.meta.excludePattern).values() as List);
-			assetHandler.gulp(conversionDir.name, find(new File(conversionDir, constants.asset.dirName), constants.asset.includePattern, constants.asset.excludePattern));
+			FileFinder finder = new FileFinder(conversionDir);
+			engine.configureWashscr(finder.find(constants.washscr.dirName, constants.washscr.includePattern, constants.washscr.excludePattern).values() as List);
+			engine.configureClmap(finder.find(constants.clmap.dirName, constants.clmap.includePattern, constants.clmap.excludePattern).values() as List);
+			engine.configureTemplate(finder.find(constants.template.dirName, constants.template.includePattern, constants.template.excludePattern));
+			engine.configureMeta(finder.find(constants.meta.dirName, constants.meta.includePattern, constants.meta.excludePattern).values() as List);
+			assetHandler.gulp(conversionDir.name, finder.find(constants.asset.dirName, constants.asset.includePattern, constants.asset.excludePattern));
 		}
 	}
 	
@@ -77,61 +80,11 @@ class YmoDocument extends YmoScript {
 	 * @param ext 出力ファイルの拡張子
 	 */
 	void setIO(File outDir, String ext){
-		List files = targetDir.listFiles().findAll { it.isFile() && TextUtil.wildcardMatch(it.name, constants.target.includePattern, constants.target.excludePattern) };
+		List files = targetDir.listFiles().findAll { it.isFile() && FileFinder.wildcardMatch(it.name, constants.target.includePattern, constants.target.excludePattern) };
 		files.each { File inFile ->
 			String sourceKey = FilenameUtils.getBaseName(inFile.name);
 			File outFile = new File(outDir, "${sourceKey}${ext}");
 			engine.setIO(sourceKey, inFile, outFile);
 		}
-	}
-	
-	/**
-	 * 特定のフォルダ配下から名前がパターンに一致するファイルのマップを返します。<br/>
-	 * 対象フォルダが存在しない場合は、空マップを返します。
-	 * @param targetDir 対象フォルダ
-	 * @param includePatterns ファイル名の適合パターンリスト
-	 * @param excludePatterns ファイル名の除外パターンリスト
-	 * @return パターンに一致するファイルのマップ（キーは対象フォルダからの相対パス、値はファイルのURL）
-	 */
-	protected Map<String, URL> find(File targetDir, List includePatterns, List excludePatterns){
-		if (!targetDir.exists()) return [:];
-		
-		// 指定フォルダ配下のファイルについて、相対パスとファイルのURLとのマップを作成するクロージャです
-		// サブフォルダも再帰的に探索します
-		Closure collectFiles;
-		collectFiles = { Map map, File curDir, String curPath ->
-			curDir.listFiles().each { File elem ->
-				switch (elem){
-					case { it.isFile() }:
-						map["${curPath}${elem.name}"] = elem.toURI().toURL();
-						break;
-					case { it.isDirectory() }:
-						collectFiles(map, elem, "${curPath}${elem.name}/");
-						break;
-					default:
-						LOG.debug('ファイルでもフォルダでもないため、無視します。elem={}', elem.path);
-				}
-			}
-		}
-		
-		// 変換対象フォルダ直下のファイルおよびフォルダについて、コピー対象か確認します
-		Map<String, URL> assetMap = [:];
-		targetDir.listFiles().each { File elem ->
-			switch (elem){
-				case { it.isFile() }:
-					if (TextUtil.wildcardMatch(elem.name, includePatterns, excludePatterns)){
-						assetMap["${elem.name}"] = elem.toURI().toURL();
-					}
-					break;
-				case { it.isDirectory() }:
-					if (TextUtil.wildcardMatch(elem.name, includePatterns, excludePatterns)){
-						collectFiles(assetMap, elem, "${elem.name}/");
-					}
-					break;
-				default:
-					LOG.debug('ファイルでもフォルダでもないため、無視します。elem={}', elem.path);
-			}
-		}
-		return assetMap;
 	}
 }

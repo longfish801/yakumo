@@ -8,8 +8,8 @@ package io.github.longfish801.yakumo;
 import groovy.text.SimpleTemplateEngine;
 import groovy.text.Template;
 import groovy.util.logging.Slf4j;
-import io.github.longfish801.shared.lang.ExistResource;
-import io.github.longfish801.shared.util.ClassDirectory;
+import io.github.longfish801.shared.lang.ExchangeResource;
+import io.github.longfish801.shared.lang.PackageDirectory;
 import io.github.longfish801.yakumo.bltxt.BLtxt;
 import io.github.longfish801.yakumo.clmap.Clinfo;
 import io.github.longfish801.yakumo.clmap.Clmap;
@@ -25,18 +25,16 @@ import spock.lang.Unroll;
  */
 @Slf4j('LOG')
 class ConversionHTMLSpec extends Specification {
+	/** ファイル入出力のテスト用フォルダ */
+	private static final File testDir = PackageDirectory.deepDir(new File('src/test/resources'), ConversionHTMLSpec.class);
 	/** SimpleTemplateEngine */
 	private static final SimpleTemplateEngine templateEngine = new SimpleTemplateEngine();
-	/** ExistResource */
-	private static final ExistResource existResource = new ExistResource(ConversionHTMLSpec.class);
-	/** ファイル入出力のテスト用フォルダ */
-	private static final File testDir = new ClassDirectory('src/test/resources').getDeepDir(ConversionHTMLSpec.class);
 	/** 変換対象のテキスト */
 	private static final Tpac tpacTarget = new Tpac(new File(testDir, 'target.tpac'));
 	/** 変換結果として期待するテキスト */
 	private static final Tpac tpacExpect = new Tpac(new File(testDir, 'expect.tpac'));
 	/** Clmap */
-	private static final Clmap clmap = new Clmap(existResource.get('_html/clmap/html.tpac'));
+	private static final Clmap clmap = new Clmap(ExchangeResource.url(ConversionHTMLSpec.class, '_html/clmap/html.tpac'));
 	
 	@Timeout(10)
 	@Unroll
@@ -115,7 +113,7 @@ class ConversionHTMLSpec extends Specification {
 	
 	private static String getHtmlText(String parentKey, String childKey){
 		Map binding =  clmap.cl('').call(new BLtxt(tpacTarget.dec.lowers["${parentKey}"].lowers["${childKey}"].text));
-		Template template = templateEngine.createTemplate(existResource.get('_html/template/default.html'));
+		Template template = templateEngine.createTemplate(ExchangeResource.url(ConversionHTMLSpec.class, '_html/template/default.html'));
 		return template.make(binding).toString() + "\n";
 	}
 	

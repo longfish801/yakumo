@@ -7,7 +7,7 @@ package io.github.longfish801.yakumo.clmap;
 
 import groovy.transform.InheritConstructors;
 import groovy.util.logging.Slf4j;
-import io.github.longfish801.shared.util.ClassSlurper;
+import io.github.longfish801.shared.lang.ExchangeResource;
 import io.github.longfish801.yakumo.tpac.Tpac;
 import io.github.longfish801.yakumo.tpac.TpacMaker;
 import io.github.longfish801.yakumo.tpac.element.TpacChild;
@@ -22,7 +22,7 @@ import io.github.longfish801.yakumo.tpac.element.TpacParent;
 @InheritConstructors
 class Clmap extends Tpac {
 	/** ConfigObject */
-	protected static final ConfigObject constants = ClassSlurper.getConfig(Clmap.class);
+	protected static final ConfigObject constants = ExchangeResource.config(Clmap.class);
 	/** ConfigObject */
 	ConfigObject config = new ConfigObject();
 	/** コンビキーとクロージャ情報のキャッシュ */

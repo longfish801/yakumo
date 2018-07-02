@@ -6,7 +6,7 @@
 package io.github.longfish801.yakumo.washscr;
 
 import groovy.util.logging.Slf4j;
-import io.github.longfish801.shared.util.ClassDirectory;
+import io.github.longfish801.shared.lang.PackageDirectory;
 import io.github.longfish801.yakumo.clmap.Clinfo.ClinfoCallException;
 import spock.lang.Specification;
 import spock.lang.Timeout;
@@ -20,7 +20,7 @@ import spock.lang.Unroll;
 @Slf4j('LOG')
 class WashScrSpec extends Specification {
 	/** ファイル入出力のテスト用フォルダ */
-	private static final File testDir = new ClassDirectory('src/test/resources').getDeepDir(WashScrSpec.class);
+	private static final File testDir = PackageDirectory.deepDir(new File('src/test/resources'), WashScrSpec.class);
 	
 	@Timeout(10)
 	@Unroll

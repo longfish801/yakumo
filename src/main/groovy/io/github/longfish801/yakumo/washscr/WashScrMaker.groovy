@@ -7,8 +7,8 @@ package io.github.longfish801.yakumo.washscr;
 
 import groovy.util.logging.Slf4j;
 import io.github.longfish801.yakumo.clmap.ClmapMaker;
-import io.github.longfish801.shared.util.ClassSlurper;
-import io.github.longfish801.shared.util.TextUtil;
+import io.github.longfish801.shared.lang.ExchangeResource;
+import io.github.longfish801.yakumo.util.TextUtil;
 import io.github.longfish801.yakumo.tpac.TpacMaker;
 import io.github.longfish801.yakumo.parser.ParseException;
 import org.apache.commons.lang3.StringUtils;
@@ -21,9 +21,9 @@ import org.apache.commons.lang3.StringUtils;
 @Slf4j('LOG')
 class WashScrMaker extends TpacMaker {
 	/** ConfigObject */
-	protected static final ConfigObject constants = ClassSlurper.getConfig(WashScrMaker.class);
+	protected static final ConfigObject constants = ExchangeResource.config(WashScrMaker.class);
 	/** ClmapMakerのConfigObject */
-	protected static final ConfigObject constantsCl = ClassSlurper.getConfig(ClmapMaker.class);
+	protected static final ConfigObject constantsCl = ExchangeResource.config(ClmapMaker.class);
 	
 	/** {@inheritDoc} */
 	void createRoot(String tag, String name, int lineNo){

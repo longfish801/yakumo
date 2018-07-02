@@ -16,7 +16,7 @@
 
 ## map
 # dec
-	import io.github.longfish801.shared.util.TextUtil;
+	import io.github.longfish801.yakumo.util.TextUtil;
 # args
 	List<String> lines
 # closure 行番号付与

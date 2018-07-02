@@ -6,7 +6,7 @@
 package io.github.longfish801.yakumo.bltxt;
 
 import groovy.util.logging.Slf4j;
-import io.github.longfish801.shared.util.ClassDirectory;
+import io.github.longfish801.shared.lang.PackageDirectory;
 import spock.lang.Specification;
 import spock.lang.Unroll;
 
@@ -18,7 +18,7 @@ import spock.lang.Unroll;
 @Slf4j('LOG')
 class BLtxtSpec extends Specification {
 	/** ファイル入出力のテスト用フォルダ */
-	private static final File testDir = new ClassDirectory('src/test/resources').getDeepDir(BLtxtSpec.class);
+	private static final File testDir = PackageDirectory.deepDir(new File('src/test/resources'), BLtxtSpec.class);
 	
 	def 'ファイル内容をBLtxt文書とみなして解析結果を保持するコンストラクタです'(){
 		given:

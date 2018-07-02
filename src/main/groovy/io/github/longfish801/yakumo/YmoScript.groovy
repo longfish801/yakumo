@@ -7,8 +7,8 @@ package io.github.longfish801.yakumo;
 
 import groovy.util.logging.Slf4j;
 import io.github.longfish801.shared.lang.ArgmentChecker;
-import io.github.longfish801.shared.lang.ExistResource;
-import io.github.longfish801.shared.util.ClassSlurper;
+import io.github.longfish801.shared.lang.ExchangeResource;
+import io.github.longfish801.yakumo.util.ResourceFinder;
 import org.apache.commons.io.FilenameUtils;
 
 /**
@@ -19,11 +19,7 @@ import org.apache.commons.io.FilenameUtils;
 @Slf4j('LOG')
 class YmoScript {
 	/** ConfigObject */
-	protected static final ConfigObject constants = ClassSlurper.getConfig(YmoScript.class);
-	/** ExistResource */
-	static ExistResource existResource = new ExistResource(YmoDocument.class);
-	/** GroovyShell */
-	static GroovyShell shell = new GroovyShell(YmoScript.class.classLoader);
+	protected static final ConfigObject constants = ExchangeResource.config(YmoScript.class);
 	/** 変換エンジン **/
 	ConvertEngine engine = new ConvertEngine();
 	/** 固定ファイル操作 **/
@@ -92,11 +88,12 @@ class YmoScript {
 	void configure(String... conversionNames){
 		ArgmentChecker.checkNotEmptyList('変換名リスト', conversionNames as List);
 		(conversionNames as List).each { String conversionName ->
-			engine.configureWashscr(existResource.find("${conversionName}/${constants.washscr.dirName}", constants.washscr.includePattern, constants.washscr.excludePattern).values() as List);
-			engine.configureClmap(existResource.find("${conversionName}/${constants.clmap.dirName}", constants.clmap.includePattern, constants.clmap.excludePattern).values() as List);
-			engine.configureTemplate(existResource.find("${conversionName}/${constants.template.dirName}", constants.template.includePattern, constants.template.excludePattern));
-			engine.configureMeta(existResource.find("${conversionName}/${constants.meta.dirName}", constants.meta.includePattern, constants.meta.excludePattern).values() as List);
-			assetHandler.gulp(conversionName, existResource.find("${conversionName}/${constants.asset.dirName}", constants.asset.includePattern, constants.asset.excludePattern));
+			ResourceFinder finder = new ResourceFinder(YmoScript.class);
+			engine.configureWashscr(finder.find("${conversionName}/${constants.washscr.dirName}", constants.washscr.includePattern, constants.washscr.excludePattern).values() as List);
+			engine.configureClmap(finder.find("${conversionName}/${constants.clmap.dirName}", constants.clmap.includePattern, constants.clmap.excludePattern).values() as List);
+			engine.configureTemplate(finder.find("${conversionName}/${constants.template.dirName}", constants.template.includePattern, constants.template.excludePattern));
+			engine.configureMeta(finder.find("${conversionName}/${constants.meta.dirName}", constants.meta.includePattern, constants.meta.excludePattern).values() as List);
+			assetHandler.gulp(conversionName, finder.find("${conversionName}/${constants.asset.dirName}", constants.asset.includePattern, constants.asset.excludePattern));
 		}
 	}
 	
