@@ -6,7 +6,7 @@
 package io.github.longfish801.yakumo;
 
 import groovy.util.logging.Slf4j;
-import io.github.longfish801.shared.lang.PackageDirectory;
+import io.github.longfish801.shared.PackageDirectory;
 import spock.lang.Specification;
 import spock.lang.Timeout;
 import spock.lang.Unroll;
@@ -19,7 +19,7 @@ import spock.lang.Unroll;
 @Slf4j('LOG')
 class YmoScriptSpec extends Specification {
 	/** ファイル入出力のテスト用フォルダ */
-	private static final File testDir = PackageDirectory.deepDir(new File('src/test/resources'), YmoScriptSpec.class);
+	static final File testDir = PackageDirectory.deepDir('src/test/resources', YmoScriptSpec.class);
 	
 	@Timeout(10)
 	def '文字列を変換し、結果を返します'(){
@@ -29,7 +29,7 @@ class YmoScriptSpec extends Specification {
 			'''.stripIndent();
 		String expected = '''\
 			これはテストです。
-			【＝見出し：2】カレーの作り方
+			【＝見出し】カレーの作り方
 			'''.stripIndent();
 		
 		expect:
@@ -45,7 +45,7 @@ class YmoScriptSpec extends Specification {
 		assetFile.delete();
 		String expected = '''\
 			これはテストです。
-			【＝見出し：2】カレーの作り方
+			【＝見出し】カレーの作り方
 			'''.stripIndent();
 		
 		when:

@@ -2,7 +2,7 @@
 
 ## dec
 import groovy.util.slurpersupport.GPathResult;
-import io.github.longfish801.yakumo.bltxt.BLxmlConvertor;
+import io.github.longfish801.bltxt.BLxmlConvertor;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 ## map nodeKey

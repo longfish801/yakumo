@@ -8,12 +8,18 @@ package io.github.longfish801.yakumo;
 import groovy.text.SimpleTemplateEngine;
 import groovy.text.Template;
 import groovy.util.logging.Slf4j;
-import io.github.longfish801.shared.lang.ExchangeResource;
-import io.github.longfish801.shared.lang.PackageDirectory;
-import io.github.longfish801.yakumo.bltxt.BLtxt;
-import io.github.longfish801.yakumo.clmap.Clinfo;
-import io.github.longfish801.yakumo.clmap.Clmap;
-import io.github.longfish801.yakumo.tpac.Tpac;
+import io.github.longfish801.shared.ExchangeResource;
+import io.github.longfish801.shared.PackageDirectory;
+import io.github.longfish801.bltxt.BLtxt;
+import io.github.longfish801.clmap.Clinfo;
+import io.github.longfish801.clmap.Clmap;
+import io.github.longfish801.clmap.ClmapServer;
+import io.github.longfish801.tpac.TeaServer;
+import io.github.longfish801.tpac.TpacServer;
+import io.github.longfish801.tpac.element.TeaDec;
+import io.github.longfish801.washsh.WashServer;
+import io.github.longfish801.washsh.Washsh;
+import spock.lang.Shared;
 import spock.lang.Specification;
 import spock.lang.Timeout;
 import spock.lang.Unroll;
@@ -26,102 +32,117 @@ import spock.lang.Unroll;
 @Slf4j('LOG')
 class ConversionHTMLSpec extends Specification {
 	/** ファイル入出力のテスト用フォルダ */
-	private static final File testDir = PackageDirectory.deepDir(new File('src/test/resources'), ConversionHTMLSpec.class);
+	static final File testDir = PackageDirectory.deepDir('src/test/resources', ConversionHTMLSpec.class);
 	/** SimpleTemplateEngine */
 	private static final SimpleTemplateEngine templateEngine = new SimpleTemplateEngine();
 	/** 変換対象のテキスト */
-	private static final Tpac tpacTarget = new Tpac(new File(testDir, 'target.tpac'));
+	@Shared TeaDec decTarget;
 	/** 変換結果として期待するテキスト */
-	private static final Tpac tpacExpect = new Tpac(new File(testDir, 'expect.tpac'));
+	@Shared TeaDec decExpect;
 	/** Clmap */
-	private static final Clmap clmap = new Clmap(ExchangeResource.url(ConversionHTMLSpec.class, '_html/clmap/html.tpac'));
+	@Shared Clmap clmap;
+	/** HTML化を実行するクロージャ */
+	@Shared Closure doHTMLize;
+	/** bodyタグ内の文字列を取得するクロージャ */
+	@Shared Closure doBody;
+	/** 期待する結果を取得するクロージャ */
+	@Shared Closure doExpect;
+	
+	def setup(){
+		TeaServer teaServer = new TpacServer();
+		teaServer.soak(new File(testDir, 'target.tpac'));
+		teaServer.soak(new File(testDir, 'expect.tpac'));
+		decTarget = teaServer['dec:target'];
+		decExpect = teaServer['dec:expect'];
+		ClmapServer clmapServer = new ClmapServer();
+		clmapServer.soak(ExchangeResource.url(ConversionHTMLSpec.class, '_html/html.tpac'));
+		clmap = clmapServer['clmap:'];
+		doHTMLize = { String parentKey, String childKey ->
+			String text = decTarget.lowers["${parentKey}"].lowers["${childKey}"].text.toString();
+			clmap.properties['bltxtMap'] = [ 'testtxt': new BLtxt(text) ];
+			clmap.properties['warnings'] = [].asSynchronized();
+			Map binding = [ 'clmap': clmap, 'outKey': 'testtxt' ]
+			Template template = templateEngine.createTemplate(ExchangeResource.url(ConversionHTMLSpec.class, '_html/template/default.html'));
+			return template.make(binding).toString().denormalize() + System.lineSeparator();
+		}
+		doBody = { String parentKey, String childKey ->
+			String text = decTarget.lowers["${parentKey}"].lowers["${childKey}"].text.toString();
+			return clmap.cl('bltxt#body').call(new BLtxt(text)).join(System.lineSeparator()) + System.lineSeparator() + System.lineSeparator();
+		}
+		doExpect = { String parentKey, String childKey ->
+			return decExpect.lowers["${parentKey}"].lowers["${childKey}"].text.toString();
+		}
+	}
 	
 	@Timeout(10)
 	@Unroll
 	def 'テンプレートを適用し正しくHTML化されること'(){
 		expect:
-		getHtmlText(parentKey, childKey) == getTpacText(parentKey, childKey);
+		doHTMLize(parentKey, childKey) == doExpect(parentKey, childKey);
 		
 		where:
 		parentKey	| childKey
-		'html#'	| 'basic#'
+		'html:'	| 'basic:'
 	}
 	
 	@Timeout(10)
 	@Unroll
 	def 'ブロック要素が正しくHTML化されること'(){
 		expect:
-		getBodyText(parentKey, childKey) == getTpacText(parentKey, childKey);
+		doBody(parentKey, childKey) == doExpect(parentKey, childKey);
 		
 		where:
 		parentKey	| childKey
-		'block#'	| 'head#'
-		'block#'	| 'head#sub'
-		'block#'	| 'figure#'
-		'block#'	| 'head#'
-		'block#'	| 'paragraph#'
-		'block#'	| 'table#'
+		'block:'	| 'head:'
+		'block:'	| 'figure:'
+		'block:'	| 'paragraph:'
+		'block:'	| 'table:'
 	}
 	
 	@Timeout(10)
 	@Unroll
 	def 'ブロック要素（コラム）が正しくHTML化されること'(){
 		expect:
-		getBodyText(parentKey, childKey) == getTpacText(parentKey, childKey);
+		doBody(parentKey, childKey) == doExpect(parentKey, childKey);
 		
 		where:
 		parentKey	| childKey
-		'block#column'	| 'basic#'
-		'block#column'	| 'basic#title'
-		'block#column'	| 'attention#'
-		'block#column'	| 'blockquote#'
-		'block#column'	| 'code#'
-		'block#column'	| 'pre#'
-		'block#column'	| 'raw#'
+		'block:column'	| 'basic:'
+		'block:column'	| 'basic:title'
+		'block:column'	| 'attention:'
+		'block:column'	| 'blockquote:'
+		'block:column'	| 'code:'
+		'block:column'	| 'pre:'
+		'block:column'	| 'raw:'
 	}
 	
 	@Timeout(10)
 	@Unroll
 	def 'ブロック要素（リスト）が正しくHTML化されること'(){
 		expect:
-		getBodyText(parentKey, childKey) == getTpacText(parentKey, childKey);
+		doBody(parentKey, childKey) == doExpect(parentKey, childKey);
 		
 		where:
 		parentKey	| childKey
-		'block#list'	| 'basic#'
-		'block#list'	| 'dl#'
+		'block:list'	| 'basic:'
+		'block:list'	| 'dl:'
 	}
 	
 	@Timeout(10)
 	@Unroll
 	def 'インライン要素が正しくHTML化されること'(){
 		expect:
-		getBodyText(parentKey, childKey) == getTpacText(parentKey, childKey);
+		doBody(parentKey, childKey) == doExpect(parentKey, childKey);
 		
 		where:
 		parentKey	| childKey
-		'inline#'	| 'link#'
-		'inline#'	| 'em#'
-		'inline#'	| 'strong#'
-		'inline#'	| 'dot#'
-		'inline#'	| 'small#'
-		'inline#'	| 'strike#'
-		'inline#'	| 'verinhori#'
-		'inline#'	| 'note#'
-		'inline#'	| 'ruby#'
-	}
-	
-	private static String getHtmlText(String parentKey, String childKey){
-		Map binding =  clmap.cl('').call(new BLtxt(tpacTarget.dec.lowers["${parentKey}"].lowers["${childKey}"].text));
-		Template template = templateEngine.createTemplate(ExchangeResource.url(ConversionHTMLSpec.class, '_html/template/default.html'));
-		return template.make(binding).toString() + "\n";
-	}
-	
-	private static String getBodyText(String parentKey, String childKey){
-		return clmap.cl('#body').call(new BLtxt(tpacTarget.dec.lowers["${parentKey}"].lowers["${childKey}"].text)).join("\n") + "\n\n";
-	}
-	
-	private static String getTpacText(String parentKey, String childKey){
-		return tpacExpect.dec.lowers["${parentKey}"].lowers["${childKey}"].text;
+		'inline:'	| 'link:'
+		'inline:'	| 'em:'
+		'inline:'	| 'strong:'
+		'inline:'	| 'dot:'
+		'inline:'	| 'small:'
+		'inline:'	| 'strike:'
+		'inline:'	| 'verinhori:'
+		'inline:'	| 'ruby:'
 	}
 }

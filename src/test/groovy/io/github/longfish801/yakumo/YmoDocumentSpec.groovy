@@ -6,7 +6,7 @@
 package io.github.longfish801.yakumo;
 
 import groovy.util.logging.Slf4j;
-import io.github.longfish801.shared.lang.PackageDirectory;
+import io.github.longfish801.shared.PackageDirectory;
 import org.apache.commons.io.FileUtils;
 import spock.lang.Specification;
 import spock.lang.Timeout;
@@ -19,7 +19,7 @@ import spock.lang.Timeout;
 @Slf4j('LOG')
 class YmoDocumentSpec extends Specification {
 	/** ファイル入出力のテスト用フォルダ */
-	private static final File testDir = PackageDirectory.deepDir(new File('src/test/resources'), YmoDocumentSpec.class);
+	static final File testDir = PackageDirectory.deepDir('src/test/resources', YmoDocumentSpec.class);
 	
 	@Timeout(10)
 	def '特定のフォルダ直下に存在するテキストファイルの変換を実現します'(){

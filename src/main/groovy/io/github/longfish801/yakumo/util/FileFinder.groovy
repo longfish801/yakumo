@@ -6,7 +6,7 @@
 package io.github.longfish801.yakumo.util;
 
 import groovy.util.logging.Slf4j;
-import io.github.longfish801.shared.lang.ArgmentChecker;
+import io.github.longfish801.shared.ArgmentChecker;
 
 /**
  * ワイルドカードと名前が一致するリソースを参照します。

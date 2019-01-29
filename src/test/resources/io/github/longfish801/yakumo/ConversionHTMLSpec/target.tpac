@@ -1,12 +1,12 @@
 #! dec target
-## html
-# basic
+#> html
+#>> basic
 【＃タイトル】円周率について
 【＃サブタイトル】著名な語呂合わせ
 【＃著者名】山田太郎
 
-【＝見出し：2】カレーの作り方
-【＝見出し：3】材料の準備
+【＝見出し】カレーの作り方
+【＝見出し：2】材料の準備
 
 　XML【註：XML】をHTML【註：HTML】に変換します。
 
@@ -17,32 +17,22 @@
 　Hyper Text Markup Languageの略です。
 【註記＊】
 
-## block
-# head
-【＝見出し：2】カレーの作り方
-【＝見出し：3】材料の準備
+#> block
+#>> head
+【＝見出し】カレーの作り方
+【＝見出し：2】材料の準備
 
-# head sub
-【＝小見出し】巨大数の歴史
-
-【＝見出し：2】カレーの作り方
-【＝小見出し】巨大数の歴史
-
-【＝見出し：2】カレーの作り方
-【＝見出し：3】材料の準備
-【＝小見出し】巨大数の歴史
-
-# figure
+#>> figure
 【＝挿入図：サンプル：img.png】これはイメージです。
 
-# paragraph
+#>> paragraph
 　おいしいカレーを作るには"隠し味"が大切です。
 　隠し味にもいろいろなものがあります。
 
 
 　一般家庭で良く使われる<隠し味>を試してみましょう。
 
-# table
+#>> table
 【－表：各県の名産】
 【－行】
 【＝見出しセル】No.
@@ -61,37 +51,37 @@
 【行－】
 【表－】
 
-## block column
-# basic
+#> block column
+#>> basic
 【－コラム】
 　日本人の四割は血液型がＯ型です。
 【コラム－】
 
-# basic title
+#>> basic title
 【－コラム：８月３１日は】
 　８月３１日は野菜の日です。
 　野菜を食べましょう。
 【コラム－】
 
-# attention
+#>> attention
 【－注意：中火とは】
 　中火とは、フライパンの底に炎の先端がちょうど届くくらいの状態を指します。
 【注意－】
 
-# blockquote
+#>> blockquote
 【－引用】
 　山路を登りながら、こう考えた。
 　智に働けば角が立つ。情に棹させば流される。意地を通せば窮屈だ。とかくに人の世は住みにくい。
 【＝引用元】夏目漱石『草枕』
 【引用－】
 
-# code
+#>> code
 【－コード】
 println "Hello, World!";
 println "This is sample code of how to hello to all of the world, which is executed " + Date().format("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 【コード－】
 
-# pre
+#>> pre
 【－整形済】
 ルートフォルダ
 　├ binフォルダ
@@ -99,14 +89,14 @@ println "This is sample code of how to hello to all of the world, which is execu
 　└ confフォルダ
 【整形済－】
 
-# raw
+#>> raw
 【－生データ】
 墨付きカッコが￥【強調：そのまま￥】表示されます。
 <strong>HTMLタグのエスケープもしません。</strong>
 【生データ－】
 
-## block list
-# basic
+#> block list
+#>> basic
 【－箇条書き：順序なし】
 【－項目】
 じゃがいも
@@ -116,11 +106,11 @@ println "This is sample code of how to hello to all of the world, which is execu
 【項目－】
 【－項目】
 玉ねぎ
-【－箇条書き：説明】
-【－説明】
+【－箇条書き：順序なし】
+【－項目】
 刻むときは注意。
 涙がでます。
-【説明－】
+【項目－】
 【箇条書き－】
 【項目－】
 【－項目】
@@ -136,43 +126,38 @@ println "This is sample code of how to hello to all of the world, which is execu
 【項目－】
 【箇条書き－】
 
-# dl
-【－箇条書き：対象】
+#>> dl
+【－項目説明】
 【－対象】
 ターメリック
 【対象－】
-【－箇条書き：説明】
 【－説明】
 香辛料の一種です。
 【説明－】
-【箇条書き－】
-【箇条書き－】
+【項目説明－】
 
-## inline
-# link
+#> inline
+#>> link
 　詳しくは【｜リンク：https://www.google.co.jp/】ネット検索【リンク｜】してください。
 
-# em
+#>> em
 　必ず最後に【｜強調】確認ボタン【強調｜】をクリックしてください。
 
-# strong
+#>> strong
 　間違えて【｜最強調】自爆スイッチ【最強調｜】を押さないでください。
 
-# dot
+#>> dot
 　ここが【｜傍点】重要【傍点｜】です。
 
-# small
+#>> small
 　もちろん本当【｜ぼかし】かもしれない【ぼかし｜】ですよ。
 
-# strike
+#>> strike
 　富士山の標高は【｜訂正】３７７７メートル【訂正｜】３７７６メートルです。
 
-# verinhori
+#>> verinhori
 　シェイクスピア全集の第【｜縦中横】10【縦中横｜】巻に記述されています。
 
-# note
-　『乱れからくり』の作者は【｜備考：泡は特殊文字】泡坂妻夫【備考｜】です。
-
-# ruby
+#>> ruby
 　【｜ルビ：すいとう】出納【ルビ｜】係は言った。
 

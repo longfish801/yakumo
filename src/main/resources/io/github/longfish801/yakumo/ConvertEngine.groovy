@@ -9,9 +9,10 @@ template {
 	defaultKey = 'default';	// デフォルトキー
 }
 
-// 現在の設定の保存用ファイル名
-current {
-	washscr = 'washscr.tpac';	// 事前整形スクリプト
+// 変換に関する設定の保存
+logging {
+	subpath = 'yakumo';	// 一時フォルダからの相対パス
+	washsh = 'washsh.tpac';	// washshスクリプト
 	clmap = 'clmap.tpac';	// クロージャマップ
-	meta = 'meta.txt';	// メタ定義
+	washed = 'washed_%s.txt';	// 整形後のテキスト
 }

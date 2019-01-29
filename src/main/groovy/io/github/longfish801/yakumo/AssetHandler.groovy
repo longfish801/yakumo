@@ -6,7 +6,7 @@
 package io.github.longfish801.yakumo;
 
 import groovy.util.logging.Slf4j;
-import io.github.longfish801.shared.lang.ArgmentChecker;
+import io.github.longfish801.shared.ArgmentChecker;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Paths;
@@ -27,8 +27,9 @@ class AssetHandler {
 	String copyMode = 'overwrite';
 	
 	/**
-	 * コピー処理<br/>
-	 * コピーモードに応じて、以下のとおり動作します。
+	 * コピーモードとコピー処理のクロージャとのマップです。<br/>
+	 * クロージャは第一引数にコピー元URLを、第二引数にコピー先ファイルを指定します。<br/>
+	 * コピーモードに応じて、以下のとおり動作します。</p>
 	 * <dl>
 	 * <dt>overwrite</dt>
 	 *   <dd>常に上書きコピーします。</dd>
