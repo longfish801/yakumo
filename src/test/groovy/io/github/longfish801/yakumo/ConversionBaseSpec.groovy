@@ -6,10 +6,14 @@
 package io.github.longfish801.yakumo;
 
 import groovy.util.logging.Slf4j;
-import io.github.longfish801.shared.lang.ExistResource;
-import io.github.longfish801.shared.util.ClassDirectory;
-import io.github.longfish801.yakumo.tpac.Tpac;
-import io.github.longfish801.yakumo.washscr.WashScr;
+import io.github.longfish801.shared.ExchangeResource;
+import io.github.longfish801.shared.PackageDirectory;
+import io.github.longfish801.tpac.TeaServer;
+import io.github.longfish801.tpac.TpacServer;
+import io.github.longfish801.tpac.element.TeaDec;
+import io.github.longfish801.washsh.WashServer;
+import io.github.longfish801.washsh.Washsh;
+import spock.lang.Shared;
 import spock.lang.Specification;
 import spock.lang.Timeout;
 import spock.lang.Unroll;
@@ -21,64 +25,78 @@ import spock.lang.Unroll;
  */
 @Slf4j('LOG')
 class ConversionBaseSpec extends Specification {
-	/** ExistResource */
-	private static final ExistResource existResource = new ExistResource(ConversionBaseSpec.class);
 	/** ファイル入出力のテスト用フォルダ */
-	private static final File testDir = new ClassDirectory('src/test/resources').getDeepDir(ConversionBaseSpec.class);
+	static final File testDir = PackageDirectory.deepDir('src/test/resources', ConversionBaseSpec.class);
+	/** Washsh */
+	@Shared Washsh washsh;
 	/** 変換対象のテキスト */
-	private static final Tpac tpacTarget = new Tpac(new File(testDir, 'target.tpac'));
+	@Shared TeaDec decTarget;
 	/** 変換結果として期待するテキスト */
-	private static final Tpac tpacExpect = new Tpac(new File(testDir, 'expect.tpac'));
-	/** WashScr */
-	private static final WashScr washscr = new WashScr(existResource.get('_bltxt/washscr/bltxt.tpac'));
+	@Shared TeaDec decExpect;
+	/** washスクリプトを実行するクロージャ */
+	@Shared Closure doWash;
+	/** 期待する結果を取得するクロージャ */
+	@Shared Closure doExpect;
+	
+	def setup(){
+		TeaServer teaServer = new TpacServer();
+		teaServer.soak(new File(testDir, 'target.tpac'));
+		teaServer.soak(new File(testDir, 'expect.tpac'));
+		decTarget = teaServer['dec:target'];
+		decExpect = teaServer['dec:expect'];
+		WashServer washServer = new WashServer();
+		washServer.soak(ExchangeResource.url(ConversionBaseSpec.class, '_bltxt/bltxt.tpac'));
+		washsh = washServer["washsh:"];
+		doWash = { String parentKey, String childKey ->
+			String text = decTarget.lowers["${parentKey}"].lowers["${childKey}"].text.toString()
+			return washsh.wash(text);
+		}
+		doExpect = { String parentKey, String childKey ->
+			return decExpect.lowers["${parentKey}"].lowers["${childKey}"].text.toString();
+		}
+	}
 	
 	@Timeout(10)
 	@Unroll
 	def 'ブロック要素が正しく整形されること'(){
 		expect:
-		getWashedText(parentKey, childKey) == getTpacText(parentKey, childKey);
+		doWash(parentKey, childKey) == doExpect(parentKey, childKey);
 		
 		where:
 		parentKey	| childKey
-		'block#'	| 'head#'
-		'block#'	| 'head#subhead'
-		'block#'	| 'list#'
-		'block#'	| 'list#dl'
-		'block#'	| 'table#'
-		'block#'	| 'table#complex'
-		'block#'	| 'column#'
-		'block#'	| 'column#blockquote'
-		'block#'	| 'column#attention'
-		'block#'	| 'escape#'
-		'block#'	| 'raw#'
+		'block:'	| 'head:'
+		'block:'	| 'list:'
+		'block:'	| 'list:ol'
+		'block:'	| 'list:misc'
+		'block:'	| 'list:dl'
+		'block:'	| 'table:'
+		'block:'	| 'table:complex'
+		'block:'	| 'column:'
+		'block:'	| 'column:range'
+		'block:'	| 'column:code'
+		'block:'	| 'column:blockquote'
+		'block:'	| 'column:attention'
+		'block:'	| 'masking:'
+		'block:'	| 'blescape:'
 	}
 	
 	@Timeout(10)
 	@Unroll
 	def 'インライン要素が正しく整形されること'(){
 		expect:
-		getWashedText(parentKey, childKey) == getTpacText(parentKey, childKey);
+		doWash(parentKey, childKey) == doExpect(parentKey, childKey);
 		
 		where:
 		parentKey	| childKey
-		'inline#'	| 'link#'
-		'inline#'	| 'link#oneline'
-		'inline#'	| 'link#simple'
-		'inline#'	| 'strong#'
-		'inline#'	| 'emphasis#'
-		'inline#'	| 'small#'
-		'inline#'	| 'strike#'
-		'inline#'	| 'dot#'
-		'inline#'	| 'rotate#'
-		'inline#'	| 'note#'
-		'inline#'	| 'ruby#'
-	}
-	
-	private static String getWashedText(String parentKey, String childKey){
-		return washscr.wash(tpacTarget.dec.lowers["${parentKey}"].lowers["${childKey}"].text);
-	}
-	
-	private static String getTpacText(String parentKey, String childKey){
-		return tpacExpect.dec.lowers["${parentKey}"].lowers["${childKey}"].text;
+		'inline:'	| 'link:'
+		'inline:'	| 'link:oneline'
+		'inline:'	| 'link:simple'
+		'inline:'	| 'strong:'
+		'inline:'	| 'emphasis:'
+		'inline:'	| 'small:'
+		'inline:'	| 'strike:'
+		'inline:'	| 'dot:'
+		'inline:'	| 'rotate:'
+		'inline:'	| 'ruby:'
 	}
 }

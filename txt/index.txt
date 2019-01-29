@@ -13,10 +13,6 @@
 ・【リンク：YmoDocument：ymodocument.html】
 ・【リンク：BLtxt変換：convert_bltxt.html】
 ・【リンク：HTML変換：convert_html.html】
-・【リンク：WashScr記法：washscr.html】
-・【リンク：Clmap記法：clmap.html】
-・【リンク：BLtxt記法：bltxt.html】
-・【リンク：TPAC記法：tpac.html】
 
 ■API仕様書
 

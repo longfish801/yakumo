@@ -6,9 +6,9 @@
 package io.github.longfish801.yakumo;
 
 import groovy.util.logging.Slf4j;
-import io.github.longfish801.shared.lang.ArgmentChecker;
-import io.github.longfish801.shared.lang.ExistResource;
-import io.github.longfish801.shared.util.ClassSlurper;
+import io.github.longfish801.shared.ArgmentChecker;
+import io.github.longfish801.shared.ExchangeResource;
+import io.github.longfish801.yakumo.util.ResourceFinder;
 import org.apache.commons.io.FilenameUtils;
 
 /**
@@ -19,9 +19,7 @@ import org.apache.commons.io.FilenameUtils;
 @Slf4j('LOG')
 class YmoScript {
 	/** ConfigObject */
-	protected static final ConfigObject constants = ClassSlurper.getConfig(YmoScript.class);
-	/** ExistResource */
-	static ExistResource existResource = new ExistResource(YmoDocument.class);
+	static final ConfigObject cnstYmoScript = ExchangeResource.config(YmoScript.class);
 	/** GroovyShell */
 	static GroovyShell shell = new GroovyShell(YmoScript.class.classLoader);
 	/** 変換エンジン **/
@@ -35,36 +33,90 @@ class YmoScript {
 	
 	/**
 	 * 文字列を変換し、結果を返します。
-	 * @param conversionNames 変換名リスト
+	 * @param convNames 変換名リスト
 	 * @param text 変換対象の文字列
 	 * @return 変換結果の文字列
 	 */
-	static String convert(List conversionNames, String text){
+	static String convert(List convNames, String text){
 		ArgmentChecker.checkNotNull('文字列', text);
-		Map writables = new YmoScript().script{
-			configure(*conversionNames);
-			engine.setIO('text', text, '');
+		Map writables = new YmoScript().script {
+			convNames.each { configure(it) }
+			engine.sourceMap['text'] = text;
+			engine.outMap['text'] = '';
 		}
 		return writables['text'].toString();
 	}
 	
 	/**
-	 * 入力ファイルに対して変換し、結果を出力ファイルに書きこみます。<br>
+	 * 入力ファイルを変換し、出力ファイルに書きこみます。<br>
 	 * 出力ファイルの親フォルダを出力フォルダとして、固定ファイルを上書きコピーします。
-	 * @param conversionNames 変換名リスト
+	 * @param convNames 変換名リスト
 	 * @param inFile 入力ファイル
 	 * @param outFile 出力ファイル
 	 */
-	static void convert(List conversionNames, File inFile, File outFile){
+	static void convert(List convNames, File inFile, File outFile){
 		String sourceKey = FilenameUtils.getBaseName(inFile.name);
 		new YmoScript().script {
-			configure(*conversionNames);
-			engine.setIO('file', inFile, outFile);
+			convNames.each { configure(it) }
+			engine.sourceMap[sourceKey] = inFile;
+			engine.outMap[sourceKey] = outFile;
 			assetHandler.setup(outFile.canonicalFile.parentFile, 'overwrite');
 			doLast {
 				assetHandler.copy();
 			}
 		}
+	}
+	
+	/**
+	 * 変換スクリプトを実行します。
+	 * @param scriptFile 変換スクリプト
+	 * @param vars 変換スクリプト内で使用する変数名と変数値のマップ
+	 */
+	void run(File scriptFile, Map vars){
+		ArgmentChecker.checkExistFile('変換スクリプト', scriptFile);
+		ArgmentChecker.checkNotNull('変数名と変数値のマップ', vars);
+		shell.setVariable('yakumo', this);
+		shell.setVariable('scriptFile', scriptFile);
+		vars.each { String key, def val -> shell.setVariable(key, val)}
+		shell.run(scriptFile, []);
+	}
+	
+	/**
+	 * リソース上の変換設定スクリプトを実行します。<br>
+	 * 変換名をリソース名とし、その配下にある変換設定スクリプト（setting.groovy）を実行します。
+	 * @param convName 変換名
+	 */
+	void configure(String convName){
+		ArgmentChecker.checkNotBlank('変換名', convName);
+		URL scriptURL = ExchangeResource.url(YmoScript.class, "${convName}/${cnstYmoScript.setting.fileName}");
+		shell.setVariable('yakumo', this);
+		shell.setVariable('convName', convName);
+		shell.run(scriptURL.toURI(), []);
+	}
+	
+	/**
+	 * フォルダ上の変換設定スクリプトを実行します。<br>
+	 * 指定されたフォルダ内の変換設定スクリプト（setting.groovy）を実行します。
+	 * @param convDir 変換設定スクリプトを格納したフォルダ
+	 */
+	void configure(File convDir){
+		ArgmentChecker.checkExistDirectory('変換設定スクリプトを格納したフォルダ', convDir);
+		File scritFile = new File(convDir, cnstYmoScript.setting.fileName);
+		shell.setVariable('yakumo', this);
+		shell.setVariable('convDir', convDir);
+		shell.run(scritFile, []);
+	}
+	
+	/**
+	 * 変換スクリプトを実行します。
+	 * @param closure 変換処理をするクロージャ
+	 * @return 変換元キーと変換結果とのマップ
+	 */
+	void setting(Closure closure){
+		ArgmentChecker.checkNotNull('クロージャ', closure);
+		closure.delegate = this;
+		closure.resolveStrategy = Closure.DELEGATE_FIRST;
+		closure();
 	}
 	
 	/**
@@ -78,26 +130,9 @@ class YmoScript {
 		closure.resolveStrategy = Closure.DELEGATE_FIRST;
 		closure();
 		doFirstClosure?.call();
-		engine.loggingCurrentConfig();
-		Map writables = engine.convertAll();
+		Map writables = engine.converts();
 		doLastClosure?.call();
 		return writables;
-	}
-	
-	/**
-	 * 各変換名毎に、各種設定を参照します。<br>
-	 * 変換名をリソース名とし、その配下にある事前整形スクリプト、クロージャマップ、テンプレート、メタ定義、固定ファイルを読みこみます。
-	 * @param conversionNames 変換名リスト
-	 */
-	void configure(String... conversionNames){
-		ArgmentChecker.checkNotEmptyList('変換名リスト', conversionNames as List);
-		(conversionNames as List).each { String conversionName ->
-			engine.configureWashscr(existResource.find("${conversionName}/${constants.washscr.dirName}", constants.washscr.includePattern, constants.washscr.excludePattern).values() as List);
-			engine.configureClmap(existResource.find("${conversionName}/${constants.clmap.dirName}", constants.clmap.includePattern, constants.clmap.excludePattern).values() as List);
-			engine.configureTemplate(existResource.find("${conversionName}/${constants.template.dirName}", constants.template.includePattern, constants.template.excludePattern));
-			engine.configureMeta(existResource.find("${conversionName}/${constants.meta.dirName}", constants.meta.includePattern, constants.meta.excludePattern).values() as List);
-			assetHandler.gulp(conversionName, existResource.find("${conversionName}/${constants.asset.dirName}", constants.asset.includePattern, constants.asset.excludePattern));
-		}
 	}
 	
 	/**

@@ -1,0 +1,216 @@
+#! washsh
+
+#> range
+#>> mask
+#-bgn //***
+#-end ***//
+
+#>> tree 箇条書き
+#-level
+import java.util.regex.Matcher;
+{ String line ->
+	if (!(line ==~ /(\t*)[・～].*/)) return -1;
+	return Matcher.getLastMatcher().group(1).length();
+}
+#-escape
+import java.util.regex.Matcher;
+{ int idx, int endIdx, int level, List lines ->
+	if (idx == endIdx) return true;
+	if (lines[idx] == '' && !(lines[idx + 1] ==~ /(\t*)[・～].*/)) return true;
+	int curLevel = (lines[idx + 1] ==~ /(\t*)[・～].*/)? Matcher.getLastMatcher().group(1).length() : -1;
+	return (curLevel >= 0 && curLevel < level);
+}
+
+#>> tree 項目説明
+#-level
+import java.util.regex.Matcher;
+{ String line ->
+	if (!(line ==~ /(\t*)[：－].*/)) return -1;
+	return Matcher.getLastMatcher().group(1).length();
+}
+#-escape
+import java.util.regex.Matcher;
+{ int idx, int endIdx, int level, List lines ->
+	if (idx == endIdx) return true;
+	if (lines[idx] == '' && !(lines[idx + 1] ==~ /(\t*)[：－].*/)) return true;
+	int curLevel = (lines[idx + 1] ==~ /(\t*)[：－].*/)? Matcher.getLastMatcher().group(1).length() : -1;
+	return (curLevel >= 0 && curLevel < level);
+}
+
+#>> divided 表
+#-div ---表---
+
+#>> divided 囲み記事
+#-div -----
+
+#>> divided 整形済
+#-div =====
+
+#>> divided コラム
+#-div ~-{3}[^：]+-{3}
+
+#>> divided 属性ありコラム
+#-div ~-{3}[^：]+：.+-{3}
+
+#>> divided BLエスケープ
+#-div #####
+
+#> format
+#>> reprex 全範囲で実施する置換
+#-exclude BLエスケープ
+
+// 見出し
+^■(.+)$	【＝見出し】$1
+^□(.+)$	【＝見出し：2】$1
+^▼(.+)$	【＝見出し：3】$1
+
+// リンク
+【リンク：([^：]+)：([^】]+)】	【｜リンク：$2】$1【リンク｜】
+【リンク：([^】]+)】	【｜リンク：$1】$1【リンク｜】
+^(http:\/\/|https:\/\/){1}[\w\.\-\/:\#\?\=\&\;\%\~\+]+$	【｜リンク：$0】$0【リンク｜】
+（((http:\/\/|https:\/\/){1}[\w\.\-\/:\#\?\=\&\;\%\~\+]+)）	（【｜リンク：$1】$1【リンク｜】）
+
+// 行範囲タグ
+^【([^：]+)：ここから】$	【－$1】
+^【([^：]+)：ここまで】$	【$1－】
+
+// 文範囲タグ
+【(強調|最強調|ぼかし|訂正|傍点|縦中横)：([^】]+)】	【｜$1】$2【$1｜】
+【ルビ：([^：]+)：([^】]+)】	【｜ルビ：$2】$1【ルビ｜】
+
+#>> replace BLエスケープ
+#-include BLエスケープ
+￥	￥￥
+【	￥【
+】	￥】
+
+#>> call 箇条書き
+#-include 箇条書き
+#-bgn
+{ Map labels ->
+	String firstLine = labels.first.replaceFirst(/\t+(.*)/, '$1');
+	return "【－箇条書き：${(firstLine.startsWith('・'))? '順序なし': '順序あり'}】";
+}
+#-end
+{ Map labels -> return '【箇条書き－】'; }
+
+#>> call 箇条書き各項目
+#-include 箇条書き#elem
+#-bgn
+{ Map labels -> return '【－項目】'; }
+#-end
+{ Map labels -> return '【項目－】'; }
+#-text
+{ List lines, Map labels ->
+	List newLines = lines.collect { String line ->
+		// 先頭のタブを取り除く
+		if (line.matches(/\t+(.*)/)) line = line.replaceFirst(/\t+(.*)/, '$1');
+		if (line.startsWith('・') || line.startsWith('～')){
+			// 箇条書きの開始の場合、開始記号を取り除く
+			line = line.substring(1);
+		} else {
+			// 半角スペースによるインデントを取り除く
+			if (line.matches(/ +(.*)/)) line = line.replaceFirst(/ +(.*)/, '$1');
+		}
+		return line;
+	}
+	// 末尾に空文字のみの行があれば削除する
+	Closure deleteLastEmpty;
+	deleteLastEmpty = { List list ->
+		return (list.size() > 0 && list.last() == '')? deleteLastEmpty(list.take(list.size() - 1)) : list;
+	}
+	return deleteLastEmpty(newLines);
+}
+
+#>> call 項目説明
+#-include 項目説明
+#-bgn
+{ Map labels -> return '【－項目説明】' }
+#-end
+{ Map labels -> return '【項目説明－】' }
+
+#>> call 項目説明各項目
+#-include 項目説明#elem
+#-bgn
+{ Map labels -> return (labels.first.startsWith('：'))? '【－対象】' : '【－説明】'; }
+#-end
+{ Map labels -> return (labels.first.startsWith('：'))? '【対象－】' : '【説明－】'; }
+#-text
+{ List lines, Map labels ->
+	List newLines = lines.collect { String line ->
+		// 先頭のタブを取り除く
+		if (line.matches(/\t+(.*)/)) line = line.replaceFirst(/\t+(.*)/, '$1');
+		if (line.startsWith('：') || line.startsWith('－')){
+			// 対象あるいは説明の開始の場合、開始記号を取り除く
+			line = line.substring(1);
+		} else {
+			// 半角スペースによるインデントを取り除く
+			if (line.matches(/ +(.*)/)) line = line.replaceFirst(/ +(.*)/, '$1');
+		}
+		return line;
+	}
+	// 末尾に空文字のみの行があれば削除する
+	Closure deleteLastEmpty;
+	deleteLastEmpty = { List list ->
+		return (list.size() > 0 && list.last() == '')? deleteLastEmpty(list.take(list.size() - 1)) : list;
+	}
+	return deleteLastEmpty(newLines);
+}
+
+#>> call 表
+#-include 表
+#-bgn
+{ Map labels -> return '【－表】'; }
+#-end
+{ Map labels -> return '【表－】'; }
+#-text
+import org.apache.commons.lang3.StringUtils;
+{ List lines, Map labels ->
+	List newLines = [];
+	lines.each { String line ->
+		newLines << '【－行】';
+		List cells = (line =~ /^\|.+\|$/)? line.replaceFirst(/^\|\s*(.+)\s*\|$/, '$1').split(/\s*\|\s*/) : line.split(/\s+/);
+		cells.each { String cell ->
+			cell = StringUtils.trim(cell);
+			newLines << ((cell.startsWith('*'))? "【＝見出しセル】${cell.substring(1)}" : "【＝セル】${cell}");
+		}
+		newLines << '【行－】';
+	}
+	return newLines;
+}
+
+#>> call 囲み記事
+#-include 囲み記事
+#-bgn
+{ Map labels -> return '【－囲み記事】'; }
+#-end
+{ Map labels -> return '【囲み記事－】'; }
+
+#>> call 整形済
+#-include 整形済
+#-bgn
+{ Map labels -> return '【－整形済】'; }
+#-end
+{ Map labels -> return '【整形済－】'; }
+
+#>> call コラム
+#-include コラム
+#-bgn
+{ Map labels -> return labels.bgn.replaceFirst(/^-{3}([^：]+)-{3}$/, /【－$1】/); }
+#-end
+{ Map labels -> return labels.end.replaceFirst(/^-{3}([^：]+)-{3}$/, /【$1－】/); }
+
+#>> call 属性ありコラム
+#-include 属性ありコラム
+#-bgn
+{ Map labels -> return labels.bgn.replaceFirst(/^-{3}([^：]+)：(.+)-{3}$/, /【－$1：$2】/); }
+#-end
+{ Map labels -> return labels.end.replaceFirst(/^-{3}([^：]+)：(.+)-{3}$/, /【$1－】/); }
+
+#>> call BLエスケープ
+#-include BLエスケープ
+#-bgn
+{ Map labels -> return null; }
+#-end
+{ Map labels -> return null; }
+

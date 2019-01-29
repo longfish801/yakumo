@@ -7,18 +7,18 @@
 　名称は、マークアップを主に約物で実現することに由来しています。
 　yakumoにはあらかじめ書式が用意されていますが、それを拡張／改変することもできます。
 
-　おおまかには事前整形、構造化、加工、テンプレート適用の順序でテキストを変換します。
-　まずテキストを事前整形します。XMLのように階層関係がある、構造化が可能な記法（BLtxt記法）に沿った文書にします。
+　おおまかには整形、構造化、加工、テンプレート適用の順序でテキストを変換します。
+　まずテキストを整形します。XMLのように階層関係がある、構造化が可能な記法（BLtxt記法）に沿った文書にします。
 　構造化した文書から、各要素を参照して加工し、テンプレートを適用することで目的のテキストを得ます。
 
 　テキストは直接 BLtxt記法で記述しても構いませんが、やや煩雑になります。
 　慣用的な表現で記述し、yakumoによって各形式へ変換するほうが省力できます。
 
-　yakumoには、デフォルトで慣用的な表現を BLtxt記法へ事前整形するスクリプトが用意されています。
+　yakumoには、デフォルトで慣用的な表現を BLtxt記法へ整形するスクリプトが用意されています。
 　詳しくは【リンク：BLtxt変換：convert_bltxt.html】を参照してください。
 
 　yakumoには、デフォルトで BLtxt記法を HTMLへ変換するための設定が用意されています。
-　詳しくは【リンク：HTML変換：convert_bltxt.html】を参照してください。
+　詳しくは【リンク：HTML変換：convert_html.html】を参照してください。
 
 ■変換に利用するクラス
 
@@ -33,35 +33,35 @@
 
 　yakumoは主に、以下のサブパッケージから構成されています。
 
-－io.github.longfish801.yakumo.washscr
-　　→WashScr記法の解析／実行のためのパッケージです。
-－io.github.longfish801.yakumo.bltxt
+－io.github.longfish801.washsh
+　　→Washsh記法の解析／実行のためのパッケージです。
+－io.github.longfish801.bltxt
 　　→BLtxt記法の解析のためのパッケージです。
-－io.github.longfish801.yakumo.clmap
-　　→Clmap記法の参照／実行のためのパッケージです。
-－io.github.longfish801.yakumo.tpac
-　　→TPAC文書を扱うためのパッケージです。
+－io.github.longfish801.clmap
+　　→clmap記法の参照／実行のためのパッケージです。
+－io.github.longfish801.tpac
+　　→tpac文書を扱うためのパッケージです。
 
-　事前整形には washscrを利用します。
-　WashScr記法で記述されたスクリプトにより、テキストに対して置換処理などを施します。
+　整形には washshを利用します。
+　Washsh記法で記述されたスクリプトにより、テキストに対して置換処理などを施します。
 　これによりテキストを BLtxt文書に整形します。
-　詳細は【リンク：WashScr記法：washscr.html】を参照してください。
+　詳細は【リンク：washsh記法：/gitdoc/washsh/washsh.html】を参照してください。
 
 　構造化には bltxtを利用します。
 　BLtxt記法で記述された文書は、XMLのように階層関係のある構造を持たせることができます。
 　BLtxt文書を読みこんで、BLtxtインスタンスへ変換します。
-　詳細は【リンク：BLtxt記法：bltxt.html】を参照してください。
+　詳細は【リンク：BLtxt記法：/gitdoc/bltxt/bltxt.html】を参照してください。
 
 　加工には clmapを利用します。
-　Clmap記法により、複数のクロージャをまとめたクロージャマップを定義できます。
+　clmap記法により、複数のクロージャをまとめたクロージャマップを定義できます。
 　BLtxtインスタンスをクロージャで加工します。
-　詳細は【リンク：Clmap記法：clmap.html】を参照してください。
+　詳細は【リンク：clmap記法：/gitdoc/clmap/clmap.html】を参照してください。
 
 　加工した結果をテンプレートに適用することで、目的のテキストを得ます。
 　テンプレートへの適用には groovy.text.SimpleTemplateEngineを利用します。
 
-　tpacは、TPAC記法を解析するためのライブラリです。
-　WashScr文書や Clmap文書は TPAC記法をベースとしています。
-　詳細は【リンク：TPAC記法：tpac.html】を参照してください。
+　tpacは、tpac記法を解析するためのライブラリです。
+　Washsh文書や clmap文書は tpac記法をベースとしています。
+　詳細は【リンク：tpac記法：/gitdoc/tpac/tpac.html】を参照してください。
 
 以上

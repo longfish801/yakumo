@@ -4,23 +4,20 @@
  * Copyright (C) io.github.longfish801 All Rights Reserved.
  */
 
-plugins { id 'ca.coglinc.javacc' version '2.4.0' }
-
-version = '0.1.00';
+version = '0.2.00';
 
 dependencies {
-	compile 'ch.qos.logback:logback-classic:1.0.12';
-	compile 'commons-io:commons-io:2.5';
-	compile 'io.github.longfish801:shared:0.1.00';
-	compile 'org.apache.commons:commons-lang3:3.3.2';
-	compile 'org.apache.commons:commons-text:1.1';
-	compile 'org.codehaus.groovy:groovy-all:2.4.11';
-	compile 'org.codehaus.gpars:gpars:1.2.1';
-	compile 'org.slf4j:slf4j-api:1.7.5';
-	testCompile 'org.spockframework:spock-core:1.0-groovy-2.4';
-}
-
-// Javaccでソースを生成します。
-compileJavacc {
-	arguments = [ static: 'false', unicode_input: 'true', grammar_encoding: 'UTF-8' ]
+	compile group: 'commons-io', name: 'commons-io', version: '2.6';
+	compile group: 'io.github.longfish801', name: 'bltxt', version: '0.2.00';
+	compile group: 'io.github.longfish801', name: 'clmap', version: '0.2.00';
+	compile group: 'io.github.longfish801', name: 'shared', version: '0.2.00';
+	compile group: 'io.github.longfish801', name: 'washsh', version: '0.2.00';
+	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1';
+	compile group: 'org.apache.commons', name: 'commons-text', version: '1.6';
+	compile group: 'org.codehaus.gpars', name: 'gpars', version: '1.2.1';
+	compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.5.3';
+	compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25';
+	testCompile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3';
+	testCompile group: 'io.github.longfish801', name: 'tpac', version: '0.2.00';
+	testCompile group: 'org.spockframework', name: 'spock-core', version: '1.2-groovy-2.5';
 }

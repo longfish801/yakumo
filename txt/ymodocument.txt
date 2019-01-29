@@ -42,12 +42,12 @@ try {
 　├ …
 　├変換対象テキストファイルｎ（拡張子txt）
 　└設定フォルダ（変換名）
-　　　├変換スクリプト（ymoscript.groovy）
-　　　├Washスクリプト格納フォルダ（washscr）
-　　　│　├Washスクリプト１（拡張子tpac）
-　　　│　├Washスクリプト２（拡張子tpac）
+　　　├変換スクリプト（ymoScript.groovy）
+　　　├washshスクリプト格納フォルダ（washsh）
+　　　│　├washshスクリプト１（拡張子tpac）
+　　　│　├washshスクリプト２（拡張子tpac）
 　　　│　├ …
-　　　│　└Washスクリプトｎ（拡張子tpac）
+　　　│　└washshスクリプトｎ（拡張子tpac）
 　　　├クロージャマップ格納フォルダ（clmap）
 　　　│　├クロージャマップ１（拡張子tpac）
 　　　│　├クロージャマップ２（拡張子tpac）
