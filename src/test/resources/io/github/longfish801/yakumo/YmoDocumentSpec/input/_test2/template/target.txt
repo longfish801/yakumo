@@ -1,2 +1,2 @@
 これはテスト。
-<%= body.join("\n\n") %>
+<%= clmap.cl('#body').call(outKey) %>

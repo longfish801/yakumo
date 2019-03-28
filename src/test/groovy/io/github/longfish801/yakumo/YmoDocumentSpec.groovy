@@ -26,7 +26,7 @@ class YmoDocumentSpec extends Specification {
 		given:
 		String expected = '''\
 			これはテスト。
-			【＝見出し：2】カレーの作り方
+			【＝見出し】カレーの作り方
 			'''.stripIndent();
 		File targetDir = new File(testDir, 'input');
 		File outDir = new File(targetDir, '_out');

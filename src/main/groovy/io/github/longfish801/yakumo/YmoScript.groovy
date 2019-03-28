@@ -103,6 +103,7 @@ class YmoScript {
 		ArgmentChecker.checkExistDirectory('変換設定スクリプトを格納したフォルダ', convDir);
 		File scritFile = new File(convDir, cnstYmoScript.setting.fileName);
 		shell.setVariable('yakumo', this);
+		shell.setVariable('convName', convDir.name);
 		shell.setVariable('convDir', convDir);
 		shell.run(scritFile, []);
 	}

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TPAC記法</title>
+<link href="/yakumo/_asset/style.css" rel="stylesheet">
+<script src="/yakumo/_asset/script.js"></script>
+</head>
+<body>
+
+<header class="container">
+<h1>TPAC記法</h1>
+
+<nav class="list-group">
+<a href="#id2_1" class="list-group-item">概要</a>
+<a href="#id2_2" class="list-group-item">サンプル</a>
+<a href="#id2_3" class="list-group-item">全般</a>
+<a href="#id2_4" class="list-group-item">使用できる文字</a>
+<a href="#id2_5" class="list-group-item">宣言</a>
+<a href="#id2_6" class="list-group-item">親子要素</a>
+<a href="#id2_7" class="list-group-item">属性</a>
+<a href="#id2_8" class="list-group-item">テキスト</a>
+</nav>
+</header>
+
+<article class="container">
+<h2><a name="id2_1"></a>概要</h2>
+
+<p>　TPAC記法は、改行を含む長めの文章や、親子関係を簡単に記述するための記法です。<br/>
+　名称は、長めの文章(Text)と親子関係(Parent And Child)に由来しています。</p>
+
+<p>　以下のとおり、既存の記法では難しいことから独自に作成した記法です。</p>
+
+<ul>
+<li>XMLは、長いテキストや階層的なデータ構造を実現できますが、表現が冗長です。</li>
+<li>JSONや YAMLは、階層的なデータ構造を実現できますが、長いテキストの記述には向いていません。</li>
+<li>Groovy DSLは、文法的な誤りを含む Closureを記述できません。</li>
+</ul>
+
+<h2><a name="id2_2"></a>サンプル</h2>
+
+<p>　以下にTPAC文書のサンプルを示します。<br/>
+　ファイル<a href="tpacSample/sample.tpac">tpacSample/sample.tpac</a>として保存したとします。</p>
+
+<pre class="code">
+#! dec ルート
+## parent1 親名１
+## parent2 親名２
+#-attr1 属性値１
+#-attr2
+サンプルテキストあ
+サンプルテキストい
+サンプルテキストう
+# child1 子名１
+サンプルテキストか
+サンプルテキストき
+サンプルテキストく
+# child2 子名２
+#-attr3 属性値３
+</pre>
+
+<p>　上記の TPAC文書を、以下の XMLに変換できます。<br/>
+　ファイル<a href="tpacSample/sample.xml">tpacSample/sample.xml</a>として保存したとします。</p>
+
+<pre class="code">
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;dec name=&quot;ルート&quot;&gt;
+  &lt;parent1 name=&quot;親名１&quot;&gt;
+&lt;/parent1&gt;
+  &lt;parent2 name=&quot;親名２&quot; attr1=&quot;属性値１&quot; attr2=&quot;&quot;&gt;
+サンプルテキストあ
+サンプルテキストい
+サンプルテキストう
+    &lt;child1 name=&quot;子名１&quot;&gt;サンプルテキストか
+サンプルテキストき
+サンプルテキストく
+&lt;/child1&gt;
+    &lt;child2 name=&quot;子名２&quot; attr3=&quot;属性値３&quot; /&gt;
+  &lt;/parent2&gt;
+&lt;/dec&gt;
+</pre>
+
+<p>　クラス<a href="/tpac/groovydoc/io/github/longfish801/yakumo/tpac/Tpac.html">Tpac</a>を利用して、XMLへの変換などができます。</p>
+
+<p>　以下をファイル<a href="tpacSample/sample.groovy">tpacSample/sample.groovy</a>として保存したとします。<br/>
+　groovyコマンドで実行すると、assertに成功します。</p>
+
+<pre class="code">
+@GrabResolver(name = 'longfish801 github repositry', root = 'https://longfish801.github.io/maven/')
+@Grab('io.github.longfish801:yakumo:0.1.00')
+@GrabExclude('org.codehaus.groovy:groovy-all')
+import io.github.longfish801.yakumo.tpac.Tpac;
+import io.github.longfish801.yakumo.parser.ParseException;
+Tpac tpac = null;
+try {
+	tpac = new Tpac(new File('sample.tpac'));
+	assert tpac.toXml() == new File('sample.xml').getText('UTF-8');
+} catch (ParseException exc){
+	println &quot;文法誤りがあるため TPAC文書を解析できません。exc=${exc}&quot;;
+}
+</pre>
+
+<h2><a name="id2_3"></a>全般</h2>
+
+<p>　必ず終端に改行コードが必要です。<br/>
+　ファイルに記述する場合、文字コードは UTF-8を使用してください。</p>
+
+<p>　タグ名、名前、属性名に改行コード、半角スペース、半角シャープは使用できません。<br/>
+　属性値に改行コードは使用できません。<br/>
+　タグ名、属性名は空文字を許容しません。名前、属性値は空文字を許容します。</p>
+
+<h2><a name="id2_4"></a>使用できる文字</h2>
+
+<p>　タグ名は必須です。<br/>
+　改行コード、半角スペース、半角シャープを使用できません。</p>
+
+<p>　名前は省略可の場合があります。<br/>
+　改行コード、半角スペース、半角シャープを使用できません。</p>
+
+<p>　属性名は必須です。<br/>
+　改行コード、半角スペース、半角シャープを使用できません。</p>
+
+<p>　属性値は省略可です。<br/>
+　改行コードを使用できません。</p>
+
+<p>　テキストは省略可です。<br/>
+　すべての文字を使用できます。複数行記述することもできます。<br/>
+　先頭を半角シャープ（#）以外の文字で始める必要があります。</p>
+
+<h2><a name="id2_5"></a>宣言</h2>
+
+<p>　先頭行に宣言をひとつだけ持ちます。<br/>
+　半角シャープ＋半角エクスクラメーションマーク（#!）を行の先頭に付加します。<br/>
+　タグ名と名前を半角スペース区切りで記述します。<br/>
+　タグ名の前にも半角スペースが必要です。<br/>
+　タグ名は必須、名前は省略可です。</p>
+
+<h2><a name="id2_6"></a>親子要素</h2>
+
+<p>　親要素、子要素を複数指定できます。</p>
+
+<ul>
+<li>親要素は半角シャープふたつ（##）を行の先頭に付加します。</li>
+<li>子要素は半角シャープ（#）を行の先頭に付加します。</li>
+</ul>
+
+<p>　子要素を定義するときは、その親要素が必要です。<br/>
+　親要素の後に記述した子要素は、その親要素に属するとみなします。</p>
+
+<p>　親子要素にはタグ名と名前を半角スペース区切りで記述します。<br/>
+　タグ名の前にも半角スペースが必要です。</p>
+
+<ul>
+<li>タグ名は必須、重複可です。</li>
+<li>名前は、ひとつのみ省略できます。<br/>
+ひとつのみとは、親要素でひとつのみか、同じ親に属する子にひとつのみです。</li>
+<li>親同士でタグと名前の組合せの重複は不可です。</li>
+<li>同じ親に属する子同士で、タグと名前の組合せの重複は不可です。</li>
+</ul>
+
+<h2><a name="id2_7"></a>属性</h2>
+
+<p>　宣言要素、親子要素には属性を複数持たせることができます。<br/>
+　各要素の後続行に、先頭が半角シャープ＋半角ハイフン（#-）で始まる行を記述します。<br/>
+　各要素と属性の間、属性の行同士の間に空行は含めないでください。</p>
+
+<p>　属性名と属性値を半角スペース区切りで記述します。<br/>
+　属性名の前に半角スペースは不要です。</p>
+
+<p>　属性名は必須です。同じ親あるいは子に属する属性名は重複不可です。<br/>
+　属性値は省略可です。</p>
+
+<h2><a name="id2_8"></a>テキスト</h2>
+
+<p>　宣言要素、親子要素はテキストを最低ひとつ持たせることができます。<br/>
+　テキストの各行は、先頭を半角シャープ（#）以外の文字で始める必要があります。</p>
+
+<p>　テキストは省略可です。</p>
+
+<p>以上</p>
+
+</article>
+
+<footer class="container">
+<a href="index.html">戻る</a>
+</footer>
+
+</body>
+</html>
