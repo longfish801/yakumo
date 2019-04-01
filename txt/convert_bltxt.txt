@@ -150,7 +150,7 @@
 ---コラム：テキスト---
 //***
 ：ターメリック
-  －香辛料の一種です。
+－香辛料の一種です。
 ***//
 ---コラム：テキスト---
 
@@ -247,25 +247,25 @@
 #####
 ---コラム：BLtxt文書---
 
-□囲み記事
+□コード
 
-　５つの半角ハイフンを区切り行として、囲み記事とすることができます。
+　５つの半角ハイフンを区切り行として、コードとすることができます。
 
 ---コラム：テキスト---
 //***
 -----
-　ここは関係者以外、立入禁止です。
-　無断で侵入した場合は法に則り処罰します。
+println "Hello, World!";
+println "This is sample code of how to hello to all of the world, which is executed " + Date().format("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 -----
 ***//
 ---コラム：テキスト---
 
 ---コラム：BLtxt文書---
 #####
-【－囲み記事】
-　ここは関係者以外、立入禁止です。
-　無断で侵入した場合は法に則り処罰します。
-【囲み記事－】
+【－コード】
+println "Hello, World!";
+println "This is sample code of how to hello to all of the world, which is executed " + Date().format("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+【コード－】
 #####
 ---コラム：BLtxt文書---
 
@@ -295,7 +295,7 @@
 #####
 ---コラム：BLtxt文書---
 
-□コラム
+□行範囲タグの汎用的な記法
 
 　半角ハイフン３つで囲んだ文字列を、行範囲タグのタグ名にします。
 

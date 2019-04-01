@@ -40,7 +40,7 @@ import java.util.regex.Matcher;
 #>> divided 表
 #-div ---表---
 
-#>> divided 囲み記事
+#>> divided コード
 #-div -----
 
 #>> divided 整形済
@@ -179,12 +179,12 @@ import org.apache.commons.lang3.StringUtils;
 	return newLines;
 }
 
-#>> call 囲み記事
-#-include 囲み記事
+#>> call コード
+#-include コード
 #-bgn
-{ Map labels -> return '【－囲み記事】'; }
+{ Map labels -> return '【－コード】'; }
 #-end
-{ Map labels -> return '【囲み記事－】'; }
+{ Map labels -> return '【コード－】'; }
 
 #>> call 整形済
 #-include 整形済
