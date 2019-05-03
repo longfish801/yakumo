@@ -3,9 +3,8 @@
  *
  * Copyright (C) io.github.longfish801 All Rights Reserved.
  */
-import io.github.longfish801.yakumo.YmoScript;
-import io.github.longfish801.shared.ExchangeResource;
 
 yakumo.setting {
-	engine.configureWashsh(ExchangeResource.url(YmoScript.class, "${convName}/bltxt.tpac"));
+	// 拡張子tpacのファイルすべてを washスクリプトとして読みこみます
+	resourceFinder.find(convName, ['*.tpac'], []).each { engine.washServer.soak(it.value) }
 }

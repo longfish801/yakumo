@@ -1,0 +1,15 @@
+【＃タイトル】円周率について
+【＃サブタイトル】著名な語呂合わせ
+【＃著者名】山田太郎
+
+【＝見出し】カレーの作り方
+【＝見出し：2】材料の準備
+
+　XML【註：XML】をHTML【註：HTML】に変換します。
+
+【＊註記：XML】
+　eXtensible Markup Languageの略です。
+【註記＊】
+【＊註記：HTML】
+　Hyper Text Markup Languageの略です。
+【註記＊】

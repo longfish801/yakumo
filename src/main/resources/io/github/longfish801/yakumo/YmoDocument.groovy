@@ -8,3 +8,9 @@ target {
 	includePattern = ['*.txt'];	// ファイル名のパターン
 	excludePattern = [];	// ファイル名の除外パターン
 }
+
+// 固定ファイル
+asset {
+	includePattern = [];	// ファイル名のパターン
+	excludePattern = ['*.txt', '_*'];	// ファイル名の除外パターン
+}

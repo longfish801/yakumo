@@ -1,67 +1,145 @@
 
-【＃タイトル】概要
+【＃タイトル】yakumoの使い方
 
 ■yakumoとは
 
-　yakumoは、特定の書式に従うテキストを構造化、変換するためのライブラリです。
-　名称は、マークアップを主に約物で実現することに由来しています。
-　yakumoにはあらかじめ書式が用意されていますが、それを拡張／改変することもできます。
+　yakumoは、特定の記法に従うテキストを他の形式へ変換するためのライブラリです。
+　名称は、主に約物で書式を実現することに由来しています。
+　あらかじめ yakumo記法に沿ったテキストを HTMLへ変換するための資材が準備されています。
+　記法や変換方法を拡張／改変することもできます。
 
-　おおまかには整形、構造化、加工、テンプレート適用の順序でテキストを変換します。
-　まずテキストを整形します。XMLのように階層関係がある、構造化が可能な記法（BLtxt記法）に沿った文書にします。
-　構造化した文書から、各要素を参照して加工し、テンプレートを適用することで目的のテキストを得ます。
+■サンプル
+□YmoScript
 
-　テキストは直接 BLtxt記法で記述しても構いませんが、やや煩雑になります。
-　慣用的な表現で記述し、yakumoによって各形式へ変換するほうが省力できます。
+　【リンク：YmoScript：/yakumo/groovydoc/io/github/longfish801/yakumo/YmoScript.html】クラスは、DSLを実行することで変換を実現します。
+　ファイルを変換して結果ファイルを出力する DSLを実行するためのメソッドが準備してあります。【リンク：sample.groovy：sampleScript/sample.groovy】は yakumo記法のテキストファイルを HTML形式に変換します。【リンク：sample.txt：sampleScript/sample.txt】から【リンク：sample.html：sampleScript/sample.html】を生成します。
 
-　yakumoには、デフォルトで慣用的な表現を BLtxt記法へ整形するスクリプトが用意されています。
-　詳しくは【リンク：BLtxt変換：convert_bltxt.html】を参照してください。
+-----
+@GrabResolver(name = 'longfish801 github repositry', root = 'https://longfish801.github.io/maven/')
+@Grab('io.github.longfish801:yakumo:0.2.00')
+@GrabExclude('org.codehaus.groovy:groovy-all')
 
-　yakumoには、デフォルトで BLtxt記法を HTMLへ変換するための設定が用意されています。
-　詳しくは【リンク：HTML変換：convert_html.html】を参照してください。
+import io.github.longfish801.yakumo.YmoScript;
 
-■変換に利用するクラス
+try {
+	new YmoScript().convert('_bltxt', '_html', new File('sample.txt'), new File('sample.html'));
+} catch (exc){
+	println "HTMLへの変換に失敗しました。exc=${exc}";
+}
+-----
 
-　パッケージ io.github.longfish801.yakumo配下に、以下のクラスがあります。
+　convertメソッドの第一引数および第二引数に、変換資材の名前をリストで指定しています。
+　"_bltxt"は yakumo記法に沿ったテキストを bltxt記法へ変換するための変換資材名です。
+　"_html"は bltxt記法によって構造化されたテキストを HTMLへ変換するための変換資材名です。
+　詳しくは【リンク：BLtxt変換：convert_bltxt.html】、【リンク：HTML変換：convert_html.html】を参照してください。
 
-－【リンク：YmoScript：ymoscript.html】
-　　→文字列から文字列へ、ひとつの入力ファイルから出力ファイルへの変換を実現します。
-－【リンク：YmoDocument：ymodocument.html】
-　　→特定のフォルダ直下に存在するテキストファイルの一括変換を実現します。
+□YmoDocument
 
-■構成
+　【リンク：YmoDocument：/yakumo/groovydoc/io/github/longfish801/yakumo/YmoDocument.html】クラスは特定のフォルダ内に格納されたテキストファイルを一括変換することを想定しています。
+　本ドキュメントは YmoDocumentクラスで生成しています。本ドキュメントを生成するサンプルスクリプト（【リンク：sampleDocument/sample.groovy】）を以下に示します。
 
-　yakumoは主に、以下のサブパッケージから構成されています。
+-----
+@GrabResolver(name = 'longfish801 github repositry', root = 'https://longfish801.github.io/maven/')
+@Grab('io.github.longfish801:yakumo:0.2.00')
+@Grab('org.slf4j:slf4j-api:1.7.25')
+@Grab('ch.qos.logback:logback-classic:1.2.3')
+@GrabExclude('org.codehaus.groovy:groovy-all')
 
-－io.github.longfish801.washsh
-　　→Washsh記法の解析／実行のためのパッケージです。
-－io.github.longfish801.bltxt
-　　→BLtxt記法の解析のためのパッケージです。
-－io.github.longfish801.clmap
-　　→clmap記法の参照／実行のためのパッケージです。
-－io.github.longfish801.tpac
-　　→tpac文書を扱うためのパッケージです。
+import io.github.longfish801.yakumo.YmoDocument;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
-　整形には washshを利用します。
-　Washsh記法で記述されたスクリプトにより、テキストに対して置換処理などを施します。
-　これによりテキストを BLtxt文書に整形します。
-　詳細は【リンク：washsh記法：/gitdoc/washsh/washsh.html】を参照してください。
+Logger LOG = LoggerFactory.getLogger("sample");
 
-　構造化には bltxtを利用します。
-　BLtxt記法で記述された文書は、XMLのように階層関係のある構造を持たせることができます。
-　BLtxt文書を読みこんで、BLtxtインスタンスへ変換します。
-　詳細は【リンク：BLtxt記法：/gitdoc/bltxt/bltxt.html】を参照してください。
+try {
+	new YmoDocument(new File('..')).run(new File('../_html'));
+} catch (exc){
+	LOG.error('HTMLへの変換に失敗しました', exc);
+}
+-----
 
-　加工には clmapを利用します。
-　clmap記法により、複数のクロージャをまとめたクロージャマップを定義できます。
-　BLtxtインスタンスをクロージャで加工します。
-　詳細は【リンク：clmap記法：/gitdoc/clmap/clmap.html】を参照してください。
+■変換の基本的な考え方
 
-　加工した結果をテンプレートに適用することで、目的のテキストを得ます。
-　テンプレートへの適用には groovy.text.SimpleTemplateEngineを利用します。
+　yakumoによる変換は、解析（parse）と適用（apply）の工程から成ります。
+　解析工程は入力に相当します。変換対象のテキストを読みこんで整形し、XMLのような階層関係に構造化された形でメモリ上に保持します。
+　適用工程は出力に相当します。メモリ上に保持した内容を目的の形式に加工し、出力します。
 
-　tpacは、tpac記法を解析するためのライブラリです。
-　Washsh文書や clmap文書は tpac記法をベースとしています。
-　詳細は【リンク：tpac記法：/gitdoc/tpac/tpac.html】を参照してください。
+　テキストの整形には washshを利用します。washsh記法で記述されたスクリプトにより、テキストに対して置換処理などを施します。これによりテキストを bltxt文書へ整形します。詳細は【リンク：washsh記法：/washsh/washsh.html】を参照してください。
+　bltxt記法で記述された文書は、XMLのように階層関係のある構造を持たせることができます。bltxt文書を読みこんで、BLtxtインスタンスへ変換します。詳細は【リンク：BLtxt記法：/bltxt/bltxt.html】を参照してください。
 
-以上
+　BLtxtインスタンスからクロージャで目的の形式に沿ったテキストを生成します。
+　clmap記法により、複数のクロージャをまとめたクロージャマップを定義できます。詳細は【リンク：clmap記法：/clmap/clmap.html】を参照してください。
+　テキストの生成にはテンプレートを利用することもできます。テンプレートの適用には groovy.text.SimpleTemplateEngineを利用します。
+　必要に応じて固定ファイルをコピーします。固定ファイルは、変換結果に併せて出力が必要なファイルです。たとえば HTMLへの変換であれば CSSファイルや JavaScriptファイルなどが相当します。
+
+■変換資材
+
+　変換に必要な各種資材をまとめたものが変換資材です。以下の最低ひとつから構成されます。
+
+・washshスクリプト
+・clmapスクリプト
+・テンプレート
+・固定ファイル
+
+　変換資材は、クラスパスにリソースとして作成する場合と、ファイルシステム上にフォルダとして作る場合との二種類あります。どちらも、上記の資材を指定するための変換設定スクリプト ymoSetting.groovyを格納します。
+　変換資材がリソースの場合は設定スクリプトを格納したフォルダのリソース名を、変換資材がフォルダの場合は設定スクリプトを格納したフォルダを変換資材として指定します。
+
+　変換設定スクリプトには以下の変数があらかじめバインドされています。
+
+：yakumo
+－【リンク：YmoScriptクラス：/yakumo/groovydoc/io/github/longfish801/yakumo/YmoScript.html】
+：convName
+－変換名（変換設定スクリプトの格納フォルダ名）、変換資材がリソースの場合のみ
+：convDir
+－変換設定スクリプトの格納フォルダ（java.io.File）、変換資材がフォルダの場合のみ
+
+■YmoScript
+
+　【リンク：YmoScriptクラス：/yakumo/groovydoc/io/github/longfish801/yakumo/YmoScript.html】は、テキストの変換のための DSLを実行するためのクラスです。
+
+　たとえば上述のサンプルは、以下の DSLを実行することと等価です。詳細は groovydocを参照してください。
+
+-----
+import io.github.longfish801.yakumo.YmoScript;
+
+List convNames = ['_bltxt', '_html'];
+File inFile = new File('sample.txt'), 
+File outFile = new File('sample.html'));
+String sourceKey = FilenameUtils.getBaseName(inFile.name);
+new YmoScript().script {
+	convNames.each { configure(it) }
+	engine.sourceMap[sourceKey] = inFile;
+	engine.outMap[sourceKey] = outFile;
+	assetHandler.setup(outFile.canonicalFile.parentFile, 'overwrite');
+	doLast {
+		assetHandler.copy();
+	}
+}
+-----
+
+■YmoDocument
+
+　【リンク：YmoDocument：/yakumo/groovydoc/io/github/longfish801/yakumo/YmoDocument.html】は、特定のフォルダ直下に存在するテキストファイルの一括変換を実現します。
+　以下のように、変換対象のファイルが格納されたフォルダの直下に、サブフォルダとして変換資材が格納されていることを前提としています。
+
+-----
+変換対象フォルダ/
+├変換資材格納フォルダ/
+│　├変換スクリプト ymoScript.groovy
+│　├変換設定スクリプト ymoSetting.groovy
+│　└変換資材のファイル（washshスクリプトなど）
+├変換対象ファイル１.txt
+│　…
+└変換対象ファイルｎ.txt
+-----
+
+　変換スクリプトは以下の変数があらかじめバインドされています。
+
+：scriptFile
+－変換スクリプト（java.io.File）
+：yakumo
+－【リンク：YmoDocumentクラス：/yakumo/groovydoc/io/github/longfish801/yakumo/YmoDocument.html】
+：convDir
+－変換設定スクリプトの格納フォルダ（java.io.File）
+：targetDir
+－変換対象フォルダ（java.io.File）

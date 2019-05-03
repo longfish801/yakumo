@@ -46,7 +46,7 @@ class ConversionBaseSpec extends Specification {
 		decExpect = teaServer['dec:expect'];
 		WashServer washServer = new WashServer();
 		washServer.soak(ExchangeResource.url(ConversionBaseSpec.class, '_bltxt/bltxt.tpac'));
-		washsh = washServer["washsh:"];
+		washsh = washServer["washsh:_bltxt"];
 		doWash = { String parentKey, String childKey ->
 			String text = decTarget.lowers["${parentKey}"].lowers["${childKey}"].text.toString()
 			return washsh.wash(text);

@@ -1,4 +1,4 @@
-#! clmap
+#! clmap _test
 
 #> dec
 	import io.github.longfish801.bltxt.node.BLNode;
@@ -11,9 +11,17 @@
 
 #> map
 #>> args
+	String outKey, def out
+#>> closure
+	Map binds = [:];
+	binds['body'] = clmap.cl('bind#body').call(outKey);
+	return engine.templateHandler.apply(outKey, out, outKey, binds);
+
+#> map bind
+#>> args
 	String outKey
 #>> closure body
-	return clmap.cl('bltxt#body').call(bltxtMap[outKey]).join("\n\n");
+	return clmap.cl('bltxt#body').call(engine.bltxtMap[outKey]).join("\n\n");
 
 #> map bltxt
 #>> args

@@ -3,12 +3,13 @@
  *
  * Copyright (C) io.github.longfish801 All Rights Reserved.
  */
-import io.github.longfish801.shared.ExchangeResource;
-import io.github.longfish801.yakumo.YmoScript;
-import io.github.longfish801.yakumo.util.FileFinder;
+import org.apache.commons.io.FilenameUtils;
 
 yakumo.setting {
-	engine.configureTemplate('default', new File(convDir, 'template/target.txt'));
-	FileFinder finder = new FileFinder(convDir);
-	assetHandler.gulp(convName, finder.find('asset', [], []));
+	// templateフォルダ内にある拡張子htmlのファイルをすべてテンプレートとして読みこみます
+	fileFinder.find("${convDir.name}/template", ['*.txt'], []).each {
+		engine.templateHandler.load(FilenameUtils.getBaseName(it.key), it.value)
+	}
+	// assetフォルダ配下を固定ファイルとして読みこみます
+	assetHandler.gulp(convDir.name, fileFinder.find("${convDir.name}/asset", [], []));
 }

@@ -1,2 +1,2 @@
 これはテスト。
-<%= clmap.cl('#body').call(outKey) %>
+<%= body %>

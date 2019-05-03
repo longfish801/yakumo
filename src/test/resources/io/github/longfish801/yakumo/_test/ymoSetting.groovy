@@ -3,13 +3,13 @@
  *
  * Copyright (C) io.github.longfish801 All Rights Reserved.
  */
-import io.github.longfish801.shared.ExchangeResource;
-import io.github.longfish801.yakumo.YmoScript;
-import io.github.longfish801.yakumo.util.ResourceFinder;
+import org.apache.commons.io.FilenameUtils;
 
 yakumo.setting {
-	engine.configureClmap(ExchangeResource.url(YmoScript.class, "${convName}/test.tpac"));
-	engine.configureTemplate('default', ExchangeResource.url(YmoScript.class, "${convName}/template/default.txt"));
-	ResourceFinder finder = new ResourceFinder(YmoScript.class);
-	assetHandler.gulp(convName, finder.find("${convName}/asset", [], []));
+	resourceFinder.find(convName, ['*.tpac'], []).each { engine.clmapServer.soak(it.value) }
+	engine.bindClmap(convName, ['engine': engine]);
+	resourceFinder.find("${convName}/template", ['*.txt'], []).each {
+		engine.templateHandler.load(FilenameUtils.getBaseName(it.key), it.value)
+	}
+	assetHandler.gulp(convName, resourceFinder.find("${convName}/asset", [], []));
 }

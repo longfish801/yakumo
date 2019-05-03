@@ -55,19 +55,25 @@ class AssetHandler {
 	];
 	
 	/**
-	 * 固定ファイルに関する設定をします。
-	 * @param outDir 固定ファイルの出力フォルダ
+	 * 固定ファイルの出力フォルダを設定します。
+	 * @param outDir 
+	 */
+	void outDir(File outDir){
+		ArgmentChecker.checkExistDirectory('固定ファイルの出力フォルダ', outDir);
+		this.outDir = outDir;
+	}
+	
+	/**
+	 * コピーモードを設定します。
 	 * @param copyMode コピーモード
 	 */
-	void setup(File outDir, String copyMode){
-		ArgmentChecker.checkNotNull('固定ファイルの出力フォルダ', outDir);
+	void mode(String copyMode){
 		ArgmentChecker.checkNotBlank('コピーモード指定文字列', copyMode);
-		this.outDir = outDir;
 		if (copyMethods[copyMode] != null) this.copyMode = copyMode;
 	}
 	
 	/**
-	 * コピー対象とする固定ファイルを読みこみます。<br>
+	 * コピー対象とする固定ファイルを一括指定します。<br>
 	 * コピー対象はマップで指定します。<br>
 	 * キーにはコピー先のパス（出力フォルダからの相対パス）を指定してください。<br>
 	 * 値にはコピー元のURLを指定してください。<br>
@@ -96,7 +102,10 @@ class AssetHandler {
 	 * コピー元の固定ファイルはアセット一覧から参照します。<br>
 	 */
 	void copy(){
-		if (outDir == null) throw new IllegalStateException("出力先フォルダが設定されていません。");
+		if (assets.size() > 0 && outDir == null){
+			LOG.debug('出力先フォルダが未設定のためコピーしません。');
+			return;
+		}
 		LOG.debug('copy assets outDir={}', outDir.path);
 		assets.each { String setName, Map<String, URL> assetMap ->
 			assetMap.each { String path, URL url ->

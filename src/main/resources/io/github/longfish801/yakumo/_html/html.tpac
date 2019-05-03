@@ -1,4 +1,4 @@
-#! clmap
+#! clmap _html
 
 #> dec
 	import io.github.longfish801.bltxt.node.BLNode;
@@ -11,9 +11,22 @@
 
 #> map
 #>> args
+	String outKey, def out
+#>> closure
+	Map binds = [:];
+	binds['title'] = clmap.cl('bind#title').call(outKey);
+	binds['fulltitle'] = clmap.cl('bind#fulltitle').call(outKey);
+	binds['author'] = clmap.cl('bind#author').call(outKey);
+	binds['index'] = clmap.cl('bind#index').call(outKey);
+	binds['body'] = clmap.cl('bind#body').call(outKey);
+	binds['backlink'] = clmap.cl('bind#backlink').call(outKey);
+	return engine.templateHandler.apply(outKey, out, outKey, binds);
+
+#> map bind
+#>> args
 	String outKey
 #>> prefix
-	BLtxt bltxt = bltxtMap[outKey];
+	BLtxt bltxt = engine.bltxtMap[outKey];
 	Map head = clmap.cl('bltxt#head').call(bltxt);
 #>> closure title
 	return (head.containsKey('タイトル'))? head['タイトル'].replaceAll(/\<[^\<]+?\>/, '') : '';
@@ -343,6 +356,9 @@
 	return node.nodes.collect { clmap.cl('raw#line').call(it) }.join(lsep);
 #>> closure line
 	if (node.xmlTag != 'line') warnings << "生データに不適切なタグが格納されています。tag=${node.tag}, node=${node.toString()}";
+	return node.nodes.collect { clmap.cl("raw#${it.xmlTag}").call(it) }.join();
+#>> closure inline
+	if (node.xmlTag != 'inline') warnings << "生データに不適切なタグが格納されています。tag=${node.tag}, node=${node.toString()}";
 	return node.nodes.collect { clmap.cl('raw#text').call(it) }.join();
 #>> closure text
 	if (node.xmlTag != 'text') warnings << "生データに不適切なタグが格納されています。tag=${node.tag}, node=${node.toString()}";

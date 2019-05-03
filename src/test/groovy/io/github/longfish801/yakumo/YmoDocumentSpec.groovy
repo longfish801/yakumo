@@ -32,7 +32,7 @@ class YmoDocumentSpec extends Specification {
 		File outDir = new File(targetDir, '_out');
 		
 		when:
-		new YmoDocument(targetDir).run('_test2');
+		new YmoDocument(targetDir).run(new File(targetDir, '_test2'));
 		
 		then:
 		new File(outDir, 'target.txt').text == expected;
