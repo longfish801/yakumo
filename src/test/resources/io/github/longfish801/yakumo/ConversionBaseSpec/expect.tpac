@@ -111,24 +111,24 @@
 【行－】
 【表－】
 
-#>> column
-【－囲み記事】
-　ここは関係者以外、立入禁止です。
-　無断で侵入した場合は法に則り処罰します。
-【囲み記事－】
+#>> code
+【－コード】
+println "Hello, World!";
+println "This is sample code of how to hello to all of the world, which is executed " + Date().format("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+【コード－】
 
-#>> column range
-【－引用】
-　山道を登りながらこう考えた。
-【引用－】
-
-#>> column code
+#>> pre
 【－整形済】
 ルートフォルダ
 　├ binフォルダ
 　│　└ 実行ファイル
 　└ confフォルダ
 【整形済－】
+
+#>> column range
+【－引用】
+　山道を登りながらこう考えた。
+【引用－】
 
 #>> column blockquote
 【－引用】

@@ -33,7 +33,17 @@ class YmoScriptSpec extends Specification {
 			'''.stripIndent();
 		
 		expect:
-		YmoScript.convert(['_bltxt', '_test'], target) == expected;
+		YmoScript.convert('_bltxt', '_test', target) == expected;
+	}
+	
+	@Timeout(10)
+	def '文字列をHTMLに変換し、結果を返します'(){
+		given:
+		String target = new File(testDir, 'target2.txt').getText('UTF-8');
+		String expect = new File(testDir, 'expect2.txt').getText('UTF-8');
+		
+		expect:
+		YmoScript.convert('_bltxt', '_html', target).denormalize() == expect;
 	}
 	
 	@Timeout(10)
@@ -49,7 +59,7 @@ class YmoScriptSpec extends Specification {
 			'''.stripIndent();
 		
 		when:
-		YmoScript.convert(['_bltxt', '_test'], new File(testDir, 'target.txt'), outFile);
+		YmoScript.convert('_bltxt', '_test', new File(testDir, 'target.txt'), outFile);
 		
 		then:
 		outFile.text == expected;

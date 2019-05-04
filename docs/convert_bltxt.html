@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BLtxt変換</title>
+<link href="/yakumo/_asset/style.css" rel="stylesheet">
+<script src="/yakumo/_asset/script.js"></script>
+</head>
+<body>
+
+<header class="container">
+<h1>BLtxt変換</h1>
+
+<nav class="list-group">
+<a href="#id2_1" class="list-group-item">概要</a>
+<a href="#id2_2" class="list-group-item">行タグ／行範囲タグへ整形</a>
+<a href="#id3_3" class="list-group-item">　見出し</a>
+<a href="#id3_4" class="list-group-item">　箇条書き</a>
+<a href="#id3_5" class="list-group-item">　項目説明</a>
+<a href="#id3_6" class="list-group-item">　表</a>
+<a href="#id3_7" class="list-group-item">　コード</a>
+<a href="#id3_8" class="list-group-item">　整形済</a>
+<a href="#id3_9" class="list-group-item">　行範囲タグの汎用的な記法</a>
+<a href="#id3_10" class="list-group-item">　マスキング</a>
+<a href="#id3_11" class="list-group-item">　BLエスケープ</a>
+<a href="#id2_12" class="list-group-item">文中タグ／文範囲タグへ整形</a>
+<a href="#id3_13" class="list-group-item">　リンク</a>
+<a href="#id3_14" class="list-group-item">　強調</a>
+<a href="#id3_15" class="list-group-item">　最強調</a>
+<a href="#id3_16" class="list-group-item">　ぼかし</a>
+<a href="#id3_17" class="list-group-item">　削除</a>
+<a href="#id3_18" class="list-group-item">　傍点</a>
+<a href="#id3_19" class="list-group-item">　縦中横</a>
+<a href="#id3_20" class="list-group-item">　ルビ</a>
+</nav>
+</header>
+
+<article class="container">
+<h2><a name="id2_1"></a>概要</h2>
+
+<p>　yakumoは変換名「_bltxt」（BLtxt変換）を用意しています。<br/>
+　BLtxt変換は、yakumo記法で記述されたテキストを BLtxt文書に変換します。<br/>
+　washshスクリプトによる処理内容について、以下に説明します。</p>
+
+<h2><a name="id2_2"></a>行タグ／行範囲タグへ整形</h2>
+
+<h3><a name="id3_3"></a>見出し</h3>
+
+<p>　行頭に■、□、▼があれば、見出しとみなします。</p>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>■カレーの作り方<br/>
+□そもそもカレーとは<br/>
+▼宇宙開闢</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>【＝見出し】カレーの作り方<br/>
+【＝見出し：2】そもそもカレーとは<br/>
+【＝見出し：3】宇宙開闢</p>
+</div>
+</aside>
+
+<h3><a name="id3_4"></a>箇条書き</h3>
+
+<p>　一文字目に中黒（・）があれば、箇条書きとみなします。<br/>
+　半角空白でインデントすることで、複数行を記述できます。<br/>
+　項目の間に空行があっても無視します。<br/>
+　箇条書きを終了するには、空行の後に中黒で開始しない行を始めてください。</p>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>・じゃがいも<br/>
+・ニンジンを、<br/>
+  二本。</p>
+<p>・玉ねぎ</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>【－箇条書き：順序なし】<br/>
+【－項目】<br/>
+じゃがいも<br/>
+【項目－】<br/>
+【－項目】<br/>
+ニンジンを、<br/>
+二本。<br/>
+【項目－】<br/>
+【－項目】<br/>
+玉ねぎ<br/>
+【項目－】<br/>
+【箇条書き－】</p>
+</div>
+</aside>
+
+<p>　一文字目に波線（～）があれば、順序ありの箇条書きとみなします。</p>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>～お湯を沸かします。<br/>
+～野菜を切って煮こみます。<br/>
+～カレー粉を入れて、<br/>
+  できあがり。</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>【－箇条書き：順序あり】<br/>
+【－項目】<br/>
+お湯を沸かします。<br/>
+【項目－】<br/>
+【－項目】<br/>
+野菜を切って煮こみます。<br/>
+【項目－】<br/>
+【－項目】<br/>
+カレー粉を入れて、<br/>
+できあがり。<br/>
+【項目－】<br/>
+【箇条書き－】</p>
+</div>
+</aside>
+
+<p>　タブによるインデントで、入れ子にすることができます。</p>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>・じゃがいも<br/>
+・ニンジン<br/>
+・玉ねぎ<br/>
+	・刻むときは注意。<br/>
+	  涙がでます。<br/>
+・カレー粉<br/>
+	～ジャワカレー<br/>
+	～バーモンドカレー</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>【－箇条書き：順序なし】<br/>
+【－項目】<br/>
+じゃがいも<br/>
+【項目－】<br/>
+【－項目】<br/>
+ニンジン<br/>
+【項目－】<br/>
+【－項目】<br/>
+玉ねぎ<br/>
+【－箇条書き：順序なし】<br/>
+【－項目】<br/>
+刻むときは注意。<br/>
+涙がでます。<br/>
+【項目－】<br/>
+【箇条書き－】<br/>
+【項目－】<br/>
+【－項目】<br/>
+カレー粉<br/>
+【－箇条書き：順序あり】<br/>
+【－項目】<br/>
+ジャワカレー<br/>
+【項目－】<br/>
+【－項目】<br/>
+バーモンドカレー<br/>
+【項目－】<br/>
+【箇条書き－】<br/>
+【項目－】<br/>
+【箇条書き－】</p>
+</div>
+</aside>
+
+<p>　順序なし/ありを同じインデントレベルで混在させることはできません。<br/>
+　先頭行の一文字目の記号（・、～）によって順序なし/ありを判断します。</p>
+
+<h3><a name="id3_5"></a>項目説明</h3>
+
+<p>　一文字目に全角コロン（：）があれば、項目説明とみなします。<br/>
+　対象には行頭に全角コロン（：）を、その説明は行頭に全角ハイフン（－）を記述します。<br/>
+　説明は半角空白でインデントしても構いません。</p>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>：ターメリック<br/>
+－香辛料の一種です。</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>【－項目説明】<br/>
+【－対象】<br/>
+ターメリック<br/>
+【対象－】<br/>
+【－説明】<br/>
+香辛料の一種です。<br/>
+【説明－】<br/>
+【項目説明－】</p>
+</div>
+</aside>
+
+<h3><a name="id3_6"></a>表</h3>
+
+<p>　半角ハイフン３文字で文字列「表」を挟んだ区切り行で囲まれた範囲を、表とみなします。</p>
+
+<p>　セル区切りに半角スペースやタブを使います。<br/>
+　半角スペースやタブの連続はすべて取り除きます。<br/>
+　見出しには先頭に半角アスタリスク(*)を付与してください。<br/>
+　セルの内容を空文字にしたり、改行を含む文字列にすることはできません。<br/>
+　セルの結合や分割には対応していません。</p>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>---表---<br/>
+*No.	*産物	*産地<br/>
+1	みかん	愛媛<br/>
+2	茶	静岡<br/>
+---表---</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>【－表】<br/>
+【－行】<br/>
+【＝見出しセル】No.<br/>
+【＝見出しセル】産物<br/>
+【＝見出しセル】産地<br/>
+【行－】<br/>
+【－行】<br/>
+【＝セル】1<br/>
+【＝セル】みかん<br/>
+【＝セル】愛媛<br/>
+【行－】<br/>
+【－行】<br/>
+【＝セル】2<br/>
+【＝セル】茶<br/>
+【＝セル】静岡<br/>
+【行－】<br/>
+【表－】</p>
+</div>
+</aside>
+
+<p>　セル区切りに半角パイプ（|）を使うこともできます。<br/>
+　必ず行頭、行末に半角パイプを記述してください。<br/>
+　こちらはセルの内容を空文字にすることができます。<br/>
+　セルの結合や分割には対応していません。<br/>
+　値の前後に半角スペースやタブの連続があれば取り除きます。</p>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>---表---<br/>
+|*名前		|ミケ	|ボギー		|<br/>
+|*種類		|三毛猫	|コーギー	|<br/>
+|*首輪の色	|		|赤			|<br/>
+---表---</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>【－表】<br/>
+【－行】<br/>
+【＝見出しセル】名前<br/>
+【＝セル】ミケ<br/>
+【＝セル】ボギー<br/>
+【行－】<br/>
+【－行】<br/>
+【＝見出しセル】種類<br/>
+【＝セル】三毛猫<br/>
+【＝セル】コーギー<br/>
+【行－】<br/>
+【－行】<br/>
+【＝見出しセル】首輪の色<br/>
+【＝セル】<br/>
+【＝セル】赤<br/>
+【行－】<br/>
+【表－】</p>
+</div>
+</aside>
+
+<h3><a name="id3_7"></a>コード</h3>
+
+<p>　５つの半角ハイフンを区切り行として、コードとすることができます。</p>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>-----<br/>
+println &quot;Hello, World!&quot;;<br/>
+println &quot;This is sample code of how to hello to all of the world, which is executed &quot; + Date().format(&quot;yyyy-MM-dd'T'HH:mm:ss.SSSZ&quot;);<br/>
+-----</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>【－コード】<br/>
+println &quot;Hello, World!&quot;;<br/>
+println &quot;This is sample code of how to hello to all of the world, which is executed &quot; + Date().format(&quot;yyyy-MM-dd'T'HH:mm:ss.SSSZ&quot;);<br/>
+【コード－】</p>
+</div>
+</aside>
+
+<h3><a name="id3_8"></a>整形済</h3>
+
+<p>　５つの半角イコールを区切り行として、整形済とすることができます。</p>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>=====<br/>
+ルートフォルダ<br/>
+　├ binフォルダ<br/>
+　│　└ 実行ファイル<br/>
+　└ confフォルダ<br/>
+=====</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>【－整形済】<br/>
+ルートフォルダ<br/>
+　├ binフォルダ<br/>
+　│　└ 実行ファイル<br/>
+　└ confフォルダ<br/>
+【整形済－】</p>
+</div>
+</aside>
+
+<h3><a name="id3_9"></a>行範囲タグの汎用的な記法</h3>
+
+<p>　半角ハイフン３つで囲んだ文字列を、行範囲タグのタグ名にします。</p>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>---引用---<br/>
+　吾輩は猫である。</p>
+<footer>夏目漱石『吾輩は猫である』</footer>
+<p>---引用---</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>【－引用】<br/>
+　吾輩は猫である。<br/>
+【＝引用元】夏目漱石『吾輩は猫である』<br/>
+【引用－】</p>
+</div>
+</aside>
+
+<p>　もしくは次の書き方も可能です。</p>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>【引用：ここから】<br/>
+　山道を登りながらこう考えた。<br/>
+【引用：ここから】</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>【－引用】<br/>
+　山道を登りながらこう考えた。<br/>
+【引用－】</p>
+</div>
+</aside>
+
+<p>　全角コロン（：）で区切ることで、一番目の属性値を指定できます。<br/>
+　全角コロンの前に行範囲タグ名を、全角コロンの後に属性値を記述します。</p>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>---注意：中火とは---<br/>
+　中火とは、フライパンの底に炎の先端がちょうど届くくらいの状態を指します。<br/>
+---注意：中火とは---</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>【－注意：中火とは】<br/>
+　中火とは、フライパンの底に炎の先端がちょうど届くくらいの状態を指します。<br/>
+【注意－】</p>
+</div>
+</aside>
+
+<h3><a name="id3_10"></a>マスキング</h3>
+
+<p>　washshスクリプトによる整形の対象外とします。<br/>
+　//***～***//を区切り行として、マスキング対象を囲みます。<br/>
+　変換後に区切り行は削除します。<br/>
+　以下のサンプルでは、本来なら箇条書きとして整形されるはずですが、エスケープしているため処理の対象外となっています。</p>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>//***<br/>
+・帰りに綿棒を買ってくること。<br/>
+***//</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>・帰りに綿棒を買ってくること。</p>
+</div>
+</aside>
+
+<h3><a name="id3_11"></a>BLエスケープ</h3>
+
+<p>　BLtxt記法上の特殊文字をエスケープします。<br/>
+　半角シャープ５つを区切り行として、エスケープ対象を囲みます。<br/>
+　変換後に区切り行は削除します。</p>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>#####<br/>
+墨付きカッコが【強調：そのまま】表示されます。<br/>
+#####</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>墨付きカッコが【強調：そのまま】表示されます。</p>
+</div>
+</aside>
+
+<h2><a name="id2_12"></a>文中タグ／文範囲タグへ整形</h2>
+
+<h3><a name="id3_13"></a>リンク</h3>
+
+<p>　一番目の属性にリンクとして表示する文字列を、二番目の属性にリンク先アドレスを指定してください。<br/>
+　一番目の属性のみ指定した場合は、表示する文字列とリンク先アドレスを同じ値とみなします。</p>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>　詳しくは<a href="ネット検索"></a>してください。<br/>
+　<a href="https://www.google.co.jp/"></a>でネット検索できます。</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>　詳しくは【｜リンク：https://www.google.co.jp/】ネット検索【リンク｜】してください。<br/>
+　【｜リンク：https://www.google.co.jp/】https://www.google.co.jp/【リンク｜】でネット検索できます。</p>
+</div>
+</aside>
+
+<p>　URLのみが記述された行や、全角括弧で囲まれた箇所に URLが記述された場合にも変換します。</p>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>https://www.google.com/<br/>
+Google（https://www.google.com/）</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>【｜リンク：https://www.google.co.jp/】https://www.google.co.jp/【リンク｜】<br/>
+Google（【｜リンク：https://www.google.co.jp/】https://www.google.co.jp/【リンク｜】）</p>
+</div>
+</aside>
+
+<h3><a name="id3_14"></a>強調</h3>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>　必ず最後に<em></em>をクリックしてください。</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>　必ず最後に【｜強調】確認ボタン【強調｜】をクリックしてください。</p>
+</div>
+</aside>
+
+<h3><a name="id3_15"></a>最強調</h3>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>　間違えて<strong></strong>を押さないでください。</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>　間違えて【｜最強調】自爆スイッチ【最強調｜】を押さないでください。</p>
+</div>
+</aside>
+
+<h3><a name="id3_16"></a>ぼかし</h3>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>　もちろん本当<span class="small"></span>ですよ。</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>　もちろん本当【｜ぼかし】かもしれない【ぼかし｜】ですよ。</p>
+</div>
+</aside>
+
+<h3><a name="id3_17"></a>削除</h3>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>　富士山の標高は【削除：３７７７メートル】３７７６メートルです。</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>　富士山の標高は【｜削除】３７７７メートル【削除｜】３７７６メートルです。</p>
+</div>
+</aside>
+
+<h3><a name="id3_18"></a>傍点</h3>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>　まだ<span class="dot"></span>じゃないか。</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>　まだ【｜傍点】午前三時【傍点｜】じゃないか。</p>
+</div>
+</aside>
+
+<h3><a name="id3_19"></a>縦中横</h3>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>　シェイクスピア全集の第巻に記述されています。</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>　シェイクスピア全集の第【｜縦中横】10【縦中横｜】巻に記述されています。</p>
+</div>
+</aside>
+
+<h3><a name="id3_20"></a>ルビ</h3>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">テキスト</header>
+<div class="panel-body">
+<p>　<ruby><rp>［</rp><rt>出納</rt><rp>］</rp></ruby>係は言った。</p>
+</div>
+</aside>
+
+<aside class="panel panel-primary">
+<header class="panel-heading">BLtxt文書</header>
+<div class="panel-body">
+<p>　【｜ルビ：すいとう】出納【ルビ｜】係は言った。</p>
+</div>
+</aside>
+
+<p>以上</p>
+</article>
+
+<footer class="container">
+<a href="index.html">戻る</a>
+</footer>
+
+</body>
+</html>

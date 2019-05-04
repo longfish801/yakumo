@@ -5,13 +5,12 @@
  */
 package io.github.longfish801.yakumo;
 
-import groovy.text.SimpleTemplateEngine;
-import groovy.text.Template;
 import groovy.util.logging.Slf4j;
 import groovyx.gpars.GParsPool;
 import io.github.longfish801.shared.ArgmentChecker;
 import io.github.longfish801.shared.ExchangeResource;
 import io.github.longfish801.bltxt.BLtxt;
+import io.github.longfish801.clmap.Clinfo;
 import io.github.longfish801.clmap.Clmap;
 import io.github.longfish801.clmap.ClmapServer;
 import io.github.longfish801.washsh.WashServer;
@@ -30,24 +29,18 @@ class ConvertEngine {
 	static final ConfigObject cnstConvertEngine = ExchangeResource.config(ConvertEngine.class);
 	/** WashServer */
 	WashServer washServer = new WashServer();
-	/** washshスクリプト */
-	Washsh washsh = null;
 	/** ClmapServer */
 	ClmapServer clmapServer = new ClmapServer();
-	/** クロージャマップ */
-	Clmap clmap = null;
-	/** テンプレートキーとテンプレートのマップ */
-	Map<String, Template> templateMap = [:];
-	/** SimpleTemplateEngine */
-	private static final SimpleTemplateEngine templateEngine = new SimpleTemplateEngine();
 	/** ログフォルダ */
 	File logDir = null;
-	/** 変換元キーと変換対象とのマップ */
-	Map sourceMap = [:];
-	/** 出力先キーと出力先とのマップ */
-	Map outMap = [:];
-	/** 出力先キーとテンプレートキーとのマップ */
-	Map templateKeys = [:];
+	/** 解析対象のリスト */
+	List targets = [];
+	/** 適用結果のリスト */
+	List outs = [];
+	/** 解析対象キーと BLtxtインスタンスとのマップ */
+	Map bltxtMap = Collections.synchronizedMap([:]);
+	/** テンプレート操作 **/
+	TemplateHandler templateHandler = new TemplateHandler();
 	
 	/**
 	 * コンストラクタ。<br/>
@@ -81,101 +74,114 @@ class ConvertEngine {
 	}
 	
 	/**
-	 * washshスクリプトを読みこみます。
-	 * @param source washshスクリプト（File、URL、String、BufferedReaderのいずれか）
+	 * 解析対象クラス。
 	 */
-	void configureWashsh(def source){
-		Washsh soaked = washServer.soak(source).getAt('washsh:');
-		washsh = washsh?.blend(soaked) ?: soaked;
+	class ParseTarget {
+		/** 解析対象キー */
+		String key;
+		/** 解析対象 */
+		def source;
+		/** washshスクリプトの識別キー */
+		String washKey;
 	}
 	
 	/**
-	 * クロージャマップを読みこみます。
-	 * @param sources クロージャマップ（File、URL、String、BufferedReaderのいずれか）
+	 * 適用結果クラス。
 	 */
-	void configureClmap(def source){
-		Clmap soaked = clmapServer.soak(source).getAt('clmap:');
-		clmap = clmap?.blend(soaked) ?: soaked;
+	class ApplyOut {
+		/** 出力先キー */
+		String key;
+		/** 出力先 */
+		def out;
+		/** clmapスクリプトの識別キー */
+		String clmapKey;
+		/** clmapスクリプトのコンビキー */
+		String combiKey;
 	}
 	
 	/**
-	 * テンプレートを読みこみます。
-	 * @param templateKey テンプレートキー
-	 * @param source テンプレート対象（Reader, String, File, URLのいずれか）
+	 * 解析対象を追加します。
+	 * @param key 解析対象キー
+	 * @param source 解析対象
+	 * @param convName 変換名
 	 */
-	void configureTemplate(String templateKey, def source){
-		Reader reader = convertToReader(templateKey, source);
-		templateMap[templateKey] = templateEngine.createTemplate(reader);
+	void appendTarget(String key, def source, String convName){
+		targets << new ParseTarget(key: key, source: source, washKey: "washsh:${convName}");
 	}
 	
 	/**
-	 * 変換設定をログフォルダに出力します。
+	 * 適用結果を追加します。
+	 * @param key 出力先キー
+	 * @param out 出力先
+	 * @param convName 変換名
 	 */
-	void logging(){
-		if (logDir != null){
-			if (washsh != null) new File(logDir, cnstConvertEngine.logging.washsh).text = washsh.toString();
-			if (clmap != null) new File(logDir, cnstConvertEngine.logging.clmap).text = clmap.toString();
-		}
+	void appendOut(String key, def out, String convName){
+		outs << new ApplyOut(key: key, out: out, clmapKey: "clmap:${convName}", combiKey: '');
 	}
 	
 	/**
-	 * 一括変換します。<br/>
-	 * テンプレートには、以下のバインド変数を設定します。</p>
-	 * <dl>
-	 * <dt>bltxtMap</dt>
-	 *   <dd>変換元キーと BLtxtインスタンスとのマップ。</dd>
-	 * <dt>clmap</dt>
-	 *   <dd>クロージャマップ。</dd>
-	 * <dt>bltxtMap</dt>
-	 *   <dd>出力先キー。</dd>
-	 * </dl>
-	 * @return 出力先キーと Writableとのマップ
+	 * 適用結果を追加します。
+	 * @param key 出力先キー
+	 * @param out 出力先
+	 * @param convName 変換名
+	 * @param combiKey クロージャマップのコンビキー
+	 * @param binds クロージャのバインド変数マップ
 	 */
-	Map converts(){
-		if (clmap == null) throw new IllegalStateException("クロージャマップが設定されていません。");
-		if (sourceMap.empty) throw new IllegalStateException("変換元キーと変換対象とのマップが設定されていません。");
-		if (outMap.empty) throw new IllegalStateException("出力先キーと出力先とのマップが設定されていません。");
-		
-		// 変換設定をログフォルダに出力します
-		logging();
-		
-		// 変換対象から BLtxtインスタンスを生成します
-		Map bltxtMap = Collections.synchronizedMap([:]);
+	void appendOut(String key, def out, String convName, String combiKey){
+		outs << new ApplyOut(key: key, out: out, clmapKey: "clmap:${convName}", combiKey: combiKey);
+	}
+	
+	/**
+	 * クロージャマップに大域変数をバインドします。
+	 * @param convName 変換名
+	 * @param binds バインド変数マップ
+	 */
+	void bindClmap(String convName, Map binds){
+		Clmap clmap = clmapServer.getAt("clmap:${convName}");
+		if (clmap == null) throw new IllegalStateException("クロージャマップを参照できません。convName=${convName}");
+		binds.each { clmap.properties[it.key] = it.value }
+	}
+	
+	/**
+	 * 複数の変換対象から並列処理で BLtxtインスタンスを生成しメンバ変数のマップに保持します。
+	 * @return 解析対象キーと BLtxtインスタンスとのマップ
+	 */
+	Map parses(){
+		if (targets.empty) throw new IllegalStateException("解析対象のリストが空です。");
+		// 変換対象から BLtxtインスタンスを並列処理で生成します
 		GParsPool.withPool {
-			sourceMap.eachParallel { String sourceKey, def target ->
-				bltxtMap[sourceKey] = load(sourceKey, target);
+			targets.eachParallel { ParseTarget target ->
+				bltxtMap[target.key] = parse(target.key, target.source, target.washKey);
 			}
 		}
-		clmap.properties['bltxtMap'] = bltxtMap;
-		
-		// 警告メッセージを格納できるようリストを定義します
-		clmap.properties['warnings'] = [].asSynchronized();
-		
-		// テンプレートを適用します
-		Map writables = Collections.synchronizedMap([:]);
-		GParsPool.withPool {
-			outMap.eachParallel { String outKey, def out ->
-				writables[outKey] = apply(outKey, out, templateKeys[outKey] ?: outKey, [ 'clmap': clmap, 'outKey': outKey ]);
-			}
-		}
-		return writables;
+		return bltxtMap;
 	}
 	
 	/**
 	 * 変換対象から BLtxtインスタンスを生成してメンバ変数のマップに保持します。<br>
 	 * まず変換対象を Washshスクリプトで整形します。<br>
 	 * 整形結果を BLtxt文書として構造化します。
-	 * @param sourceKey 変換元キー
+	 * @param targetKey 解析対象キー
 	 * @param source 変換対象（Reader, String, File, URLのいずれか）
+	 * @param washKey washshスクリプトの識別キー
 	 * @return BLtxt
 	 */
-	BLtxt load(String sourceKey, def source){
-		ArgmentChecker.checkNotBlank('変換元キー', sourceKey);
+	BLtxt parse(String targetKey, def source, String washKey){
+		ArgmentChecker.checkNotBlank('解析対象キー', targetKey);
 		ArgmentChecker.checkNotNull('変換対象', source);
-		if (washsh == null) throw new IllegalStateException("Washshスクリプトが設定されていません。sourceKey=${sourceKey}");
+		ArgmentChecker.checkNotBlank('washshスクリプトの識別キー', washKey);
 		
 		// 整形を実行します
-		Reader reader = convertToReader(sourceKey, source);
+		Washsh washsh = washServer.getAt(washKey);
+		if (washsh == null) throw new IllegalStateException("washshスクリプトを参照できません。targetKey=${targetKey}, washKey=${washKey}");
+		Reader reader = null;
+		switch (source){
+			case Reader: reader = source; break;
+			case String: reader = new StringReader(source); break;
+			case File: reader = new FileReader(source); break;
+			case URL: reader = new InputStreamReader(source.openStream()); break;
+			default: throw new YmoConvertException("変換対象が未対応のクラスです。targetKey=${targetKey}, source=${source.class}");
+		}
 		Writer pipedWriter = new PipedWriter();
 		PipedReader pipedReader = new PipedReader(pipedWriter);
 		Exception washExc = null;
@@ -184,7 +190,9 @@ class ConvertEngine {
 				washsh.wash(new BufferedReader(reader), new BufferedWriter(pipedWriter));
 			} catch (exc){
 				washExc = exc;
-				LOG.warn("整形に失敗しました。sourceKey={} exc={}", sourceKey, exc);
+				pipedWriter.close();
+				pipedReader.close();
+				LOG.warn("整形に失敗しました。targetKey={} exc={}", targetKey, exc);
 			}
 		}
 		
@@ -195,66 +203,68 @@ class ConvertEngine {
 		washThread.join();
 		if (washExc != null) throw washExc;
 		// 整形後のテキストを保存します
-		String washedFname = String.format(cnstConvertEngine.logging.washed, sourceKey);
+		String washedFname = String.format(cnstConvertEngine.logging.washed, targetKey);
 		if (logDir != null) new File(logDir, washedFname).text = bltxt.leakedWriter.toString();
 		return bltxt;
 	}
 	
 	/**
-	 * テンプレートを適用します。<br/>
-	 * テンプレートは以下の順番で取得を試みます。</p>
-	 * <ol>
-	 * <li>テンプレートキーと一致するテンプレート。</li>
-	 * <li>デフォルトのテンプレートキー（default）と一致するテンプレート。</li>
-	 * </ol>
+	 * 適用工程を一括実行します。<br/>
+	 * テンプレートには、以下のバインド変数を設定します。</p>
+	 * <dl>
+	 * <dt>bltxtMap</dt>
+	 *   <dd>解析対象キーと BLtxtインスタンスとのマップ。</dd>
+	 * <dt>clmap</dt>
+	 *   <dd>クロージャマップ。</dd>
+	 * <dt>bltxtMap</dt>
+	 *   <dd>出力先キー。</dd>
+	 * </dl>
+	 * @return 出力先キーと Writableとのマップ
+	 */
+	Map applys(){
+		if (outs.empty) throw new IllegalStateException("出力先キーと出力先とのマップが設定されていません。");
+		Map writables = Collections.synchronizedMap([:]);
+		GParsPool.withPool {
+			outs.eachParallel { ApplyOut out ->
+				writables[out.key] = apply(out.key, out.out, out.clmapKey, out.combiKey);
+			}
+		}
+		return writables;
+	}
+	
+	/**
+	 * 適用工程を実行します。<br/>
+	 * クロージャには第一引数として出力先キー、第二引数として出力先を渡します。<br/>
 	 * @param outKey 出力先キー
 	 * @param out 出力先（Writer, String, Fileのいずれか）
-	 * @param templateKey テンプレートキー
-	 * @param binds バインド変数
+	 * @param clmapKey clmapの識別キー
+	 * @param combiKey clmapのコンビキー
 	 * @return Writable
-	 * @throws YmoConvertException 出力先が未対応のクラスです。
-	 * @throws YmoConvertException 適用できるテンプレートがありません。
+	 * @throws IllegalStateException クロージャマップを参照できません。
+	 * @throws IllegalStateException クロージャを参照できません。
 	 */
-	Writable apply(String outKey, def out, String templateKey, Map binds){
-		ArgmentChecker.checkNotBlank('出力先キー', outKey);
-		ArgmentChecker.checkNotNull('出力先', out);
-		ArgmentChecker.checkNotBlank('テンプレートキー', templateKey);
-		ArgmentChecker.checkNotEmptyMap('バインド変数', binds);
-		if (templateMap.empty) throw new IllegalStateException("テンプレートの読込がされていません。outKey=${outKey}");
-		
-		// 変換先から Writerインスタンスを生成します
-		Writer writer = null;
-		switch (out){
-			case Writer: writer = out; break;
-			case String: writer = new StringWriter(); break;
-			case File: writer = new FileWriter(out); break;
-			default: throw new YmoConvertException("出力先が未対応のクラスです。outKey=${outKey}, out=${out.class}");
-		}
-		
-		// テンプレートを取得します
-		Template template = templateMap[templateKey] ?: templateMap[cnstConvertEngine.template.defaultKey];
-		if (template == null) throw new YmoConvertException("適用できるテンプレートがありません。templateKey=${templateKey}, templateMap=${templateMap.keySet()}");
-		
-		// 変換元からバインド変数を取得し、テンプレートを適用します
-		Writable writable = template.make(binds);
-		writable.writeTo(writer);
-		return writable;
+	Writable apply(String outKey, def out, String clmapKey, String combiKey){
+		Clmap clmap = clmapServer.getAt(clmapKey);
+		if (clmap == null) throw new IllegalStateException("クロージャマップを参照できません。outKey=${outKey}, clmapKey=${clmapKey}");
+		Clinfo clinfo = clmap.cl(combiKey);
+		if (clinfo == null) throw new IllegalStateException("クロージャを参照できません。outKey=${outKey}, clmapKey=${clmapKey}, combiKey=${combiKey}");
+		return clinfo.call(outKey, out);
 	}
 	
 	/**
 	 * Readerインスタンスを生成します。
-	 * @param sourceKey 変換元キー
+	 * @param targetKey 解析対象キー
 	 * @param source 変換対象（Reader, String, File, URLのいずれか）
 	 * @return Reader
 	 */
-	private static Reader convertToReader(String sourceKey, def source){
+	private static Reader convertToReader(String targetKey, def source){
 		Reader reader = null;
 		switch (source){
 			case Reader: reader = source; break;
 			case String: reader = new StringReader(source); break;
 			case File: reader = new FileReader(source); break;
 			case URL: reader = new InputStreamReader(source.openStream()); break;
-			default: throw new YmoConvertException("変換対象が未対応のクラスです。sourceKey=${sourceKey}, source=${source.class}");
+			default: throw new YmoConvertException("変換対象が未対応のクラスです。targetKey=${targetKey}, source=${source.class}");
 		}
 		return reader;
 	}

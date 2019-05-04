@@ -46,24 +46,24 @@
 |*首輪の色	|		|赤			|
 ---表---
 
-#>> column
+#>> code
 -----
-　ここは関係者以外、立入禁止です。
-　無断で侵入した場合は法に則り処罰します。
+println "Hello, World!";
+println "This is sample code of how to hello to all of the world, which is executed " + Date().format("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 -----
 
-#>> column range
-【引用：ここから】
-　山道を登りながらこう考えた。
-【引用：ここまで】
-
-#>> column code
+#>> pre
 =====
 ルートフォルダ
 　├ binフォルダ
 　│　└ 実行ファイル
 　└ confフォルダ
 =====
+
+#>> column range
+【引用：ここから】
+　山道を登りながらこう考えた。
+【引用：ここまで】
 
 #>> column blockquote
 ---引用---

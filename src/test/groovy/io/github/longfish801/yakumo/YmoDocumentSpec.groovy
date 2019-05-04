@@ -26,13 +26,13 @@ class YmoDocumentSpec extends Specification {
 		given:
 		String expected = '''\
 			これはテスト。
-			【＝見出し：2】カレーの作り方
+			【＝見出し】カレーの作り方
 			'''.stripIndent();
 		File targetDir = new File(testDir, 'input');
 		File outDir = new File(targetDir, '_out');
 		
 		when:
-		new YmoDocument(targetDir).run('_test2');
+		new YmoDocument(targetDir).run(new File(targetDir, '_test2'));
 		
 		then:
 		new File(outDir, 'target.txt').text == expected;

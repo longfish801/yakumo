@@ -56,15 +56,7 @@ class ConversionHTMLSpec extends Specification {
 		decExpect = teaServer['dec:expect'];
 		ClmapServer clmapServer = new ClmapServer();
 		clmapServer.soak(ExchangeResource.url(ConversionHTMLSpec.class, '_html/html.tpac'));
-		clmap = clmapServer['clmap:'];
-		doHTMLize = { String parentKey, String childKey ->
-			String text = decTarget.lowers["${parentKey}"].lowers["${childKey}"].text.toString();
-			clmap.properties['bltxtMap'] = [ 'testtxt': new BLtxt(text) ];
-			clmap.properties['warnings'] = [].asSynchronized();
-			Map binding = [ 'clmap': clmap, 'outKey': 'testtxt' ]
-			Template template = templateEngine.createTemplate(ExchangeResource.url(ConversionHTMLSpec.class, '_html/template/default.html'));
-			return template.make(binding).toString().denormalize() + System.lineSeparator();
-		}
+		clmap = clmapServer['clmap:_html'];
 		doBody = { String parentKey, String childKey ->
 			String text = decTarget.lowers["${parentKey}"].lowers["${childKey}"].text.toString();
 			return clmap.cl('bltxt#body').call(new BLtxt(text)).join(System.lineSeparator()) + System.lineSeparator() + System.lineSeparator();
@@ -72,17 +64,6 @@ class ConversionHTMLSpec extends Specification {
 		doExpect = { String parentKey, String childKey ->
 			return decExpect.lowers["${parentKey}"].lowers["${childKey}"].text.toString();
 		}
-	}
-	
-	@Timeout(10)
-	@Unroll
-	def 'テンプレートを適用し正しくHTML化されること'(){
-		expect:
-		doHTMLize(parentKey, childKey) == doExpect(parentKey, childKey);
-		
-		where:
-		parentKey	| childKey
-		'html:'	| 'basic:'
 	}
 	
 	@Timeout(10)

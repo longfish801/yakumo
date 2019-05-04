@@ -3,13 +3,20 @@
  *
  * Copyright (C) io.github.longfish801 All Rights Reserved.
  */
-import io.github.longfish801.shared.ExchangeResource;
-import io.github.longfish801.yakumo.YmoScript;
-import io.github.longfish801.yakumo.util.ResourceFinder;
+import org.apache.commons.io.FilenameUtils;
 
 yakumo.setting {
-	engine.configureClmap(ExchangeResource.url(YmoScript.class, "${convName}/html.tpac"));
-	engine.configureTemplate('default', ExchangeResource.url(YmoScript.class, "${convName}/template/default.html"));
-	ResourceFinder finder = new ResourceFinder(YmoScript.class);
-	assetHandler.gulp(convName, finder.find("${convName}/asset", [], []));
+	// 拡張子tpacのファイルすべてを clmapスクリプトとして読みこみます
+	resourceFinder.find(convName, ['*.tpac'], []).each { engine.clmapServer.soak(it.value) }
+	// クロージャマップ内で利用する大域変数をバインドします
+	Map binds = [:];
+	binds['engine'] = engine;	// ConvertEngineインスタンス
+	binds['warnings'] = [].asSynchronized();	// 警告ログ格納用のリスト
+	engine.bindClmap(convName, binds);
+	// templateフォルダ内にある拡張子htmlのファイルをすべてテンプレートとして読みこみます
+	resourceFinder.find("${convName}/template", ['*.html'], []).each {
+		engine.templateHandler.load(FilenameUtils.getBaseName(it.key), it.value)
+	}
+	// assetフォルダ配下を固定ファイルとして読みこみます
+	assetHandler.gulp(convName, resourceFinder.find("${convName}/asset", [], []));
 }
