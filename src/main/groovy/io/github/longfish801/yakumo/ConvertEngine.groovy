@@ -151,7 +151,11 @@ class ConvertEngine {
 		// 変換対象から BLtxtインスタンスを並列処理で生成します
 		GParsPool.withPool {
 			targets.eachParallel { ParseTarget target ->
-				bltxtMap[target.key] = parse(target.key, target.source, target.washKey);
+				try {
+					bltxtMap[target.key] = parse(target.key, target.source, target.washKey);
+				} catch (exc){
+					throw new YmoConvertException("解析工程で問題が生じました。targetKey=${target.key}, washKey=${target.washKey}", exc);
+				}
 			}
 		}
 		return bltxtMap;
@@ -226,7 +230,11 @@ class ConvertEngine {
 		Map writables = Collections.synchronizedMap([:]);
 		GParsPool.withPool {
 			outs.eachParallel { ApplyOut out ->
-				writables[out.key] = apply(out.key, out.out, out.clmapKey, out.combiKey);
+				try {
+					writables[out.key] = apply(out.key, out.out, out.clmapKey, out.combiKey);
+				} catch (exc){
+					throw new YmoConvertException("適用工程で問題が生じました。outKey=${out.key}, clmapKey=${out.clmapKey}, combiKey=${out.combiKey}", exc);
+				}
 			}
 		}
 		return writables;

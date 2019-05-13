@@ -84,8 +84,13 @@ class TemplateHandler {
 		if (template == null) throw new YmoConvertException("適用できるテンプレートがありません。outKey=${outKey}, templateKey=${templateKey}, templateMap=${templateMap.keySet()}");
 		
 		// 変換元からバインド変数を取得し、テンプレートを適用します
-		Writable writable = template.make(binds);
-		writable.writeTo(writer);
+		Writable writable = null;
+		try {
+			writable = template.make(binds);
+			writer.withWriter { writable.writeTo(it) }
+		} catch (exc){
+			throw new YmoConvertException("テンプレートの適用に失敗しました。outKey=${outKey}, templateKey=${templateKey}", exc);
+		}
 		return writable;
 	}
 }
