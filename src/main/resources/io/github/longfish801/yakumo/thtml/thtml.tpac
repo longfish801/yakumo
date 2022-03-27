@@ -1,0 +1,368 @@
+#! clmap:thtml
+
+#> dec
+	import org.slf4j.LoggerFactory
+#> prefix
+	def LOG = LoggerFactory.getLogger('io.github.longfish801.yakumo.thtml.clmap.thtml')
+	String lsep = System.lineSeparator()
+
+#> map
+#>> args
+	String outKey, Map bltxtMap
+#>> return
+	Map binds
+#>> closure
+	binds = [
+		title: clmap.cl('../bind#title').call(bltxtMap[outKey]),
+		header: clmap.cl('../bind#header').call(bltxtMap[outKey]),
+		toc: clmap.cl('../bind#toc').call(bltxtMap[outKey]),
+		bodytext: clmap.cl('../bind#bodytext').call(bltxtMap[outKey]),
+		note: clmap.cl('../bind#note').call(bltxtMap[outKey])
+	]
+
+#> map:bind
+#>> dec
+	import io.github.longfish801.bltxt.BLtxt
+#>> args
+	BLtxt bltxt
+#>> return
+	String html
+#>> closure:title
+	// headerタグ内のタイトルを返します
+	List nodes = bltxt.grepNodes('meta', 'タイトル')
+	html = (nodes.size() > 0)? clmap.cl('../lowers#textize').call(nodes[0]).join() : '（無題）'
+#>> closure:header
+	// タイトル、サブタイトル、公開日、著者名のためのHTMLを返します
+	Closure getMeta = { String tag ->
+		List nodes = bltxt.grepNodes('meta', tag)
+		return (nodes.size() > 0)? clmap.cl('../lowers#htmlize').call(nodes[0]).join() : null
+	}
+	html = clmap.cl('../template#dflt').call('body#header', [
+		title: clmap.cl('#title').call(bltxt),
+		subtitle: getMeta.call('サブタイトル'),
+		pubdate: getMeta.call('公開日'),
+		author: getMeta.call('著者名')
+	])
+#>> closure:toc
+	// 目次を生成します
+	List list = []
+	bltxt.grepNodes('block', '見出し').each { def node ->
+		int level
+		try {
+			level = (node.attrs.size() > 0)? Integer.parseInt(node.attrs[0]) + 1 : 2
+		} catch (NumberFormatException exc){
+			throw new Exception('見出しレベルの型変換に失敗しました。見出しレベルは半角数字を指定してください。', exc)
+		}
+		list << clmap.cl('../template#dflt').call('meta#toc', [
+			text: clmap.cl('../lowers#htmlize').call(node).join(),
+			level: level,
+			id: "${level}_${node.serialNo}"
+		])
+	}
+	html = list.join(lsep)
+#>> closure:bodytext
+	html = clmap.cl('../htmlize#dflt').call(bltxt.root)
+#>> closure:note
+	// 註のノードと、そのキーを収集します
+	List noteList = bltxt.grepNodes('inline', '註')
+	List noteKeys = []
+	noteList.each { noteKeys << it.attrs[0] }
+	if (noteKeys.size() == 0) return ''
+	
+	// 註記のノードと、そのキーを収集します
+	List cmntList = bltxt.grepNodes('meta', '註記')
+	List cmntKeys = []
+	Map cmntMap = [:]
+	cmntList.each {
+		cmntKeys << it.attrs[0]
+		cmntMap[it.attrs[0]] = it
+	}
+	
+	// キーの重複や過不足をチェックします
+	if (noteKeys.unique(false).size() < noteKeys.size()){
+		Map map = [:]
+		noteKeys.each { map[it] = (map.containsKey(it))? ++ map[it] : 1 }
+		fprint.warn("註のキーに重複があります。：重複キー=${map.findAll { it.value > 1 }.keySet()}")
+		return ''
+	}
+	List diff1 = noteKeys - cmntKeys
+	if (diff1.size() > 0){
+		fprint.warn("註に対する註記の記述漏れがあります。：diff=${diff1}")
+		return ''
+	}
+	List diff2 = cmntKeys - noteKeys
+	if (diff2.size() > 0){
+		fprint.warn("不要な註記あるいは註の記述漏れがあります。：diff=${diff2}")
+		return ''
+	}
+	
+	// 註記を生成します
+	List list = []
+	noteKeys.eachWithIndex { String noteKey, int cnt ->
+		list << clmap.cl('../template#dflt').call('meta#note', [
+			text: clmap.cl('../lowers#htmlize').call(cmntMap[noteKey]).join(lsep),
+			id: cnt + 1
+		])
+	}
+	html = list.join(lsep)
+
+#> map:htmlize
+#>> dec
+	import org.apache.commons.text.StringEscapeUtils
+#>> args
+	def node
+#>> return
+	String html
+#>> prefix
+	LOG.trace("htmlize {} tag={}", node.xmlTag, node.tag)
+	List lowers = clmap.cl('/thtml/lowers#htmlize').call(node)
+#>> closure
+	switch (node.xmlTag){
+		case 'block':
+		case 'inline':
+			html = clmap.cl("${node.xmlTag}#${node.tag}").call(node)
+			break
+		default:
+			html = clmap.cl("#${node.xmlTag}").call(node)
+			break
+	}
+#>> closure:bltxt
+	html = clmap.cl('/thtml/lowers#htmlize').call(node).join(lsep + lsep)
+#>> closure:line
+	html = clmap.cl('/thtml/lowers#htmlize').call(node).join()
+#>> closure:text
+	html = StringEscapeUtils.escapeHtml4(node.text)
+#>> closure:para
+	switch (node.parent.xmlTag){
+		case 'bltxt':
+			// 最上位にあるならば pタグを付与します
+			html = '<p>' + lowers.join("<br/>" + lsep) + '</p>'
+			break
+		case 'block':	// 上位がブロック要素の場合
+			switch (node.parent.tag){
+				case '見出し':
+				case '画像':
+				case '項目':
+				case '引用元':
+					html = lowers.join("<br/>" + lsep)
+					break
+				case '生データ':
+				case '整形済':
+				case 'コード':
+					html = lowers.join(lsep)
+					break
+				default:
+					html = '<p>' + lowers.join("<br/>" + lsep) + '</p>'
+			}
+			break
+		case 'meta':
+			if (node.parent.isSingle()){	// 単一の場合
+				html = lowers.join("<br/>" + lsep)
+			} else {
+				html = '<p>' + lowers.join("<br/>" + lsep) + '</p>'
+			}
+			break
+		default:
+			html = lowers.join("<br/>" + lsep)
+			break
+	}
+#>> map:block
+#>>> args
+	def node
+#>>> return
+	String html
+#>>> prefix
+	String templateKey = "block#${node.tag}"
+#>>> closure
+	fprint.warn("未対応のブロック要素です。tag=${node.tag}, node=${node.toString()}")
+	return lowers.join()
+#>>> closure:見出し
+	int level
+	try {
+		level = (node.attrs.size() > 0)? Integer.parseInt(node.attrs[0]) + 1 : 2
+	} catch (NumberFormatException exc){
+		throw new Exception('見出しレベルの型変換に失敗しました。見出しレベルは半角数字を指定してください。', exc)
+	}
+	html = clmap.cl('/thtml/template#dflt').call(templateKey, [
+		text: lowers.join(),
+		level: level,
+		id: "id${level}_${node.serialNo}"
+	])
+#>>> closure:箇条書き
+	html = clmap.cl('/thtml/template#dflt').call(templateKey, [ text: lowers.join(lsep) ])
+#>>> closure:項目
+	html = clmap.cl('/thtml/template#dflt').call(templateKey, [ text: lowers.join(lsep) ])
+#>>> closure:コラム
+	html = clmap.cl('/thtml/template#dflt').call(templateKey, [
+		text: lowers.join(lsep),
+		title: (node.attrs.size() > 0)? node.attrs[0] : null
+	])
+#>>> closure:注意
+	html = clmap.cl('/thtml/template#dflt').call(templateKey, [
+		text: lowers.join(lsep),
+		title: (node.attrs.size() > 0)? node.attrs[0] : null
+	])
+#>>> closure:引用
+	html = clmap.cl('/thtml/template#dflt').call(templateKey, [ text: lowers.join(lsep) ])
+#>>> closure:引用元
+	html = clmap.cl('/thtml/template#dflt').call(templateKey, [ text: lowers.join() ])
+#>>> closure:コード
+	html = clmap.cl('/thtml/template#dflt').call(templateKey, [ text: lowers.join(lsep) ])
+#>>> closure:画像
+	html = clmap.cl('/thtml/template#dflt').call(templateKey, [
+		text: (lowers.size() > 0)? lowers.join() : null,
+		path: node.attrs[1],
+		alt: node.attrs[0]
+	])
+#>> map:inline
+#>>> args
+	def node
+#>>> return
+	String html
+#>>> prefix
+	String templateKey = "inline#${node.tag}"
+	String text = lowers.join()
+#>>> closure
+	fprint.warn("未対応のインライン要素です。tag=${node.tag}, node=${node.toString()}")
+	html = (node.nodes.size() == 0)? "【${node.tag}${node.attrs.toString()}】" : "【｜${node.tag}${node.attrs.toString()}】${text}【${node.tag}｜】"
+#>>> closure:註
+	html = clmap.cl('/thtml/template#dflt').call(templateKey, [
+		id: node.serialNo,
+		url: node.attrs[0]
+	])
+#>>> closure:リンク
+	html = clmap.cl('/thtml/template#dflt').call(templateKey, [
+		text: text,
+		url: node.attrs[0]
+	])
+#>>> closure:重要
+	html = clmap.cl('/thtml/template#dflt').call(templateKey, [ text: text ])
+#>>> closure:補足
+	html = clmap.cl('/thtml/template#dflt').call(templateKey, [ text: text ])
+#>>> closure:訂正
+	html = clmap.cl('/thtml/template#dflt').call(templateKey, [ text: text ])
+#>>> closure:縦中横
+	html = text
+#>>> closure:傍点
+	html = clmap.cl('/thtml/template#dflt').call(templateKey, [ text: text ])
+#>>> closure:ルビ
+	html = clmap.cl('/thtml/template#dflt').call(templateKey, [
+		text: text,
+		ruby: node.attrs[0]
+	])
+
+#> map:textize
+#>> args
+	def node
+#>> return
+	String text
+#>> prefix
+	LOG.trace("textize {} tag={}", node.xmlTag, node.tag)
+#>> closure
+	switch (node.xmlTag){
+		case 'text':
+			text = clmap.cl("../htmlize#${node.xmlTag}").call(node)
+			break
+		default:
+			text = clmap.cl("#${node.xmlTag}").call(node)
+			break
+	}
+#>> closure:line
+	text = clmap.cl('../lowers#textize').call(node).join()
+#>> closure:para
+	text = clmap.cl('../lowers#textize').call(node).join(lsep)
+#>> closure:block
+	text = clmap.cl('../lowers#textize').call(node).join(lsep)
+#>> closure:inline
+	text = clmap.cl('../lowers#textize').call(node).join()
+
+#> map:lowers
+#>> args
+	def node
+#>> return
+	List lowers
+#>> closure:htmlize
+	// 下位のノードをHTML化したリストを返します
+	lowers = node.nodes.findAll {
+		it.xmlTag != 'meta'
+	}.collect {
+		clmap.cl('/thtml/htmlize#dflt').call(it)
+	}
+#>> closure:textize
+	// 下位のノードをテキスト化したリストを返します
+	lowers = node.nodes.findAll {
+		it.xmlTag != 'meta'
+	}.collect {
+		clmap.cl('/thtml/textize#dflt').call(it)
+	}
+
+#> map:template
+#>> args
+	String templateKey
+	Map binds
+#>> return
+	String html
+#>> closure
+	// フォーマットをテンプレートとして読みこみます
+	if (!templateHandler.map.containsKey(templateKey)){
+		def tmpl = clmap.refer("/clmap:thtml/map:format/data:${templateKey}")
+		templateHandler.set(templateKey, (tmpl instanceof List)? tmpl.join(lsep) : tmpl)
+	}
+	// テンプレートを適用します
+	html = templateHandler.apply(templateKey, binds)
+
+#> map:format
+#>> data:body
+#-header
+<div class="col-lg-8">
+<h1>${title}</h1>
+<% if (subtitle != null){ %><div id="subtitle">${subtitle}</div><% } %>
+</div>
+<% if (pubdate != null || author != null){ %><div class="col-lg-4 text-end">
+<% if (pubdate != null){ %><div id="pubdate">公開日 ${pubdate}</div><% } %>
+<% if (author != null){ %><div id="author">${author}</div><% } %>
+</div><% } %>
+#>> data:meta
+#-toc <li class="nav-item toc_h${level}"><a href="#id${id}" class="nav-link">${text}</a></li>
+#-note
+<dt><a name="t${id}" href="#f${id}">[*${id}]</a></dt>
+<dd>${text}</dd>
+#>> data:block
+#-見出し <h${level}><a name="${id}"></a>${text}</h${level}>
+#-箇条書き
+<ul>
+${text}
+</ul>
+#-項目 <li>${text}</li>
+#-コラム
+<aside class="alert alert-success" role="alert">
+<% if (title != null){ %><header class="alert-heading"><i class="bi bi-info-circle-fill"></i> ${title}</header><% } %>
+${text}
+</aside>
+#-注意
+<aside class="alert alert-danger" role="alert">
+<% if (title != null){ %><header class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> ${title}</header><% } %>
+${text}
+</aside>
+#-引用
+<blockquote>
+${text}
+</blockquote>
+#-引用元 <footer><cite>${text}</cite></footer>
+#-コード
+<pre>
+${text}
+</pre>
+#-画像
+<figure class="text-center">
+<img src="${path}" class="img-fluid" alt="${alt}">
+<% if (text != null){ %><figcaption>${text}</figcaption><% } %>
+</figure>
+#>> data:inline
+#-註 <sup><a id="f${id}" href="#t${id}">*${id}</a></sup>
+#-リンク <a href="${url}">${text}</a>
+#-重要 <strong>${text}</strong>
+#-補足 <small>${text}</small>
+#-訂正 <s>${text}</s>
+#-傍点 <span class="dot">${text}</span>
+#-ルビ <ruby>${text}<rp>［</rp><rt>${ruby}</rt><rp>］</rp></ruby>

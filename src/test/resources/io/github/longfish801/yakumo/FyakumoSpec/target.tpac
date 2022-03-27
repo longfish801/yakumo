@@ -1,0 +1,68 @@
+#! dec:target
+#> block
+#>> head
+■おいしいカレーの作り方
+□材料の準備
+▼牛の飼い方
+
+#>> list
+・じゃがいも
+・ニンジンを、
+  二本。
+
+・玉ねぎ
+
+#>> list:misc
+・じゃがいも
+・ニンジン
+・玉ねぎ
+  ・刻むときは注意。
+    涙がでます。
+・カレー粉
+  ・ジャワカレー
+  ・バーモンドカレー
+
+#>> blockquote
+=====
+　山路を登りながら、こう考えた。
+　智に働けば角が立つ。情に棹させば流される。意地を通せば窮屈だ。とかくに人の世は住みにくい。
+【＝引用元】夏目漱石『草枕』
+=====
+
+#>> code
+-----
+println "Hello, World!";
+println "This is sample code of how to hello to all of the world, which is executed " + Date().format("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+-----
+
+#>> masking
+【－マスキング】
+・帰りに綿棒を買ってくること。
+【マスキング－】
+
+#> inline
+#>> link
+　詳しくは【リンク：ネット検索：https://www.google.com/】してください。
+　【リンク：https://www.google.com/】でネット検索できます。
+
+#>> link:oneline
+https://www.google.com/
+
+#>> strong
+　間違えて【重要：自爆スイッチ】を押さないでください。
+
+#>> small
+　もちろん本当【補足：かもしれない】ですよ。
+
+#>> strike
+　富士山の標高は【訂正：３７７７メートル】３７７６メートルです。
+
+#>> rotate
+　シェイクスピア全集の第【縦中横：10】巻に記述されています。
+
+#>> dot
+　まだ【傍点：午前三時】じゃないか。
+
+#>> ruby
+　【ルビ：出納：すいとう】係は言った。
+
