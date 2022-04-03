@@ -1,0 +1,93 @@
+#! switem:fyakumo
+
+#> parse
+#>> oneline:見出し1
+#-bullet ■
+#>> oneline:見出し2
+#-bullet □
+#>> oneline:見出し3
+#-bullet ▼
+
+#>> indent:箇条書き
+#-bullet ・
+#-more   
+
+#>> enclose:引用
+#-bgn _=====
+
+#>> enclose:コード
+#-bgn -----
+
+#>> enclose:マスキング
+#-refer null
+#-bgn 【－マスキング】
+#-end 【マスキング－】
+
+#> format
+#>> call:見出し
+#-include
+見出し1
+見出し2
+見出し3
+#-cover
+{ def hndl ->
+	switch (hndl.bullet){
+		case '■': hndl.attr = ''; break
+		case '□': hndl.attr = '：2'; break
+		case '▼': hndl.attr = '：3'; break
+	}
+	hndl.bullet = null
+}
+#-chunk
+{ def hndl ->
+	return [ "【＝見出し${hndl.upper.attr}】${hndl.dflt[0]}" ]
+}
+
+#>> call 箇条書き
+#-include 箇条書き
+#-cover
+{ def hndl ->
+	hndl.tops = []
+	hndl.top = '【－項目】'
+	if (hndl.tagnum == 1) hndl.top = [ '【－箇条書き】', hndl.top ]
+	hndl.btm = '【項目－】'
+	if (hndl.tagnum == hndl.tagtotal) hndl.btm = [ hndl.btm, '【箇条書き－】' ]
+	hndl.bullet = null
+	hndl.more = null
+	hndl.nogap = true
+}
+
+#>> call:引用
+#-include 引用
+#-cover
+{ def hndl ->
+	hndl.top = '【－引用】'
+	hndl.btm = '【引用－】'
+}
+
+#>> call:コード
+#-include コード
+#-cover
+{ def hndl ->
+	hndl.top = '【－コード】'
+	hndl.btm = '【コード－】'
+}
+
+#>> call:マスキング
+#-include マスキング
+#-cover
+{ def hndl ->
+	hndl.top = null
+	hndl.btm = null
+}
+
+#>> reprex
+#-exclude マスキング
+// リンク
+【リンク：([^：]+)：([^】]+)】	【｜リンク：$2】$1【リンク｜】
+【リンク：([^】]+)】	【｜リンク：$1】$1【リンク｜】
+^(http:\/\/|https:\/\/){1}[\w\.\-\/:\#\?\=\&\;\%\~\+]+$	【｜リンク：$0】$0【リンク｜】
+
+// 文範囲タグ
+【(重要|補足|訂正|縦中横|傍点)：([^】]+)】	【｜$1】$2【$1｜】
+【ルビ：([^：]+)：([^】]+)】	【｜ルビ：$2】$1【ルビ｜】

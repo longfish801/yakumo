@@ -1,7 +1,0 @@
-
-【＃タイトル】YmoScript
-
-■YmoScriptとは
-
-　【リンク：YmoScript：/yakumo/groovydoc/io/github/longfish801/yakumo/YmoScript.html】は、文字列から文字列へ、ひとつの入力ファイルから出力ファイルへの変換を実現します。
-

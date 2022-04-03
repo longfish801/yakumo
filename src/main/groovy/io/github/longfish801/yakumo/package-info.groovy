@@ -1,5 +1,5 @@
 /**
- * テキストの構造化と変換のためのパッケージです。
+ * テキストの形式を変換するためのパッケージです。
  * @author io.github.longfish801
  */
-package io.github.longfish801.yakumo;
+package io.github.longfish801.yakumo
