@@ -11,7 +11,6 @@ import org.apache.commons.io.FileUtils
 
 /**
  * 関連ファイルを操作します。
- * @version 0.3.00 2022/01/10
  * @author io.github.longfish801
  */
 @Slf4j('LOG')
@@ -110,10 +109,10 @@ class RelatedSources {
 	 */
 	void copy(){
 		if (dir == null) return
-		LOG.info(msgs.logstr.copyRelatedBegin, dir.absolutePath)
+		LOG.debug(msgs.logstr.copyRelatedBegin, dir.absolutePath)
 		relateds.each { String setName, Map map ->
 			map.each { String path, File file ->
-				LOG.info(msgs.logstr.copyRelatedEach, setName, path)
+				LOG.debug(msgs.logstr.copyRelatedEach, setName, path)
 				copyMethods[mode].call(file, new File(dir, path))
 			}
 		}

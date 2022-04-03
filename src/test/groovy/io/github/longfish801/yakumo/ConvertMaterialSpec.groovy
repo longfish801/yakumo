@@ -14,7 +14,6 @@ import spock.lang.Specification
 
 /**
  * ConvertMaterialのテスト。
- * @version 0.3.00 2022/01/10
  * @author io.github.longfish801
  */
 class ConvertMaterialSpec extends Specification implements GropedResource {

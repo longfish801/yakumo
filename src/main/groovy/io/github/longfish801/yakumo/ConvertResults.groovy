@@ -10,7 +10,6 @@ import io.github.longfish801.yakumo.YmoConst as cnst
 
 /**
  * 解析結果を管理します。
- * @version 0.3.00 2022/01/10
  * @author io.github.longfish801
  */
 @Slf4j('LOG')

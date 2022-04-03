@@ -13,7 +13,6 @@ import io.github.longfish801.yakumo.YmoMsg as msgs
  * テンプレートの処理には {@link SimpleTemplateEngine}を用います。<br/>
  * あらかじめテンプレート文字列を特定のキーと紐づけて設定しておきます。<br/>
  * テンプレートキーとバインド変数を指定することでテンプレート適用結果を得ることができます。
- * @version 0.3.00 2022/01/10
  * @author io.github.longfish801
  */
 class TemplateHandler {

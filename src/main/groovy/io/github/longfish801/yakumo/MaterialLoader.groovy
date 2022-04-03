@@ -12,7 +12,6 @@ import io.github.longfish801.yakumo.YmoMsg as msgs
 
 /**
  * 変換資材を読みこみます。
- * @version 0.3.00 2022/01/10
  * @author io.github.longfish801
  */
 @Slf4j('LOG')

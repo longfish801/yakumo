@@ -9,7 +9,6 @@ import groovy.util.logging.Slf4j
 
 /**
  * 変換スクリプトです。
- * @version 0.3.00 2022/01/10
  * @author io.github.longfish801
  */
 @Slf4j('LOG')

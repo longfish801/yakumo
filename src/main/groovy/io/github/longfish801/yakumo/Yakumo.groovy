@@ -10,7 +10,6 @@ import io.github.longfish801.gonfig.GropedResource
 
 /**
  * DSLに基づき、テキストを変換します。
- * @version 0.3.00 2022/01/10
  * @author io.github.longfish801
  */
 @Slf4j('LOG')

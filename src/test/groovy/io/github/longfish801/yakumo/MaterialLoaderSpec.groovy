@@ -12,7 +12,6 @@ import spock.lang.Specification
 
 /**
  * MaterialLoaderのテスト。
- * @version 0.3.00 2022/01/10
  * @author io.github.longfish801
  */
 class MaterialLoaderSpec extends Specification {

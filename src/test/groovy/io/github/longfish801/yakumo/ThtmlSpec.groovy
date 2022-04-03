@@ -16,7 +16,6 @@ import spock.lang.Unroll
 
 /**
  * thtml変換資材のテスト。
- * @version 0.3.00 2022/01/10
  * @author io.github.longfish801
  */
 class ThtmlSpec extends Specification implements GropedResource {

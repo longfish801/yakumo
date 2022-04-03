@@ -19,7 +19,6 @@ import java.lang.Thread as JavaThread
 
 /**
  * 変換資材です。
- * @version 0.3.00 2022/01/10
  * @author io.github.longfish801
  */
 @Slf4j('LOG')

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Converts text in a specific format to another format.  
+Convert text format.  
 You can use your original format for the source text.
 
 This is individual development, for self-learning.  
@@ -51,4 +51,4 @@ This sample code is executed in the execSamples task, see build.gradle.
 
 ## Next Step
 
-Please see the [documents](https://longfish801.github.io/yakumo/) for more detail.
+Please see the [documents](https://longfish801.github.io/maven/yakumo/) for more detail.

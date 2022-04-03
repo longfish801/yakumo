@@ -5,7 +5,7 @@
  */
 
 plugins {
-	id 'com.github.monosoul.markdown.page.generator' version '2.1.0'
+	id 'com.github.monosoul.markdown.page.generator' version '2.3.1.1'
 	id 'jacoco'
 }
 
@@ -18,13 +18,14 @@ apply plugin: 'maven-publish'
 
 defaultTasks 'fix'
 group = 'io.github.longfish801'
-version = '0.3.00'
+version = '1.0.00'
 
 // 環境変数からローカルのmavenリポジトリへのパスを取得します
 String mavenPath = System.env['MAVEN_PATH']
 if (mavenPath == null || mavenPath.empty){
 	throw new Exception('Environment variables MAVEN_PATH is required.')
 }
+mavenPath += '/docs'
 
 repositories {
 	mavenCentral()
@@ -33,11 +34,11 @@ repositories {
 
 dependencies {
 	implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
-	implementation group: 'io.github.longfish801', name: 'bltxt', version: '0.3.00'
-	implementation group: 'io.github.longfish801', name: 'clmap', version: '0.4.00'
-	implementation group: 'io.github.longfish801', name: 'gonfig', version: '0.2.00'
-	implementation group: 'io.github.longfish801', name: 'switem', version: '0.1.00'
-	implementation group: 'io.github.longfish801', name: 'tpac', version: '0.4.00'
+	implementation group: 'io.github.longfish801', name: 'bltxt', version: '1.0.00'
+	implementation group: 'io.github.longfish801', name: 'clmap', version: '1.0.00'
+	implementation group: 'io.github.longfish801', name: 'gonfig', version: '1.0.00'
+	implementation group: 'io.github.longfish801', name: 'switem', version: '1.0.00'
+	implementation group: 'io.github.longfish801', name: 'tpac', version: '1.0.00'
 	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
 	implementation group: 'org.apache.commons', name: 'commons-text', version: '1.9'
 	implementation group: 'org.codehaus.gpars', name: 'gpars', version: '1.2.1'
@@ -84,7 +85,7 @@ publishing {
 
 // サンプルを実行します
 task execSamples(type: JavaExec) {
-	main = 'Sample'
+	mainClass = 'Sample'
 	classpath = sourceSets.test.runtimeClasspath
 }
 

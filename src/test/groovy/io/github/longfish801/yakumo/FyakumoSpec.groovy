@@ -15,7 +15,6 @@ import spock.lang.Unroll
 
 /**
  * fyakumo変換資材のテスト。
- * @version 0.3.00 2022/01/10
  * @author io.github.longfish801
  */
 class FyakumoSpec extends Specification implements GropedResource {

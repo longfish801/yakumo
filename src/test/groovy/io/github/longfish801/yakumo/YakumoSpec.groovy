@@ -12,7 +12,6 @@ import spock.lang.Specification
 
 /**
  * Yakumoのテスト。
- * @version 0.3.00 2022/01/10
  * @author io.github.longfish801
  */
 class YakumoSpec extends Specification {

@@ -13,7 +13,6 @@ import java.text.SimpleDateFormat
 /**
  * 簡単なロガーです。<br/>
  * clmap文書での処理の記録に利用します。
- * @version 0.3.00 2022/01/10
  * @author io.github.longfish801
  */
 class Footprints {

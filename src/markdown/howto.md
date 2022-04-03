@@ -51,7 +51,7 @@
 　以下のバインド変数を利用できます。
 
 yakumo
-: YmoScriptクラスのインスタンス。詳細は [Groovydoc](groovydoc/) を参照してください。
+: YmoScriptクラスのインスタンス。
 
 convName
 : 変換資材名。変換資材がリソースの場合のみ。
@@ -60,13 +60,13 @@ convDir
 : 資材スクリプト格納フォルダ（java.io.File）。変換資材がフォルダの場合のみ。
 
 　Yakumo#loadメソッドに渡すクロージャで、必要な他の変換資材を読みこみます。
-　クロージャ内では以下のメソッドを使用できます。委任クラスはMaterialLoaderです。引数など詳細は [Groovydoc](groovydoc/) を参照してください。
+　クロージャ内では以下のメソッドを使用できます。委任クラスはMaterialLoaderです。
 
 material
 : 利用する他の変換資材を設定します。
 
 　Yakumo#materialメソッドに渡すクロージャで、変換資材を設定します。
-　クロージャ内では以下のメソッドを使用できます。委任クラスはConvertMaterialです。引数など詳細は [Groovydoc](groovydoc/) を参照してください。
+　クロージャ内では以下のメソッドを使用できます。委任クラスはConvertMaterialです。
 
 switem
 : switemスクリプトを設定します。
@@ -91,7 +91,7 @@ script
 : 変換スクリプト（java.io.File）
 
 yakumo
-: YmoDocumentクラスのインスタンス。詳細は [Groovydoc](groovydoc/) を参照してください。
+: YmoDocumentクラスのインスタンス。
 
 convDir
 : 資材スクリプトの格納フォルダ（java.io.File）
@@ -100,7 +100,7 @@ convDir
 　詳細は「[変換資材](#変換資材)」を参照してください。
 
 　Yakumo#scriptメソッドに渡すクロージャで、変換スクリプトを設定します。
-　クロージャ内では以下のメソッドを使用できます。委任クラスはConvertScriptです。引数など詳細は [Groovydoc](groovydoc/) を参照してください。
+　クロージャ内では以下のメソッドを使用できます。委任クラスはConvertScriptです。
 
 targets
 : 変換対象について設定するためのクロージャを渡します。
@@ -127,7 +127,7 @@ doLast
 　Yakumo#relatedメソッドに渡すクロージャで、関連ファイルを設定します。
 　関連ファイルは資材スクリプト、変換スクリプトどちらでも設定できます。
 
-　クロージャ内では以下のメソッドを使用できます。委任クラスはRelatedSourcesです。引数など詳細は [Groovydoc](groovydoc/) を参照してください。
+　クロージャ内では以下のメソッドを使用できます。委任クラスはRelatedSourcesです。
 
 outDir
 : 関連ファイルの出力ディレクトリを設定します。

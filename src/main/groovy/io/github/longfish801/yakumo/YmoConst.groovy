@@ -9,7 +9,6 @@ import io.github.longfish801.gonfig.Gonfig
 
 /**
  * 固定値を保持します。
- * @version 0.3.00 2022/01/10
  * @author io.github.longfish801
  */
 class YmoConst implements Gonfig {
