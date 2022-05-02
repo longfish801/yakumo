@@ -9,6 +9,7 @@ import groovy.util.logging.Slf4j
 import io.github.longfish801.gonfig.GropedResource
 import io.github.longfish801.yakumo.YmoConst as cnst
 import io.github.longfish801.yakumo.YmoMsg as msgs
+import org.codehaus.groovy.control.CompilerConfiguration
 
 /**
  * 変換資材を読みこみます。
@@ -19,9 +20,20 @@ class MaterialLoader implements GropedResource {
 	/** 自クラス */
 	static final Class clazz = MaterialLoader.class
 	/** GroovyShell */
-	GroovyShell shell = new GroovyShell(MaterialLoader.class.classLoader)
+	GroovyShell shell = initShell()
 	/** Yakumo */
 	Yakumo yakumo
+	
+	/**
+	 * GroovyShellのインスタンスを取得します。<br/>
+	 * スクリプト基底クラスとして {@link DelegatingScript} を設定します。
+	 * @return GroovyShellのインスタンス
+	 */
+	GroovyShell initShell(){
+		CompilerConfiguration config = new CompilerConfiguration()
+		config.setScriptBaseClass(DelegatingScript.class.name)
+		return new GroovyShell(MaterialLoader.class.classLoader, new Binding(), config)
+	}
 	
 	/**
 	 * 変換資材を設定します。<br/>
@@ -49,9 +61,10 @@ class MaterialLoader implements GropedResource {
 		String path = "${convName}/${cnst.setting.fileName}"
 		URL url = grope(path)
 		if (url == null) throw new YmoConvertException(String.format(msgs.exc.noSuchMaterialResource, path))
-		shell.setVariable('yakumo', this.yakumo)
-		shell.setVariable('convName', convName)
-		shell.run(url.toURI(), [])
+		DelegatingScript script = (DelegatingScript) shell.parse(url.toURI())
+		script.setDelegate(this.yakumo)
+		script.setProperty('convName', convName)
+		script.run()
 	}
 	
 	/**
@@ -62,8 +75,9 @@ class MaterialLoader implements GropedResource {
 	void material(File convDir){
 		File file = new File(convDir, cnst.setting.fileName)
 		if (!file.canRead()) throw new YmoConvertException(String.format(msgs.exc.noSuchMaterialFile, file.absolutePath))
-		shell.setVariable('yakumo', this.yakumo)
-		shell.setVariable('convDir', convDir)
-		shell.run(file, [])
+		DelegatingScript script = (DelegatingScript) shell.parse(file)
+		script.setDelegate(this.yakumo)
+		script.setProperty('convDir', convDir)
+		script.run()
 	}
 }

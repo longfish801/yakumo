@@ -42,7 +42,9 @@ class YakumoSpec extends Specification {
 				#! clmap:sampleClmap
 				#> map
 				#>> args
-					String outKey, Map bltxtMap
+					String outKey
+					Map bltxtMap
+					Map appendMap
 				#>> return
 					Map binds
 				#>> closure

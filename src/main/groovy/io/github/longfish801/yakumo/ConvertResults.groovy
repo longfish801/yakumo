@@ -42,7 +42,7 @@ class ConvertResults {
 	 * @param clmapName clmap宣言の名前
 	 * @see #result(String, Writer, String)
 	 */
-	void result(String key, File file, String clmapName, String templateKey){
+	void result(String key, File file, String clmapName){
 		result(key, new FileWriter(file), clmapName)
 	}
 	

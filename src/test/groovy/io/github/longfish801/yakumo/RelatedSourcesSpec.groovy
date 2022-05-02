@@ -22,17 +22,6 @@ class RelatedSourcesSpec extends Specification {
 		related = new RelatedSources()
 	}
 	
-	def 'outDir - exception'(){
-		given:
-		YmoConvertException exc
-		
-		when:
-		related.outDir('noSuch')
-		then:
-		exc = thrown(YmoConvertException)
-		exc.message == String.format(msgs.exc.invalidOutDir, 'noSuch')
-	}
-	
 	def 'mode - exception'(){
 		given:
 		YmoConvertException exc
@@ -42,5 +31,17 @@ class RelatedSourcesSpec extends Specification {
 		then:
 		exc = thrown(YmoConvertException)
 		exc.message == String.format(msgs.exc.invalidCopyMode, 'noSuch')
+	}
+	
+	def 'copy - exception'(){
+		given:
+		YmoConvertException exc
+		
+		when:
+		related.outDir('noSuch')
+		related.copy()
+		then:
+		exc = thrown(YmoConvertException)
+		exc.message == String.format(msgs.exc.invalidOutDir, 'noSuch')
 	}
 }

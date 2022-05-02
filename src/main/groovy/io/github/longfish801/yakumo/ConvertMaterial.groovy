@@ -142,7 +142,7 @@ class ConvertMaterial {
 				result.fprint = new Footprints()
 				clmap.properties[cnst.clmap.footprint] = result.fprint
 				// クロージャを実行し、戻り値としてバインド変数を受けとってテンプレートに適用します
-				Map binds = cl.call(result.key, bltxtMap)
+				Map binds = cl.call(result.key, bltxtMap, script.appendMap)
 				templateHandler.apply(result.templateKey, result.writer, binds)
 			}
 		}

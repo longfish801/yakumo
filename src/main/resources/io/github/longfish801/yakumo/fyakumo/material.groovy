@@ -5,7 +5,7 @@
  */
 
 // yakumo記法からbtxt記法へ変換するための資材を設定します
-yakumo.material {
+material {
 	// switemスクリプトを設定します
-	switem yakumo.grope("${convName}/fyakumo.tpac")
+	switem grope("${convName}/fyakumo.tpac")
 }
