@@ -5,7 +5,6 @@
  */
 
 plugins {
-	id 'ca.coglinc.javacc' version '2.4.0'
 	id 'com.github.monosoul.markdown.page.generator' version '2.3.1.1'
 	id 'groovy'
 	id 'jacoco'
@@ -44,11 +43,6 @@ dependencies {
 	testImplementation('org.spockframework:spock-core:2.1-groovy-3.0') {
 		exclude group: 'org.codehaus.groovy'
 	}
-}
-
-// JavaCCのソースコードを生成します
-compileJavacc {
-	arguments = [ static: 'false', unicode_input: 'true', grammar_encoding: 'UTF-8' ]
 }
 
 test {
