@@ -5,10 +5,10 @@ load {
 def writer = new StringWriter()
 script {
 	targets {
-		target 'target', new File('src/test/resources/target.txt'), 'fyakumo'
+		target 'target', new File('src/test/resources/target.txt')
 	}
 	results {
-		result 'target', writer, 'thtml'
+		result 'target', writer
 	}
 }
 return writer.toString()

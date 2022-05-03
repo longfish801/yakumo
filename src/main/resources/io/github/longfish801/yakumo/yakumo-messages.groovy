@@ -3,6 +3,8 @@
 exc {
 	noSuchMaterialResource = 'No such material resource, path=%s'
 	noSuchMaterialFile = 'No such material file, path=%s'
+	noResult = 'No result for the specified result key. key=%s'
+	noTarget = 'No target for the specified target key. key=%s'
 	noTemplate = 'No template for the specified template key. templateKey=%s, templateKeys=%s'
 	invalidCopyMode = 'No support such copy mode. copyMode=%s'
 	noClmap = 'No clmap for specified name. name=%s'

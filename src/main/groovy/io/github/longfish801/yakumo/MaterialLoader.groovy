@@ -58,7 +58,7 @@ class MaterialLoader implements GropedResource {
 	 * @throws YmoConvertException リソースパスに相当する変換資材がありません。
 	 */
 	void material(String convName){
-		String path = "${convName}/${cnst.setting.fileName}"
+		String path = "${convName}/${cnst.material.fileName}"
 		URL url = grope(path)
 		if (url == null) throw new YmoConvertException(String.format(msgs.exc.noSuchMaterialResource, path))
 		DelegatingScript script = (DelegatingScript) shell.parse(url.toURI())
@@ -73,7 +73,7 @@ class MaterialLoader implements GropedResource {
 	 * @throws YmoConvertException 資材スクリプトの格納フォルダに相当する変換資材がありません。
 	 */
 	void material(File convDir){
-		File file = new File(convDir, cnst.setting.fileName)
+		File file = new File(convDir, cnst.material.fileName)
 		if (!file.canRead()) throw new YmoConvertException(String.format(msgs.exc.noSuchMaterialFile, file.absolutePath))
 		DelegatingScript script = (DelegatingScript) shell.parse(file)
 		script.setDelegate(this.yakumo)

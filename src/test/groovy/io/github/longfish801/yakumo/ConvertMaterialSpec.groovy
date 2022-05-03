@@ -69,8 +69,8 @@ class ConvertMaterialSpec extends Specification implements GropedResource {
 		material.switem(grope('fyakumo/fyakumo.tpac'))
 		script = new ConvertScript()
 		script.targets {
-			target 'key1', '■こんにちは。', 'fyakumo'
-			target 'key2', '□さようなら。', 'fyakumo'
+			target 'key1', '■こんにちは。'
+			target 'key2', '□さようなら。'
 		}
 		bltxtMap = material.parse(script)
 		then:
@@ -88,7 +88,7 @@ class ConvertMaterialSpec extends Specification implements GropedResource {
 		when:
 		script = new ConvertScript()
 		script.targets {
-			target 'key1', '■こんにちは。', 'fyakumo'
+			target 'key1', '■こんにちは。'
 		}
 		material.parse(script)
 		then:
@@ -111,8 +111,8 @@ class ConvertMaterialSpec extends Specification implements GropedResource {
 		writer2 = new StringWriter()
 		script = new ConvertScript()
 		script.results {
-			result 'key1', writer1, 'thtml'
-			result 'key2', writer2, 'thtml'
+			result 'key1', writer1
+			result 'key2', writer2
 		}
 		bltxtMap = [
 			'key1': new BLtxt('【＝見出し】こんにちは。'),
@@ -133,7 +133,8 @@ class ConvertMaterialSpec extends Specification implements GropedResource {
 		material.clmap('#! clmap:thtml')
 		script = new ConvertScript()
 		script.results {
-			result 'key1', new StringWriter(), 'noSuch'
+			baseClmapName 'noSuch'
+			result 'key1', new StringWriter()
 		}
 		material.format(script, [:])
 		then:
@@ -144,7 +145,7 @@ class ConvertMaterialSpec extends Specification implements GropedResource {
 		material.clmap('#! clmap:thtml')
 		script = new ConvertScript()
 		script.results {
-			result 'key1', new StringWriter(), 'thtml'
+			result 'key1', new StringWriter()
 		}
 		material.format(script, [:])
 		then:

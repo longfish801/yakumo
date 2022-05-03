@@ -93,8 +93,9 @@ class ConvertMaterial {
 		GParsPool.withPool {
 			script.targets.map.values().eachParallel { def target ->
 				// switemスクリプトを参照します
-				Switem switem = switemServer["switem:${target.switemName}"]
-				if (switem == null) throw new YmoConvertException(String.format(msgs.exc.noSwitem, target.key, target.switemName))
+				String switemName = target.switemName ?: script.targets.baseSwitemName
+				Switem switem = switemServer["switem:${switemName}"]
+				if (switem == null) throw new YmoConvertException(String.format(msgs.exc.noSwitem, target.key, switemName))
 				
 				// 対象のテキストをswitemスクリプトで整形します
 				Writer pipedWriter = new PipedWriter()
@@ -134,10 +135,11 @@ class ConvertMaterial {
 		GParsPool.withPool {
 			script.results.map.values().eachParallel { def result ->
 				// clmapスクリプトからクロージャを取得します
-				Clmap clmap = clmapServer["clmap:${result.clmapName}"]
-				if (clmap == null) throw new IllegalStateException(String.format(msgs.exc.noClmapForOutput, result.key, result.clmapName))
+				String clmapName = result.clmapName ?: script.results.baseClmapName
+				Clmap clmap = clmapServer["clmap:${clmapName}"]
+				if (clmap == null) throw new IllegalStateException(String.format(msgs.exc.noClmapForOutput, result.key, clmapName))
 				ClmapClosure cl = clmap.cl(cnst.clmap.clpath)
-				if (cl == null) throw new IllegalStateException(String.format(msgs.exc.noClosure, result.key, result.clmapName))
+				if (cl == null) throw new IllegalStateException(String.format(msgs.exc.noClosure, result.key, clmapName))
 				// 足跡をclmapスクリプトの大域変数に設定します
 				result.fprint = new Footprints()
 				clmap.properties[cnst.clmap.footprint] = result.fprint

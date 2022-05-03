@@ -61,12 +61,14 @@ class YakumoSpec extends Specification {
 		}
 		yakumo.script {
 			targets {
-				target 'key1', 'Hello, World.', 'sampleSwitem'
-				target 'key2', 'Bye, World.', 'sampleSwitem'
+				baseSwitemName 'sampleSwitem'
+				target 'key1', 'Hello, World.'
+				target 'key2', 'Bye, World.'
 			}
 			results {
-				result 'key1', writer1, 'sampleClmap'
-				result 'key2', writer2, 'sampleClmap'
+				baseClmapName 'sampleClmap'
+				result 'key1', writer1
+				result 'key2', writer2
 			}
 		}
 		then:

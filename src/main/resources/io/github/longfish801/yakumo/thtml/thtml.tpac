@@ -130,10 +130,6 @@
 	}
 #>> closure:bltxt
 	html = clmap.cl('/thtml/lowers#htmlize').call(node).join(lsep + lsep)
-#>> closure:line
-	html = clmap.cl('/thtml/lowers#htmlize').call(node).join()
-#>> closure:text
-	html = StringEscapeUtils.escapeHtml4(node.text)
 #>> closure:para
 	switch (node.parent.xmlTag){
 		case 'bltxt':
@@ -168,6 +164,10 @@
 			html = lowers.join("<br/>" + lsep)
 			break
 	}
+#>> closure:line
+	html = clmap.cl('/thtml/lowers#htmlize').call(node).join()
+#>> closure:text
+	html = StringEscapeUtils.escapeHtml4(node.text)
 #>> map:block
 #>>> args
 	def node
@@ -261,22 +261,19 @@
 #>> prefix
 	LOG.trace("textize {} tag={}", node.xmlTag, node.tag)
 #>> closure
-	switch (node.xmlTag){
-		case 'text':
-			text = clmap.cl("../htmlize#${node.xmlTag}").call(node)
-			break
-		default:
-			text = clmap.cl("#${node.xmlTag}").call(node)
-			break
-	}
-#>> closure:line
-	text = clmap.cl('../lowers#textize').call(node).join()
-#>> closure:para
+	text = clmap.cl("#${node.xmlTag}").call(node)
+#>> closure:bltxt
 	text = clmap.cl('../lowers#textize').call(node).join(lsep)
 #>> closure:block
 	text = clmap.cl('../lowers#textize').call(node).join(lsep)
+#>> closure:para
+	text = clmap.cl('../lowers#textize').call(node).join(lsep)
+#>> closure:line
+	text = clmap.cl('../lowers#textize').call(node).join()
 #>> closure:inline
 	text = clmap.cl('../lowers#textize').call(node).join()
+#>> closure:text
+	text = clmap.cl("../htmlize#${node.xmlTag}").call(node)
 
 #> map:lowers
 #>> args

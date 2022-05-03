@@ -31,13 +31,13 @@ class MaterialLoaderSpec extends Specification {
 		loader.material('noSuch')
 		then:
 		exc = thrown(YmoConvertException)
-		exc.message == String.format(msgs.exc.noSuchMaterialResource, "noSuch/${cnst.setting.fileName}")
+		exc.message == String.format(msgs.exc.noSuchMaterialResource, "noSuch/${cnst.material.fileName}")
 		
 		when:
 		convDir = new File('noSuch')
 		loader.material(convDir)
 		then:
 		exc = thrown(YmoConvertException)
-		exc.message == String.format(msgs.exc.noSuchMaterialFile, new File(convDir, cnst.setting.fileName).absolutePath)
+		exc.message == String.format(msgs.exc.noSuchMaterialFile, new File(convDir, cnst.material.fileName).absolutePath)
 	}
 }
