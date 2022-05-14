@@ -10,7 +10,7 @@ material {
 	clmap grope("${convName}/thtml.tpac")
 	
 	// クロージャマップに大域変数をバインドします
-	clmapProps convName, "/thtml/template", [ 'templateHandler': templateHandler ]
+	clmapProp convName, 'template', 'templateHandler', templateHandler
 	
 	// テンプレートを設定します
 	template 'default', grope("${convName}/default.html")

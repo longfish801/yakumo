@@ -29,9 +29,9 @@ repositories {
 
 dependencies {
 	api 'io.github.longfish801:bltxt:1.2.00'
-	api 'io.github.longfish801:clmap:1.1.00'
+	api 'io.github.longfish801:clmap:1.2.00'
 	api 'io.github.longfish801:gonfig:1.1.00'
-	api 'io.github.longfish801:switem:1.1.00'
+	api 'io.github.longfish801:switem:1.2.00'
 	implementation 'commons-io:commons-io:2.11.0'
 	implementation 'org.apache.commons:commons-lang3:3.12.0'
 	implementation 'org.apache.commons:commons-text:1.9'

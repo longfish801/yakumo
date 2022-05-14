@@ -42,19 +42,15 @@ class YakumoSpec extends Specification {
 				#! clmap:sampleClmap
 				#> map
 				#>> args
-					String outKey
 					Map bltxtMap
 					Map appendMap
 				#>> return
 					Map binds
 				#>> closure
-					Closure findText
-					findText = { def node ->
-						if (node.xmlTag == 'text') return node.text
-						return node.nodes.collect { findText(it) }.join('')
-					}
+					fprint.info("resultKey=${resultKey}")
+					if (resultKey == 'key2') fprint.warn("resultKey=${resultKey}")
 					binds = [
-						bodytext: findText.call(bltxtMap[outKey].root)
+						bodytext: bltxtMap[resultKey].root.find { it.xmlTag == 'text' }?.text
 					]
 				'''.stripIndent())
 			template('default', '<h1>${bodytext}</h1>')
@@ -74,5 +70,7 @@ class YakumoSpec extends Specification {
 		then:
 		writer1.toString() == '<h1>Hello, Groovy.</h1>'
 		writer2.toString() == '<h1>Hi, Groovy.</h1>'
+		yakumo.script.fprint.logs.size() == 3
+		yakumo.script.fprint.warns.size() == 1
 	}
 }

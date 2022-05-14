@@ -47,30 +47,32 @@ class ConvertMaterial {
 	}
 	
 	/**
-	 * クロージャマップの宣言に大域変数をバインドします。
+	 * clmap宣言に大域変数をバインドします。
 	 * @param name clmap宣言の名前
-	 * @param binds バインド変数のマップ
+	 * @param varName 大域変数の変数名
+	 * @param varVal 大域変数の値
+	 * @throws IllegalArgumentException 指定されたクロージャパスに相当するClmap/ClmapMapがありません。
 	 */
-	void clmapProps(String name, Map binds){
-		clmapProps(name, null, binds)
+	void clmapProp(String name, String varName, def varVal){
+		clmapProp(name, null, varName, varVal)
 	}
 	
 	/**
-	 * クロージャマップに大域変数をバインドします。
+	 * clmap宣言あるいはクロージャマップに大域変数をバインドします。<br/>
+	 * clmap宣言に設定するときは、clpathLaterには nullを指定してください。
+	 * clmap宣言に設定するときのクロージャパスは "/${name}"です。
+	 * クロージャマップに設定するときのクロージャパスは "/${name}/${clpathLater}"です。
 	 * @param name clmap宣言の名前
-	 * @param clpath クロージャパス（null指定時は宣言に設定）
-	 * @param binds バインド変数のマップ
-	 * @throws IllegalArgumentException 指定されたclmap宣言の名前に相当するclmapスクリプトがありません。
-	 * @throws IllegalArgumentException 指定されたクロージャパスに相当するクロージャがありません。
+	 * @param clpathLater クロージャパスの宣言より後ろ（先頭にスラッシュは不要）
+	 * @param varName 大域変数の変数名
+	 * @param varVal 大域変数の値
+	 * @throws IllegalArgumentException 指定されたクロージャパスに相当するClmap/ClmapMapがありません。
 	 */
-	void clmapProps(String name, String clpath, Map binds){
-		def clmap = clmapServer.getAt("clmap:${name}")
-		if (clmap == null) throw new IllegalArgumentException(String.format(msgs.exc.noClmap, name))
-		if (clpath != null){
-			clmap = clmap.cl(clpath)
-			if (clmap == null) throw new IllegalArgumentException(String.format(msgs.exc.noClmapForClpath, name, clpath))
-		}
-		binds.each { clmap.properties[it.key] = it.value }
+	void clmapProp(String name, String clpathLater, String varName, def varVal){
+		String clpath = (clpathLater == null)? "/${name}" : "/${name}/${clpathLater}"
+		def clmap = clmapServer.cl(clpath)
+		if (clmap == null) throw new IllegalArgumentException(String.format(msgs.exc.noClmap, clpath))
+		clmap.properties[varName] = varVal
 	}
 	
 	/**
@@ -125,26 +127,30 @@ class ConvertMaterial {
 	}
 	
 	/**
-	 * 変換結果毎に並列処理でclmapのクロージャを呼び、テンプレートを適用して出力します。
+	 * 変換結果毎に並列処理でclmapのクロージャを呼び、テンプレートを適用して出力します。<br/>
+	 * 並列処理の前に、すべてのclmapスクリプトに大域変数として足跡fprintを設定します。
 	 * @param script 変換スクリプト
 	 * @param bltxtMap 変換対象キーとBLtxtインスタンスとのマップ
 	 * @throws IllegalArgumentException clmap宣言の名前に相当するclmapスクリプトがありません。
 	 * @throws IllegalArgumentException クロージャパスに相当するクロージャがありません。
 	 */
 	void format(ConvertScript script, Map bltxtMap){
+		// すべてのclmapスクリプトに大域変数として足跡fprintを設定します
+		clmapServer.decs.values().each { def clmap ->
+			clmap.properties[cnst.clmap.footprint] = script.fprint
+		}
 		GParsPool.withPool {
 			script.results.map.values().eachParallel { def result ->
 				// clmapスクリプトからクロージャを取得します
 				String clmapName = result.clmapName ?: script.results.baseClmapName
-				Clmap clmap = clmapServer["clmap:${clmapName}"]
-				if (clmap == null) throw new IllegalStateException(String.format(msgs.exc.noClmapForOutput, result.key, clmapName))
+				if (clmapServer["clmap:${clmapName}"] == null) throw new IllegalStateException(String.format(msgs.exc.noClmapForResult, result.key, clmapName))
+				Clmap clmap = clmapServer["clmap:${clmapName}"].clone()
 				ClmapClosure cl = clmap.cl(cnst.clmap.clpath)
 				if (cl == null) throw new IllegalStateException(String.format(msgs.exc.noClosure, result.key, clmapName))
-				// 足跡をclmapスクリプトの大域変数に設定します
-				result.fprint = new Footprints()
-				clmap.properties[cnst.clmap.footprint] = result.fprint
+				// 変換結果毎の大域変数を設定します
+				clmap.properties[cnst.clmap.resultKey] = result.key
 				// クロージャを実行し、戻り値としてバインド変数を受けとってテンプレートに適用します
-				Map binds = cl.call(result.key, bltxtMap, script.appendMap)
+				Map binds = cl.call(bltxtMap, script.appendMap)
 				templateHandler.apply(result.templateKey, result.writer, binds)
 			}
 		}

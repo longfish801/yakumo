@@ -4,23 +4,23 @@
 	import org.slf4j.LoggerFactory
 #> prefix
 	def LOG = LoggerFactory.getLogger('io.github.longfish801.yakumo.thtml.clmap.thtml')
-	String lsep = System.lineSeparator()
+#>
 
 #> map
 #>> args
-	String outKey
 	Map bltxtMap
 	Map appendMap
 #>> return
 	Map binds
 #>> closure
 	binds = [
-		title: clmap.cl('../bind#title').call(bltxtMap[outKey]),
-		header: clmap.cl('../bind#header').call(bltxtMap[outKey]),
-		toc: clmap.cl('../bind#toc').call(bltxtMap[outKey]),
-		bodytext: clmap.cl('../bind#bodytext').call(bltxtMap[outKey]),
-		note: clmap.cl('../bind#note').call(bltxtMap[outKey])
+		title: clmap.cl('../bind#title').call(bltxtMap[resultKey]),
+		header: clmap.cl('../bind#header').call(bltxtMap[resultKey]),
+		toc: clmap.cl('../bind#toc').call(bltxtMap[resultKey]),
+		bodytext: clmap.cl('../bind#bodytext').call(bltxtMap[resultKey]),
+		note: clmap.cl('../bind#note').call(bltxtMap[resultKey])
 	]
+#>
 
 #> map:bind
 #>> dec
@@ -61,7 +61,7 @@
 			id: "${level}_${node.serialNo}"
 		])
 	}
-	html = list.join(lsep)
+	html = list.join(System.lineSeparator())
 #>> closure:bodytext
 	html = clmap.cl('../htmlize#dflt').call(bltxt.root)
 #>> closure:note
@@ -84,17 +84,17 @@
 	if (noteKeys.unique(false).size() < noteKeys.size()){
 		Map map = [:]
 		noteKeys.each { map[it] = (map.containsKey(it))? ++ map[it] : 1 }
-		fprint.warn("註のキーに重複があります。：重複キー=${map.findAll { it.value > 1 }.keySet()}")
+		fprint.warn("[${resultKey}] 註のキーに重複があります。：重複キー=${map.findAll { it.value > 1 }.keySet()}")
 		return ''
 	}
 	List diff1 = noteKeys - cmntKeys
 	if (diff1.size() > 0){
-		fprint.warn("註に対する註記の記述漏れがあります。：diff=${diff1}")
+		fprint.warn("[${resultKey}] 註に対する註記の記述漏れがあります。：diff=${diff1}")
 		return ''
 	}
 	List diff2 = cmntKeys - noteKeys
 	if (diff2.size() > 0){
-		fprint.warn("不要な註記あるいは註の記述漏れがあります。：diff=${diff2}")
+		fprint.warn("[${resultKey}] 不要な註記あるいは註の記述漏れがあります。：diff=${diff2}")
 		return ''
 	}
 	
@@ -102,11 +102,12 @@
 	List list = []
 	noteKeys.eachWithIndex { String noteKey, int cnt ->
 		list << clmap.cl('../template#dflt').call('meta#note', [
-			text: clmap.cl('../lowers#htmlize').call(cmntMap[noteKey]).join(lsep),
+			text: clmap.cl('../lowers#htmlize').call(cmntMap[noteKey]).join(System.lineSeparator()),
 			id: cnt + 1
 		])
 	}
-	html = list.join(lsep)
+	html = list.join(System.lineSeparator())
+#>
 
 #> map:htmlize
 #>> dec
@@ -129,12 +130,12 @@
 			break
 	}
 #>> closure:bltxt
-	html = clmap.cl('/thtml/lowers#htmlize').call(node).join(lsep + lsep)
+	html = clmap.cl('/thtml/lowers#htmlize').call(node).join(System.lineSeparator() * 2)
 #>> closure:para
 	switch (node.parent.xmlTag){
 		case 'bltxt':
 			// 最上位にあるならば pタグを付与します
-			html = '<p>' + lowers.join("<br/>" + lsep) + '</p>'
+			html = '<p>' + lowers.join("<br/>" + System.lineSeparator()) + '</p>'
 			break
 		case 'block':	// 上位がブロック要素の場合
 			switch (node.parent.tag){
@@ -142,26 +143,26 @@
 				case '画像':
 				case '項目':
 				case '引用元':
-					html = lowers.join("<br/>" + lsep)
+					html = lowers.join("<br/>" + System.lineSeparator())
 					break
 				case '生データ':
 				case '整形済':
 				case 'コード':
-					html = lowers.join(lsep)
+					html = lowers.join(System.lineSeparator())
 					break
 				default:
-					html = '<p>' + lowers.join("<br/>" + lsep) + '</p>'
+					html = '<p>' + lowers.join("<br/>" + System.lineSeparator()) + '</p>'
 			}
 			break
 		case 'meta':
 			if (node.parent.isSingle()){	// 単一の場合
-				html = lowers.join("<br/>" + lsep)
+				html = lowers.join("<br/>" + System.lineSeparator())
 			} else {
-				html = '<p>' + lowers.join("<br/>" + lsep) + '</p>'
+				html = '<p>' + lowers.join("<br/>" + System.lineSeparator()) + '</p>'
 			}
 			break
 		default:
-			html = lowers.join("<br/>" + lsep)
+			html = lowers.join("<br/>" + System.lineSeparator())
 			break
 	}
 #>> closure:line
@@ -176,14 +177,14 @@
 #>>> prefix
 	String templateKey = "block#${node.tag}"
 #>>> closure
-	fprint.warn("未対応のブロック要素です。tag=${node.tag}, node=${node.toString()}")
+	fprint.warn("[${resultKey}] 未対応のブロック要素です。tag=${node.tag}, node=${node.toString()}")
 	return lowers.join()
 #>>> closure:見出し
 	int level
 	try {
 		level = (node.attrs.size() > 0)? Integer.parseInt(node.attrs[0]) + 1 : 2
 	} catch (NumberFormatException exc){
-		throw new Exception('見出しレベルの型変換に失敗しました。見出しレベルは半角数字を指定してください。', exc)
+		throw new Exception("[${resultKey}] 見出しレベルの型変換に失敗しました。見出しレベルは半角数字を指定してください。", exc)
 	}
 	html = clmap.cl('/thtml/template#dflt').call(templateKey, [
 		text: lowers.join(),
@@ -191,25 +192,25 @@
 		id: "id${level}_${node.serialNo}"
 	])
 #>>> closure:箇条書き
-	html = clmap.cl('/thtml/template#dflt').call(templateKey, [ text: lowers.join(lsep) ])
+	html = clmap.cl('/thtml/template#dflt').call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
 #>>> closure:項目
-	html = clmap.cl('/thtml/template#dflt').call(templateKey, [ text: lowers.join(lsep) ])
+	html = clmap.cl('/thtml/template#dflt').call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
 #>>> closure:コラム
 	html = clmap.cl('/thtml/template#dflt').call(templateKey, [
-		text: lowers.join(lsep),
+		text: lowers.join(System.lineSeparator()),
 		title: (node.attrs.size() > 0)? node.attrs[0] : null
 	])
 #>>> closure:注意
 	html = clmap.cl('/thtml/template#dflt').call(templateKey, [
-		text: lowers.join(lsep),
+		text: lowers.join(System.lineSeparator()),
 		title: (node.attrs.size() > 0)? node.attrs[0] : null
 	])
 #>>> closure:引用
-	html = clmap.cl('/thtml/template#dflt').call(templateKey, [ text: lowers.join(lsep) ])
+	html = clmap.cl('/thtml/template#dflt').call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
 #>>> closure:引用元
 	html = clmap.cl('/thtml/template#dflt').call(templateKey, [ text: lowers.join() ])
 #>>> closure:コード
-	html = clmap.cl('/thtml/template#dflt').call(templateKey, [ text: lowers.join(lsep) ])
+	html = clmap.cl('/thtml/template#dflt').call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
 #>>> closure:画像
 	html = clmap.cl('/thtml/template#dflt').call(templateKey, [
 		text: (lowers.size() > 0)? lowers.join() : null,
@@ -225,7 +226,7 @@
 	String templateKey = "inline#${node.tag}"
 	String text = lowers.join()
 #>>> closure
-	fprint.warn("未対応のインライン要素です。tag=${node.tag}, node=${node.toString()}")
+	fprint.warn("[${resultKey}] 未対応のインライン要素です。tag=${node.tag}, node=${node.toString()}")
 	html = (node.nodes.size() == 0)? "【${node.tag}${node.attrs.toString()}】" : "【｜${node.tag}${node.attrs.toString()}】${text}【${node.tag}｜】"
 #>>> closure:註
 	html = clmap.cl('/thtml/template#dflt').call(templateKey, [
@@ -263,17 +264,18 @@
 #>> closure
 	text = clmap.cl("#${node.xmlTag}").call(node)
 #>> closure:bltxt
-	text = clmap.cl('../lowers#textize').call(node).join(lsep)
+	text = clmap.cl('../lowers#textize').call(node).join(System.lineSeparator())
 #>> closure:block
-	text = clmap.cl('../lowers#textize').call(node).join(lsep)
+	text = clmap.cl('../lowers#textize').call(node).join(System.lineSeparator())
 #>> closure:para
-	text = clmap.cl('../lowers#textize').call(node).join(lsep)
+	text = clmap.cl('../lowers#textize').call(node).join(System.lineSeparator())
 #>> closure:line
 	text = clmap.cl('../lowers#textize').call(node).join()
 #>> closure:inline
 	text = clmap.cl('../lowers#textize').call(node).join()
 #>> closure:text
 	text = clmap.cl("../htmlize#${node.xmlTag}").call(node)
+#>
 
 #> map:lowers
 #>> args
@@ -294,6 +296,7 @@
 	}.collect {
 		clmap.cl('/thtml/textize#dflt').call(it)
 	}
+#>
 
 #> map:template
 #>> args
@@ -305,10 +308,11 @@
 	// フォーマットをテンプレートとして読みこみます
 	if (!templateHandler.map.containsKey(templateKey)){
 		def tmpl = clmap.refer("/clmap:thtml/map:format/data:${templateKey}")
-		templateHandler.set(templateKey, (tmpl instanceof List)? tmpl.join(lsep) : tmpl)
+		templateHandler.set(templateKey, (tmpl instanceof List)? tmpl.join(System.lineSeparator()) : tmpl)
 	}
 	// テンプレートを適用します
 	html = templateHandler.apply(templateKey, binds)
+#>
 
 #> map:format
 #>> data:body

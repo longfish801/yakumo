@@ -25,6 +25,8 @@ class ConvertScript {
 	Closure doBetween
 	/** 変換後に実行する処理 */
 	Closure doLast
+	/** 足跡 */
+	Footprints fprint = new Footprints()
 	
 	/**
 	 * 変換対象を設定します。<br/>

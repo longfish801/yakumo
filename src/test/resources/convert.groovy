@@ -10,5 +10,8 @@ script {
 	results {
 		result 'target', writer
 	}
+	doLast {
+		fprint.logs.each { println it }
+	}
 }
 return writer.toString()

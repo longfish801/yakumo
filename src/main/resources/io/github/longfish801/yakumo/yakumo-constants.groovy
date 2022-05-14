@@ -5,6 +5,8 @@ clmap {
 	clpath = 'dflt#dflt'
 	// 足跡の変数名
 	footprint = 'fprint'
+	// 変換結果キーの変数名
+	resultKey = 'resultKey'
 }
 
 // 資材スクリプト
