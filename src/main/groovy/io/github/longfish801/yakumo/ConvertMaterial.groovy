@@ -136,7 +136,7 @@ class ConvertMaterial {
 	 */
 	void format(ConvertScript script, Map bltxtMap){
 		// すべてのclmapスクリプトに大域変数として足跡fprintを設定します
-		clmapServer.decs.values().each { def clmap ->
+		clmapServer.decs.values().each { Clmap clmap ->
 			clmap.properties[cnst.clmap.footprint] = script.fprint
 		}
 		GParsPool.withPool {
