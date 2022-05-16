@@ -1,8 +1,10 @@
 
 // clmap文書関連
 clmap {
-	// クロージャパス
-	clpath = 'dflt#dflt'
+	// 事前準備のためのクロージャパス
+	clpathPrepare = 'prepare#dflt'
+	// テンプレートに適用するバインド変数取得のためのクロージャパス
+	clpathBind = 'dflt#dflt'
 	// 足跡の変数名
 	footprint = 'fprint'
 	// 変換結果キーの変数名

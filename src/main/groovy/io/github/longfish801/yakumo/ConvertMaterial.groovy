@@ -128,7 +128,14 @@ class ConvertMaterial {
 	
 	/**
 	 * 変換結果毎に並列処理でclmapのクロージャを呼び、テンプレートを適用して出力します。<br/>
-	 * 並列処理の前に、すべてのclmapスクリプトに大域変数として足跡fprintを設定します。
+	 * 並列処理の前に、すべてのclmapスクリプトに大域変数として足跡fprintを設定します。<br/>
+	 * 変換結果毎に以下の並列処理を実行します。</p>
+	 * <ul>
+	 * <li>clmapスクリプトのクローンを取得し、大域変数として変換結果キーを設定します。</li>
+	 * <li>事前準備のためのクロージャを実行し、戻り値を補足情報とします。</li>
+	 * <li>バインド変数を取得するためのクロージャを実行します。</li>
+	 * </ul>
+	 * <p>事前準備のためのクロージャが存在しない場合は実行しません。
 	 * @param script 変換スクリプト
 	 * @param bltxtMap 変換対象キーとBLtxtインスタンスとのマップ
 	 * @throws IllegalArgumentException clmap宣言の名前に相当するclmapスクリプトがありません。
@@ -141,15 +148,26 @@ class ConvertMaterial {
 		}
 		GParsPool.withPool {
 			script.results.map.values().eachParallel { def result ->
-				// clmapスクリプトからクロージャを取得します
+				// clmapスクリプトを参照し、そのクローンを取得します
 				String clmapName = result.clmapName ?: script.results.baseClmapName
 				if (clmapServer["clmap:${clmapName}"] == null) throw new IllegalStateException(String.format(msgs.exc.noClmapForResult, result.key, clmapName))
-				Clmap clmap = clmapServer["clmap:${clmapName}"].clone()
-				ClmapClosure cl = clmap.cl(cnst.clmap.clpath)
-				if (cl == null) throw new IllegalStateException(String.format(msgs.exc.noClosure, result.key, clmapName))
-				// 変換結果毎の大域変数を設定します
-				clmap.properties[cnst.clmap.resultKey] = result.key
-				// クロージャを実行し、戻り値としてバインド変数を受けとってテンプレートに適用します
+				result.clmap = clmapServer["clmap:${clmapName}"].clone()
+				// 大域変数として変換結果キーを設定します
+				result.clmap.properties[cnst.clmap.resultKey] = result.key
+			}
+		}
+		GParsPool.withPool {
+			script.results.map.values().eachParallel { def result ->
+				// 事前準備のためのクロージャを実行します
+				ClmapClosure cl = result.clmap.cl(cnst.clmap.clpathPrepare)
+				cl?.call(bltxtMap, script.appendMap)
+			}
+		}
+		GParsPool.withPool {
+			script.results.map.values().eachParallel { def result ->
+				// 戻り値としてバインド変数を受けとってテンプレートに適用します
+				ClmapClosure cl = result.clmap.cl(cnst.clmap.clpathBind)
+				if (cl == null) throw new IllegalStateException(String.format(msgs.exc.noClosure, result.key))
 				Map binds = cl.call(bltxtMap, script.appendMap)
 				templateHandler.apply(result.templateKey, result.writer, binds)
 			}

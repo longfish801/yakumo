@@ -6,6 +6,7 @@
 package io.github.longfish801.yakumo
 
 import groovy.util.logging.Slf4j
+import io.github.longfish801.clmap.Clmap
 import io.github.longfish801.yakumo.YmoConst as cnst
 import io.github.longfish801.yakumo.YmoMsg as msgs
 
@@ -103,5 +104,7 @@ class ConvertResults {
 		String templateKey = cnst.results.templateKey
 		/** 足跡（整形時に設定） */
 		Footprints fprint
+		/** clmapスクリプト */
+		Clmap clmap
 	}
 }

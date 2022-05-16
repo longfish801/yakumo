@@ -18,7 +18,7 @@ class ConvertScript {
 	/** 変換結果 */
 	ConvertResults results = new ConvertResults()
 	/** 補足情報のマップ */
-	Map appendMap = [:]
+	Map appendMap = [:].asSynchronized()
 	/** 変換前に実行する処理 */
 	Closure doFirst
 	/** 変換中に実行する処理 */

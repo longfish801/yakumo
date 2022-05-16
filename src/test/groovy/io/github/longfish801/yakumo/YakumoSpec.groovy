@@ -50,8 +50,14 @@ class YakumoSpec extends Specification {
 					fprint.info("resultKey=${resultKey}")
 					if (resultKey == 'key2') fprint.warn("resultKey=${resultKey}")
 					binds = [
-						bodytext: bltxtMap[resultKey].root.find { it.xmlTag == 'text' }?.text
+						bodytext: "[${appendMap[resultKey]}] " + bltxtMap[resultKey].root.find { it.xmlTag == 'text' }?.text
 					]
+				#> map:prepare
+				#>> args
+					Map bltxtMap
+					Map appendMap
+				#>> closure
+					appendMap[resultKey] = resultKey.toUpperCase()
 				'''.stripIndent())
 			template('default', '<h1>${bodytext}</h1>')
 		}
@@ -68,8 +74,8 @@ class YakumoSpec extends Specification {
 			}
 		}
 		then:
-		writer1.toString() == '<h1>Hello, Groovy.</h1>'
-		writer2.toString() == '<h1>Hi, Groovy.</h1>'
+		writer1.toString() == '<h1>[KEY1] Hello, Groovy.</h1>'
+		writer2.toString() == '<h1>[KEY2] Hi, Groovy.</h1>'
 		yakumo.script.fprint.logs.size() == 3
 		yakumo.script.fprint.warns.size() == 1
 	}

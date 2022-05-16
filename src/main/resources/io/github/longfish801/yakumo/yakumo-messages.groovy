@@ -10,7 +10,7 @@ exc {
 	noClmap = 'No clmap for specified clpath. clpath=%s'
 	noClmapForResult = 'No clmap for the specified clmap name. resultKey=%s, clmapName=%s'
 	noSwitem = 'No switem scrpit for the specified target key. targetKey=%s, switemName=%s'
-	noClosure = 'No closure for the specified clmap. resultKey=%s, clmapName=%s'
+	noClosure = 'No closure for the specified clmap. resultKey=%s'
 	cannotSetTemplateKey = 'Cannot set template key, because no result is set. key=%s, templateKey=%s'
 	invalidOutDir = 'No such directory for outputting related files. path=%s'
 }
