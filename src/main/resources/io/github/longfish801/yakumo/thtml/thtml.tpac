@@ -307,8 +307,8 @@
 #>> closure
 	// フォーマットをテンプレートとして読みこみます
 	if (!templateHandler.map.containsKey(templateKey)){
-		def tmpl = clmap.refer("/clmap:thtml/map:format/data:${templateKey}")
-		templateHandler.set(templateKey, (tmpl instanceof List)? tmpl.join(System.lineSeparator()) : tmpl)
+		String source = clmap.referAsString("../map:format/data:${templateKey}")
+		templateHandler.set(templateKey, source)
 	}
 	// テンプレートを適用します
 	html = templateHandler.apply(templateKey, binds)
