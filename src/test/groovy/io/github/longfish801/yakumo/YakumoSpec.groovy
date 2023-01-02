@@ -42,33 +42,41 @@ class YakumoSpec extends Specification {
 				#! clmap:sampleClmap
 				#> map
 				#>> args
-					String outKey, Map bltxtMap
+					Map bltxtMap
+					Map appendMap
 				#>> return
 					Map binds
 				#>> closure
-					Closure findText
-					findText = { def node ->
-						if (node.xmlTag == 'text') return node.text
-						return node.nodes.collect { findText(it) }.join('')
-					}
+					fprint.info("resultKey=${resultKey}")
+					if (resultKey == 'key2') fprint.warn("resultKey=${resultKey}")
 					binds = [
-						bodytext: findText.call(bltxtMap[outKey].root)
+						bodytext: "[${appendMap[resultKey]}] " + bltxtMap[resultKey].root.find { it.xmlTag == 'text' }?.text
 					]
+				#> map:prepare
+				#>> args
+					Map bltxtMap
+					Map appendMap
+				#>> closure
+					appendMap[resultKey] = resultKey.toUpperCase()
 				'''.stripIndent())
 			template('default', '<h1>${bodytext}</h1>')
 		}
 		yakumo.script {
 			targets {
-				target 'key1', 'Hello, World.', 'sampleSwitem'
-				target 'key2', 'Bye, World.', 'sampleSwitem'
+				baseSwitemName 'sampleSwitem'
+				target 'key1', 'Hello, World.'
+				target 'key2', 'Bye, World.'
 			}
 			results {
-				result 'key1', writer1, 'sampleClmap'
-				result 'key2', writer2, 'sampleClmap'
+				baseClmapName 'sampleClmap'
+				result 'key1', writer1
+				result 'key2', writer2
 			}
 		}
 		then:
-		writer1.toString() == '<h1>Hello, Groovy.</h1>'
-		writer2.toString() == '<h1>Hi, Groovy.</h1>'
+		writer1.toString() == '<h1>[KEY1] Hello, Groovy.</h1>'
+		writer2.toString() == '<h1>[KEY2] Hi, Groovy.</h1>'
+		yakumo.script.fprint.logs.size() == 3
+		yakumo.script.fprint.warns.size() == 1
 	}
 }

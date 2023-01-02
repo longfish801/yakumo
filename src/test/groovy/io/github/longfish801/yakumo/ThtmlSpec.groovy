@@ -46,7 +46,8 @@ class ThtmlSpec extends Specification implements GropedResource {
 		// テンプレートを読みこみます
 		TemplateHandler templateHandler = new TemplateHandler()
 		templateHandler.set('default', grope('thtml/default.html'))
-		clmap.properties['warnings'] = [].asSynchronized()
+		clmap.properties['resultKey'] = 'someresult'
+		clmap.properties['fprint'] = new Footprints()
 		clmap.cl('/thtml/template').properties['templateHandler'] = templateHandler
 		
 		// HTML化のためクロージャです
@@ -91,6 +92,7 @@ class ThtmlSpec extends Specification implements GropedResource {
 		'inline'	| 'verinhori'
 		'inline'	| 'dot'
 		'inline'	| 'ruby'
+		'inline'	| 'nosuch'
 	}
 	
 	@Timeout(10)

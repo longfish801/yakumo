@@ -29,17 +29,18 @@ class Yakumo implements GropedResource {
 	 * 変換スクリプトを実行します。<br/>
 	 * 本メソッド内で以下の変数をバインドします。
 	 * <ul>
-	 * <li>yakumo：自インスタンス</li>
-	 * <li>scriptFile：変換スクリプト（java.io.File）</li>
+	 * <li>scriptFile：変換スクリプトファイル（java.io.File）</li>
 	 * </ul>
-	 * @param script 変換スクリプト
+	 * @param file 変換スクリプトファイル
 	 * @param vars バインド変数の変数名と変数値のマップ
+	 * @return 変換スクリプトの実行結果
 	 */
-	void run(File script, Map vars){
-		loader.shell.setVariable('yakumo', this)
-		loader.shell.setVariable('script', script)
-		vars.each { loader.shell.setVariable(it.key, it.value) }
-		loader.shell.run(script, [])
+	def run(File file, Map vars){
+		DelegatingScript script = (DelegatingScript) loader.shell.parse(file)
+		script.setDelegate(this)
+		script.setProperty('scriptFile', file)
+		vars?.each { script.setProperty(it.key, it.value) }
+		return script.run()
 	}
 	
 	/**

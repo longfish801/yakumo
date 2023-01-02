@@ -27,23 +27,36 @@
 import io.github.longfish801.yakumo.Yakumo
 
 try {
-	def writer = new StringWriter()
 	def yakumo = new Yakumo()
-	yakumo.load { material 'fyakumo', 'thtml' }
-	yakumo.script {
-		targets {
-			target 'target', new File('src/test/resources/target.txt'), 'fyakumo'
-		}
-		results {
-			result 'target', writer, 'thtml'
-		}
-	}
-	assert writer.toString().normalize() == new File('src/test/resources/result.html').text
-	assert yakumo.script.results.target.fprint.warns.size() == 0
+	String converted = yakumo.run(new File('src/test/resources/convert.groovy'), null)
+	assert converted.normalize() == new File('src/test/resources/result.html').text
+	assert yakumo.script.fprint.warns.size() == 0
 } catch (exc){
 	println "Failed to convert: message=${exc.message}"
 	throw exc
 }
+```
+
+　上記で実行している変換スクリプトは以下です（src/test/resources/convert.groovy）。
+
+```
+load {
+	material 'fyakumo', 'thtml'
+}
+
+def writer = new StringWriter()
+script {
+	targets {
+		target 'target', new File('src/test/resources/target.txt')
+	}
+	results {
+		result 'target', writer
+	}
+	doLast {
+		fprint.logs.each { println it }
+	}
+}
+return writer.toString()
 ```
 
 　変換対象は [target.txt](https://github.com/longfish801/yakumo/tree/master/src/test/resources/target.txt) です。
@@ -76,3 +89,23 @@ dependencies {
 	implementation group: 'io.github.longfish801', name: 'yakumo', version: '0.3.00'
 }
 ```
+
+## 改版履歴
+
+1.1.00
+: gradle 7.4の記法に対応しました。
+: クロージャによる変換時に補足情報を渡せるよう対応しました。
+: outDirに指定されたディレクトリの存在チェックはcopyメソッド実行時に移しました。
+: 資材スクリプト、変換スクリプトの委任クラスをyakumoにしました。
+: 基底のswitem宣言の名前、clmap宣言の名前を設定するようにしました。
+
+1.1.01
+: 足跡は変換結果毎ではなく全体でひとつのみに修正しました。
+: クロージャマップはクローンによって変換結果毎に異なるものを用いるようにしました。
+: 変換結果キーはclmapスクリプトに引数ではなく大域変数として渡すよう修正しました。
+
+1.1.02
+: 事前準備のためのクロージャprepare#dfltの実行に対応しました。
+
+1.1.03
+: tpac 1.1.05に対応しました。

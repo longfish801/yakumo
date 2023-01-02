@@ -6,26 +6,21 @@
 
 plugins {
 	id 'com.github.monosoul.markdown.page.generator' version '2.3.1.1'
+	id 'groovy'
 	id 'jacoco'
+	id 'java-library'
+	id 'maven-publish'
 }
-
-tasks.withType(AbstractCompile).each { it.options.encoding = 'UTF-8' }
-tasks.withType(GroovyCompile).each { it.groovyOptions.encoding = 'UTF-8' }
-tasks.withType(Javadoc).each { it.options.encoding = 'UTF-8' }
-
-apply plugin: 'groovy'
-apply plugin: 'maven-publish'
 
 defaultTasks 'fix'
 group = 'io.github.longfish801'
-version = '1.0.00'
+version = '1.2.00'
 
-// 環境変数からローカルのmavenリポジトリへのパスを取得します
-String mavenPath = System.env['MAVEN_PATH']
-if (mavenPath == null || mavenPath.empty){
-	throw new Exception('Environment variables MAVEN_PATH is required.')
+// mavenローカルリポジトリへのパスが設定されているか確認します
+if (System.properties.mavenPath == null || System.properties.mavenPath.empty){
+	throw new Exception('Environment variables mavenPath is required.')
 }
-mavenPath += '/docs'
+String mavenPjPath = [System.properties.mavenPath, project.name].join(File.separator)
 
 repositories {
 	mavenCentral()
@@ -33,25 +28,85 @@ repositories {
 }
 
 dependencies {
-	implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
-	implementation group: 'io.github.longfish801', name: 'bltxt', version: '1.0.00'
-	implementation group: 'io.github.longfish801', name: 'clmap', version: '1.0.00'
-	implementation group: 'io.github.longfish801', name: 'gonfig', version: '1.0.00'
-	implementation group: 'io.github.longfish801', name: 'switem', version: '1.0.00'
-	implementation group: 'io.github.longfish801', name: 'tpac', version: '1.0.00'
-	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
-	implementation group: 'org.apache.commons', name: 'commons-text', version: '1.9'
-	implementation group: 'org.codehaus.gpars', name: 'gpars', version: '1.2.1'
-	implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.5.10'
-	implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-	testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
-	testImplementation group: 'org.spockframework', name: 'spock-core', version: '1.2-groovy-2.5'
+	api 'io.github.longfish801:bltxt:1.2.00'
+	api 'io.github.longfish801:clmap:1.2.00'
+	api 'io.github.longfish801:gonfig:1.1.00'
+	api 'io.github.longfish801:switem:1.2.00'
+	implementation 'commons-io:commons-io:2.11.0'
+	implementation 'org.apache.commons:commons-lang3:3.12.0'
+	implementation 'org.apache.commons:commons-text:1.9'
+	implementation 'org.codehaus.groovy:groovy-all:3.0.9'
+	implementation 'org.codehaus.gpars:gpars:1.2.1'
+	implementation 'org.slf4j:slf4j-api:1.7.36'
+	testImplementation 'ch.qos.logback:logback-classic:1.2.11'
+	testImplementation 'io.github.longfish801:tpac:1.1.00'
+	testImplementation('org.spockframework:spock-core:2.1-groovy-3.0') {
+		exclude group: 'org.codehaus.groovy'
+	}
 }
 
 test {
-	systemProperty 'file.encoding', 'UTF-8'
-	minHeapSize = '128m'
-	maxHeapSize = '1024m'
+	useJUnitPlatform()
+	finalizedBy jacocoTestReport
+}
+
+groovydoc {
+	overviewText = resources.text.fromFile('src/main/resources/overview.html')
+	[
+		'http://docs.oracle.com/javase/8/docs/api/' : 'java.,javax.,org.xml.',
+		'https://docs.groovy-lang.org/3.0.9/html/gapi/' : 'groovy.,org.codehaus.groovy.'
+	].each { link(it.key, it.value); }
+}
+
+generateHtml {
+	inputDirectory = file('src/markdown')
+	headerHtmlFile = file('src/markdown/template/header.html')
+	footerHtmlFile = file('src/markdown/template/footer.html')
+	pegdownExtensions = 'TOC,ANCHORLINKS,EXTANCHORLINKS,HARDWRAPS,FENCED_CODE_BLOCKS,DEFINITIONS,TABLES'
+}
+
+publishing {
+	publications {
+		library(MavenPublication) { from components.java }
+	}
+	repositories {
+		maven { url System.properties.mavenPath }
+    }
+}
+
+// サンプルを実行します
+tasks.register('execSamples', JavaExec) {
+	dependsOn 'classes'
+	mainClass = 'Sample'
+	classpath = sourceSets.test.runtimeClasspath
+}
+
+// フィックスします
+tasks.register('fix'){
+	dependsOn 'clean', 'test', 'execSamples', 'groovydoc', 'generateHtml'
+}
+
+// ドキュメントをローカルのmavenリポジトリに出力します
+tasks.register('deleteDoc', Delete){
+	delete mavenPjPath
+}
+tasks.register('copyHtml', Copy){
+	dependsOn 'deleteDoc', 'generateHtml'
+	from 'build/html'
+	into mavenPjPath
+}
+tasks.register('copyGroovydoc', Copy){
+	dependsOn 'copyHtml', 'groovydoc'
+	from 'build/docs/groovydoc'
+	into "${[mavenPjPath, 'groovydoc'].join(File.separator)}"
+}
+tasks.register('publishDoc'){
+	dependsOn 'copyGroovydoc'
+}
+
+// リリースします
+tasks.register('release'){
+	dependsOn 'publish', 'publishDoc'
 }
 
 jacocoTestReport {

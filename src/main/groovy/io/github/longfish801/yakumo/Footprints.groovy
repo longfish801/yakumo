@@ -17,7 +17,7 @@ import java.text.SimpleDateFormat
  */
 class Footprints {
 	/** 足跡 */
-	List prints = []
+	List prints = [].asSynchronized()
 	/** SimpleDateFormat */
 	def dateFormat = new SimpleDateFormat(cnst.footprints.format.timestamp)
 	/** ログ文字列のテンプレート */

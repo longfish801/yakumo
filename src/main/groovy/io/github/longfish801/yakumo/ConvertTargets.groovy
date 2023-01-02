@@ -6,6 +6,8 @@
 package io.github.longfish801.yakumo
 
 import groovy.util.logging.Slf4j
+import io.github.longfish801.yakumo.YmoConst as cnst
+import io.github.longfish801.yakumo.YmoMsg as msgs
 
 /**
  * 変換対象を管理します。
@@ -15,6 +17,8 @@ import groovy.util.logging.Slf4j
 class ConvertTargets {
 	/** 変換対象キーと変換対象とのマップ */
 	Map map = [:]
+	/** switem宣言の名前の基底値 */
+	String baseSwitemName = cnst.target.baseSwitemName
 	
 	/**
 	 * 変換対象キーに対応する変換対象を参照します。
@@ -38,32 +42,50 @@ class ConvertTargets {
 	 * 変換対象を追加します。
 	 * @param key 変換対象キー
 	 * @param str 入力子
-	 * @param switemName switem宣言の名前
 	 * @see #target(String, Reader, String)
 	 */
-	void target(String key, String str, String switemName){
-		target(key, new StringReader(str), switemName)
+	void target(String key, String str){
+		target(key, new StringReader(str))
 	}
 	
 	/**
 	 * 変換対象を追加します。
 	 * @param key 変換対象キー
 	 * @param file 変換対象ファイル
-	 * @param switemName switem宣言の名前
 	 * @see #target(String, Reader, String)
 	 */
-	void target(String key, File file, String switemName){
-		target(key, new FileReader(file), switemName)
+	void target(String key, File file){
+		target(key, new FileReader(file))
 	}
 	
 	/**
 	 * 変換対象を格納します。
 	 * @param key 変換対象キー
 	 * @param reader 入力子
-	 * @param switemName switem宣言の名前
 	 */
-	void target(String key, Reader reader, String switemName){
-		map[key] = new Target(key: key, reader: reader, switemName: switemName)
+	void target(String key, Reader reader){
+		map[key] = new Target(key: key, reader: reader)
+	}
+	
+	/**
+	 * switem宣言の名前の基底値を設定します。<br/>
+	 * 設定しない場合は "fyakumo"です。
+	 * @param name switem宣言の名前の基底値
+	 */
+	void baseSwitemName(String switemName){
+		baseSwitemName = switemName
+	}
+	
+	/**
+	 * 特定の変換対象キーに対応する変換対象についてswitem宣言の名前を設定します。<br/>
+	 * 設定しない場合は基底値が用いられます。
+	 * @param key 変換対象キー
+	 * @param switemName switem宣言の名前
+	 * @throws IllegalArgumentException 指定された変換対象キーに相当する変換対象がありません。
+	 */
+	void switemName(String key, String switemName){
+		if (!map.containsKey(key)) throw new IllegalArgumentException(String.format(msgs.exc.noTarget, key))
+		map[key].switemName = switemName
 	}
 	
 	/**

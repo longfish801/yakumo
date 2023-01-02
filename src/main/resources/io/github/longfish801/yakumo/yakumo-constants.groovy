@@ -1,43 +1,34 @@
 
 // clmap文書関連
 clmap {
-	// クロージャパス
-	clpath = 'dflt#dflt'
+	// 事前準備のためのクロージャパス
+	clpathPrepare = 'prepare#dflt'
+	// テンプレートに適用するバインド変数取得のためのクロージャパス
+	clpathBind = 'dflt#dflt'
 	// 足跡の変数名
 	footprint = 'fprint'
+	// 変換結果キーの変数名
+	resultKey = 'resultKey'
 }
 
 // 資材スクリプト
-setting {
-	fileName = 'material.groovy'	// ファイル名
-}
-
-// 変換スクリプト
-script {
+material {
 	// ファイル名
-	fileName = 'ymoScript.groovy'
+	fileName = 'material.groovy'
 }
 
 // 変換対象
 target {
-	// ファイル名のパターン
-	includePattern = ['*.txt']
-	// ファイル名の除外パターン
-	excludePattern = []
+	// switem宣言の名前の基底値
+	baseSwitemName = 'fyakumo'
 }
 
-// テンプレート関係
-template {
+// 変換結果
+results {
+	// clmap宣言の名前の基底値
+	baseClmapName = 'thtml'
 	// デフォルトのテンプレートキー
-	defaultKey = 'default'
-}
-
-// 関連ファイル
-related {
-	// ファイル名のパターン
-	includePattern = []
-	// ファイル名の除外パターン
-	excludePattern = ['*.txt', '_*']
+	templateKey = 'default'
 }
 
 footprints {

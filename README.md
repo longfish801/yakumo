@@ -25,23 +25,36 @@ Here is a sample script which convert from text with yakumo notation to HTML (sr
 import io.github.longfish801.yakumo.Yakumo
 
 try {
-	def writer = new StringWriter()
 	def yakumo = new Yakumo()
-	yakumo.load { material 'fyakumo', 'thtml' }
-	yakumo.script {
-		targets {
-			target 'target', new File('src/test/resources/target.txt'), 'fyakumo'
-		}
-		results {
-			result 'target', writer, 'thtml'
-		}
-	}
-	assert writer.toString().normalize() == new File('src/test/resources/result.html').text
-	assert yakumo.script.results.target.fprint.warns.size() == 0
+	String converted = yakumo.run(new File('src/test/resources/convert.groovy'), null)
+	assert converted.normalize() == new File('src/test/resources/result.html').text
+	assert yakumo.script.fprint.warns.size() == 0
 } catch (exc){
 	println "Failed to convert: message=${exc.message}"
 	throw exc
 }
+```
+
+Here is the conversion script running above (src/test/resources/convert.groovy).
+
+```
+load {
+	material 'fyakumo', 'thtml'
+}
+
+def writer = new StringWriter()
+script {
+	targets {
+		target 'target', new File('src/test/resources/target.txt')
+	}
+	results {
+		result 'target', writer
+	}
+	doLast {
+		fprint.logs.each { println it }
+	}
+}
+return writer.toString()
 ```
 
 Convert target is [target.txt](https://github.com/longfish801/yakumo/tree/master/src/test/resources/target.txt).  

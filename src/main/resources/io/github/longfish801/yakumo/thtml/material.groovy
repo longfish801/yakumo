@@ -5,13 +5,13 @@
  */
 
 // HTML形式へ変換するための資材を設定します
-yakumo.material {
+material {
 	// clmapスクリプトを設定します
-	clmap yakumo.grope("${convName}/thtml.tpac")
+	clmap grope("${convName}/thtml.tpac")
 	
 	// クロージャマップに大域変数をバインドします
-	clmapProps convName, "/thtml/template", [ 'templateHandler': templateHandler ]
+	clmapProp convName, 'template', 'templateHandler', templateHandler
 	
 	// テンプレートを設定します
-	template 'default', yakumo.grope("${convName}/default.html")
+	template 'default', grope("${convName}/default.html")
 }

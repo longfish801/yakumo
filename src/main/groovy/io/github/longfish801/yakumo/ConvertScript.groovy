@@ -17,12 +17,16 @@ class ConvertScript {
 	ConvertTargets targets = new ConvertTargets()
 	/** 変換結果 */
 	ConvertResults results = new ConvertResults()
+	/** 補足情報のマップ */
+	Map appendMap = [:].asSynchronized()
 	/** 変換前に実行する処理 */
 	Closure doFirst
 	/** 変換中に実行する処理 */
 	Closure doBetween
 	/** 変換後に実行する処理 */
 	Closure doLast
+	/** 足跡 */
+	Footprints fprint = new Footprints()
 	
 	/**
 	 * 変換対象を設定します。<br/>
@@ -46,6 +50,16 @@ class ConvertScript {
 		closure.delegate = results
 		closure.resolveStrategy = Closure.DELEGATE_FIRST
 		closure()
+	}
+	
+	/**
+	 * 補足情報を設定します。<br/>
+	 * クロージャでの変換時に引数として補足情報のマップを渡します。
+	 * @param key 補足情報キー
+	 * @param val 補足情報
+	 */
+	void append(String key, def val){
+		appendMap[key] = val
 	}
 	
 	/**

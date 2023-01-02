@@ -115,6 +115,10 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 <p>　<ruby>出納<rp>［</rp><rt>すいとう</rt><rp>］</rp></ruby>係は言った。</p>
 #>
 
+#>> nosuch
+<p>　これは【未対応：未対応のインライン要素】です。</p>
+#>
+
 #> bind
 #>> title
 秘密の&lt;円周率&gt;について

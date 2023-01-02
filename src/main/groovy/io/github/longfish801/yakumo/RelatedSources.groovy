@@ -64,9 +64,6 @@ class RelatedSources {
 	 * @throws YmoConvertException 出力フォルダが存在しないかディレクトリではありません。
 	 */
 	void outDir(File dir){
-		if (!dir.exists() || !dir.directory){
-			throw new YmoConvertException(String.format(msgs.exc.invalidOutDir, dir.path))
-		}
 		this.dir = dir
 	}
 	
@@ -109,6 +106,9 @@ class RelatedSources {
 	 */
 	void copy(){
 		if (dir == null) return
+		if (!dir.exists() || !dir.directory){
+			throw new YmoConvertException(String.format(msgs.exc.invalidOutDir, dir.path))
+		}
 		LOG.debug(msgs.logstr.copyRelatedBegin, dir.absolutePath)
 		relateds.each { String setName, Map map ->
 			map.each { String path, File file ->
