@@ -80,7 +80,7 @@ ${header}
 
 <div class="row justify-content-center">
 
-<% if (toc != null){ %><nav class="col-lg-4">
+<% if (!toc.empty){ %><nav class="col-lg-4">
 <ul class="nav flex-column">
 ${toc}
 </ul>
@@ -88,7 +88,7 @@ ${toc}
 
 <main class="col-lg-8">
 ${bodytext}
-<% if (note != null){ %><aside>
+<% if (!note.empty){ %><aside>
 <dl id="note">
 ${note}
 </dl>

@@ -13,6 +13,9 @@ exc {
 	noClosure = 'No closure for the specified clmap. resultKey=%s'
 	cannotSetTemplateKey = 'Cannot set template key, because no result is set. key=%s, templateKey=%s'
 	invalidOutDir = 'No such directory for outputting related files. path=%s'
+	errorCallPrepare = 'An error occurred while executing prepare clmap. resultKey=%s'
+	errorCallClmap = 'An error occurred while executing clmap. resultKey=%s'
+	failApplyTemplate = 'Failed to apply template. resultKey=%s templateKey=%s'
 }
 
 // ログメッセージ

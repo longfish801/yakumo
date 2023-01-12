@@ -2,19 +2,21 @@
 // clmap文書関連
 clmap {
 	// 事前準備のためのクロージャパス
-	clpathPrepare = 'prepare#dflt'
+	clpathPrepare = '#prepare'
 	// テンプレートに適用するバインド変数取得のためのクロージャパス
-	clpathBind = 'dflt#dflt'
+	clpathBind = '#'
 	// 足跡の変数名
 	footprint = 'fprint'
-	// 変換結果キーの変数名
-	resultKey = 'resultKey'
+	// テンプレート利用の変数名
+	templateHandler = 'templateHandler'
 }
 
 // 資材スクリプト
 material {
 	// ファイル名
 	fileName = 'material.groovy'
+	// 資材スクリプトの格納フォルダの変数名の接尾辞
+	dirSuffix = 'Dir'
 }
 
 // 変換対象

@@ -108,9 +108,6 @@ println "This is sample code of how to hello to all of the world, which is execu
 　これは【未対応：未対応のインライン要素】です。
 
 #> bind
-#>> title
-【＃タイトル】秘密の【｜重要】<円周率>【重要｜】について
-
 #>> header
 【＃タイトル】円周率について
 【＃サブタイトル】著名な語呂合わせ
@@ -121,13 +118,6 @@ println "This is sample code of how to hello to all of the world, which is execu
 【＝見出し】おいしいカレーの作り方
 【＝見出し：2】材料の準備
 【＝見出し：3】牛の飼い方
-
-#>> bodytext
-　おいしいカレーを作るには隠し味が大切です。
-　隠し味にもいろいろなものがあります。
-
-
-　一般家庭で良く使われる隠し味を試してみましょう。
 
 #>> note
 　XML【註：XML】をHTML【註：HTML】に変換します。

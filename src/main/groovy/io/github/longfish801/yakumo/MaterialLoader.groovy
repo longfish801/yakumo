@@ -23,6 +23,8 @@ class MaterialLoader implements GropedResource {
 	GroovyShell shell = initShell()
 	/** Yakumo */
 	Yakumo yakumo
+	/**  ロード済み資材 */
+	List loaded = []
 	
 	/**
 	 * GroovyShellのインスタンスを取得します。<br/>
@@ -48,7 +50,10 @@ class MaterialLoader implements GropedResource {
 	 */
 	void material(Object... materials){
 		for (int idx = 0; idx < materials.size(); idx ++){
-			this.material(materials[idx])
+			if (!loaded.contains(materials[idx])){
+				this.material(materials[idx])
+				loaded << materials[idx]
+			}
 		}
 	}
 	
@@ -63,7 +68,6 @@ class MaterialLoader implements GropedResource {
 		if (url == null) throw new YmoConvertException(String.format(msgs.exc.noSuchMaterialResource, path))
 		DelegatingScript script = (DelegatingScript) shell.parse(url.toURI())
 		script.setDelegate(this.yakumo)
-		script.setProperty('convName', convName)
 		script.run()
 	}
 	
@@ -77,7 +81,7 @@ class MaterialLoader implements GropedResource {
 		if (!file.canRead()) throw new YmoConvertException(String.format(msgs.exc.noSuchMaterialFile, file.absolutePath))
 		DelegatingScript script = (DelegatingScript) shell.parse(file)
 		script.setDelegate(this.yakumo)
-		script.setProperty('convDir', convDir)
+		script.setProperty(convDir.name + cnst.material.dirSuffix, convDir)
 		script.run()
 	}
 }

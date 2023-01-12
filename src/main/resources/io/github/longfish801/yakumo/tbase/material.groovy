@@ -4,16 +4,11 @@
  * Copyright (C) io.github.longfish801 All Rights Reserved.
  */
 
-load {
-	material 'tbase', 'ttext'
-}
-
 // HTML形式へ変換するための資材を設定します
 material {
 	// clmapスクリプトを設定します
-	clmap grope('thtml/htmlize.tpac')
-	clmap grope('thtml/thtml.tpac')
+	clmap grope('tbase/util.tpac')
 	
-	// テンプレートを設定します
-	template 'default', grope('thtml/default.html')
+	// テンプレート利用を大域変数としてバインドします
+	clmapProp '/util', 'templateHandler', templateHandler
 }

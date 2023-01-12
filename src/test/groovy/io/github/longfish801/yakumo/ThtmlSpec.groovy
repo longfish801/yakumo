@@ -5,6 +5,7 @@
  */
 package io.github.longfish801.yakumo
 
+import groovy.util.logging.Slf4j
 import io.github.longfish801.bltxt.BLtxt
 import io.github.longfish801.clmap.ClmapServer
 import io.github.longfish801.gonfig.GropedResource
@@ -18,6 +19,7 @@ import spock.lang.Unroll
  * thtml変換資材のテスト。
  * @author io.github.longfish801
  */
+@Slf4j('LOG')
 class ThtmlSpec extends Specification implements GropedResource {
 	/** 自クラス */
 	static final Class clazz = ThtmlSpec.class
@@ -41,19 +43,27 @@ class ThtmlSpec extends Specification implements GropedResource {
 		def decExpect = teaServer['dec:expect']
 		
 		// clmap文書を読みこみます
-		def clmap = new ClmapServer().soak(grope('thtml/thtml.tpac'))['clmap:thtml']
+		def clmapServer = new ClmapServer()
+		[	'tbase/util.tpac',
+			'ttext/textize.tpac',
+			'thtml/htmlize.tpac',
+			'thtml/thtml.tpac',
+		].each { clmapServer.soak(grope(it)) }
+		def clmap = clmapServer['clmap:thtml']
 		
 		// テンプレートを読みこみます
 		TemplateHandler templateHandler = new TemplateHandler()
 		templateHandler.set('default', grope('thtml/default.html'))
-		clmap.properties['resultKey'] = 'someresult'
-		clmap.properties['fprint'] = new Footprints()
-		clmap.cl('/thtml/template').properties['templateHandler'] = templateHandler
+		
+		// 大域変数を設定します
+		clmap.cl('/util').properties['templateHandler'] = templateHandler
+		clmap.cl('/util').properties['fprint'] = new Footprints()
+		clmap.cl('/util').properties['resultKey'] = 'someresult'
 		
 		// HTML化のためクロージャです
 		getHtmlized = { String parentKey, String childKey ->
 			String text = decTarget.solve("${parentKey}/${childKey}").dflt.join(System.lineSeparator())
-			return clmap.cl('htmlize#dflt').call(new BLtxt(text).root).denormalize()
+			return clmap.cl('/htmlize').call(new BLtxt(text).root).denormalize()
 		}
 		// bind変数取得のためクロージャです
 		getBind = { String parentKey, String childKey ->
@@ -103,10 +113,8 @@ class ThtmlSpec extends Specification implements GropedResource {
 		
 		where:
 		parentKey	| childKey
-		'bind'	| 'title'
 		'bind'	| 'header'
 		'bind'	| 'toc'
-		'bind'	| 'bodytext'
 		'bind'	| 'note'
 	}
 }

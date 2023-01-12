@@ -109,3 +109,7 @@ dependencies {
 
 1.1.03
 : tpac 1.1.05に対応しました。
+
+1.1.04
+: clmap 2.1.00に対応しました。
+: thtmlの clmapを複数の資材(tbase, ttext, thtml)に分割しました。

@@ -40,24 +40,24 @@ class YakumoSpec extends Specification {
 				'''.stripIndent())
 			clmap('''\
 				#! clmap:sampleClmap
-				#> map
-				#>> args
-					Map bltxtMap
-					Map appendMap
-				#>> return
-					Map binds
-				#>> closure
+				#> closure
 					fprint.info("resultKey=${resultKey}")
 					if (resultKey == 'key2') fprint.warn("resultKey=${resultKey}")
 					binds = [
 						bodytext: "[${appendMap[resultKey]}] " + bltxtMap[resultKey].root.find { it.xmlTag == 'text' }?.text
 					]
-				#> map:prepare
-				#>> args
+				#-args
+					String resultKey
 					Map bltxtMap
 					Map appendMap
-				#>> closure
+				#-return
+					Map binds
+				#> closure:prepare
 					appendMap[resultKey] = resultKey.toUpperCase()
+				#-args
+					String resultKey
+					Map bltxtMap
+					Map appendMap
 				'''.stripIndent())
 			template('default', '<h1>${bodytext}</h1>')
 		}
