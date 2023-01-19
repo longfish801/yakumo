@@ -46,6 +46,16 @@
 【項目－】
 【箇条書き－】
 
+#>> dl
+【－用語説明】
+【＝用語】甘口
+【＝説明】いちばん辛みが穏やか。子供向け。
+【＝用語】中辛
+【＝説明】中くらいの辛さ。一般的。
+【＝用語】大辛
+【＝説明】とても辛い。マニアック。
+【用語説明－】
+
 #>> column
 【－コラム】
 　日本人の四割は血液型がＯ型です。
@@ -78,6 +88,14 @@ println "This is sample code of how to hello to all of the world, which is execu
 #>> figure
 【＝画像：猫ちゃん：cutecat.png】猫ちゃん、可愛い～
 
+#>> complete
+【－変換済：html】
+<table>
+<tr><th>好きなおかず</th><th>好きなごはん</th></tr>
+<tr><td>カレー</td><td>ライス</td></tr>
+</table>
+【変換済－】
+
 #>> note
 　XML【註：XML】をHTML【註：HTML】に変換します。
 
@@ -108,9 +126,11 @@ println "This is sample code of how to hello to all of the world, which is execu
 　これは【未対応：未対応のインライン要素】です。
 
 #> bind
-#>> header
+#>> title
 【＃タイトル】円周率について
 【＃サブタイトル】著名な語呂合わせ
+
+#>> extra
 【＃公開日】2022.02.03
 【＃著者名】山田太郎
 

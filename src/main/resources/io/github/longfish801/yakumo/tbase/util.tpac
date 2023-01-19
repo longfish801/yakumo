@@ -1,15 +1,18 @@
 #! clmap:util
-#:汎用的な処理のためのクロージャを定義します。
+#: 汎用的な処理のためのクロージャを定義します。
+#-dec
+	import io.github.longfish801.yakumo.YmoConvertException
 #>
 
 #> map:log
+#: ログを出力します。
 #-args
 	String message
 	List embeddeds
 #-dec
 	import org.slf4j.LoggerFactory
 #-prefix
-	if (resultKey == null) throw new Exception("resultKeyがバインドされていません。")
+	if (resultKey == null) throw new YmoConvertException("resultKeyがバインドされていません。")
 	def LOG = LoggerFactory.getLogger('io.github.longfish801.yakumo.thtml.util')
 #>> closure:trace
 	LOG.trace("[${resultKey}] ${message}", *embeddeds)
@@ -22,11 +25,12 @@
 #>
 
 #> map:fprint
+#: 足跡からログを出力します。
 #-args
 	String message
 	List embeddeds
 #-prefix
-	if (resultKey == null) throw new Exception("resultKeyがバインドされていません。")
+	if (resultKey == null) throw new YmoConvertException("resultKeyがバインドされていません。")
 	message = String.format("[${resultKey}] ${message}", *embeddeds)
 #>> closure:trace
 	fprint.trace(message)
@@ -39,8 +43,8 @@
 #>
 
 #> closure:grep
-#:指定したタグと名前が一致するノードの各要素を callbackで変換したリストを返します。
-#:callbackは callメソッドで引数としてノードを渡せるオブジェクトを渡してください。
+#: 指定したタグと名前が一致するノードの各要素を callbackで変換したリストを返します。
+#: callbackは callメソッドで引数としてノードを渡せるオブジェクトを渡してください。
 	greped =  bltxt.grepNodes(tag, name).collect { callback.call(it) }
 #-dec
 	import io.github.longfish801.bltxt.BLtxt
@@ -54,8 +58,8 @@
 #>
 
 #> closure:lowers
-#:nodeについて metaタグ以外の下位のノードを callbackで変換したリストを返します。
-#:callbackは callメソッドで引数としてノードを渡せるオブジェクトを渡してください。
+#: nodeについて metaタグ以外の下位のノードを callbackで変換したリストを返します。
+#: callbackは callメソッドで引数としてノードを渡せるオブジェクトを渡してください。
 	lowers = node.nodes.findAll {
 		it.xmlTag != 'meta'
 	}.collect {
@@ -71,36 +75,36 @@
 #>
 
 #> closure:template
-#:フォーマットをテンプレートとして読みこみます。
-#:指定されたテンプレートキーをクロージャパスとみなしてテンプレートのフォーマットを参照します。
-#:そこからテンプレートを作成し、キャッシュします。
-#:バインド引数をテンプレートに適用した結果を返します。
-#:io.github.longfish801.yakumo.TemplateHandlerのインスタンスが
-#:大域変数templateHandlerとしてバインドされている必要があります。
+#: テンプレートを適用した結果を返します。
+#: 指定されたテンプレートのクロージャパスからフォーマットを参照します。
+#: そこからテンプレートのインスタンスを作成し、キャッシュします。
+#: バインド引数をテンプレートに適用した結果を返します。
+#: io.github.longfish801.yakumo.TemplateHandlerのインスタンスが
+#: 大域変数templateHandlerとしてバインドされている必要があります。
 	if (templateHandler == null){
-		throw new Exception("[${resultKey}] templateHandlerがバインドされていません。", exc)
+		throw new YmoConvertException("templateHandlerがバインドされていません。", exc)
 	}
 	// フォーマットをテンプレートとして読みこみます
-	if (!templateHandler.map.containsKey(templateKey)){
-		String source = clmap.referAsString(templateKey)
-		templateHandler.set(templateKey, source)
+	if (!templateHandler.map.containsKey(tmplClpath)){
+		String source = clmap.referAsString(tmplClpath)
+		templateHandler.set(tmplClpath, source)
 	}
 	// バインド引数をテンプレートを適用します
-	html = templateHandler.apply(templateKey, binds)
+	html = templateHandler.apply(tmplClpath, binds)
 #-args
-	String templateKey
+	String tmplClpath
 	Map binds
 #-return
 	String html
 #>
 
 #> closure:parseInt
-#:文字列を整数に変換します。
-#:変換に失敗する（NumberFormatException）場合は例外をスローします。
+#: 文字列を整数に変換します。
+#: 変換に失敗する（NumberFormatException）場合は例外をスローします。
 	try {
 		num = Integer.parseInt(numstr)
 	} catch (NumberFormatException exc){
-		throw new Exception("[${resultKey}] ${name}を整数に変換できません。半角数字を指定してください。${name}=${numstr}", exc)
+		throw new YmoConvertException("${name}を整数に変換できません。半角数字を指定してください。${name}=${numstr}", exc)
 	}
 #-args
 	String numstr

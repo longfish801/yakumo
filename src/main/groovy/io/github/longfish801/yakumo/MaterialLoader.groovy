@@ -27,6 +27,15 @@ class MaterialLoader implements GropedResource {
 	List loaded = []
 	
 	/**
+	 * コンストラクタ。
+	 * @param yakumo Yakumo
+	 * @return 自インスタンス
+	 */
+	MaterialLoader(Yakumo yakumo){
+		this.yakumo = yakumo
+	}
+	
+	/**
 	 * GroovyShellのインスタンスを取得します。<br/>
 	 * スクリプト基底クラスとして {@link DelegatingScript} を設定します。
 	 * @return GroovyShellのインスタンス

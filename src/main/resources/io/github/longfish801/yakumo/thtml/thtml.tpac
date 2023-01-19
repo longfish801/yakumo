@@ -4,11 +4,13 @@
 #> closure
 	BLtxt bltxt = bltxtMap[resultKey]
 	binds = [
-		title: clmap.cl('/textize#meta').call(bltxt, 'タイトル', '（無題）'),
-		header: clmap.cl('/thtml/bind#header').call(bltxt),
+		headTitle: clmap.cl('/htmltextize#meta').call(bltxt, 'タイトル', '（無題）'),
+		title: clmap.cl('/thtml/bind#title').call(bltxt),
+		extra: clmap.cl('/thtml/bind#extra').call(bltxt),
 		toc: clmap.cl('/thtml/bind#toc').call(bltxt),
 		bodytext: clmap.cl('/htmlize').call(bltxt.root),
 		note: clmap.cl('/thtml/bind#note').call(bltxt),
+		navi: clmap.cl("/thtml/navi#${resultKey}").call(resultKey, appendMap['order']),
 	]
 #-dec
 	import io.github.longfish801.bltxt.BLtxt
@@ -33,52 +35,70 @@
 #-return
 	String html
 #-prefix
+	Closure htmlizerMeta = { String name, String dflt ->
+		return clmap.cl('/htmlize#meta').call(bltxt, name, dflt)
+	}
 	def templater = clmap.cl('/util#template')
 	String templateKey = "${clmap.path}/data:template#"
+#>> config
+extra {
+	targets = [ '公開日', '著者名' ]
+}
 #>> data:template
-#-header
-<div class="col-lg-8">
+#-サブタイトル <div id="subtitle">${text}</div>
+#-title
 <h1>${title}</h1>
-<% if (!subtitle.empty){ %><div id="subtitle">${subtitle}</div><% } %>
-</div>
-<% if (!pubdate.empty || !author.empty){ %><div class="col-lg-4 text-end">
-<% if (!pubdate.empty){ %><div id="pubdate">公開日 ${pubdate}</div><% } %>
-<% if (!author.empty){ %><div id="author">${author}</div><% } %>
-</div><% } %>
+${subtitle}
+#-公開日 <li>公開日 ${text}</li>
+#-著者名 <li>${text}</li>
 #-toc <li class="nav-item toc_h${level}"><a href="#id${id}" class="nav-link">${text}</a></li>
 #-note
 <dt><a name="t${id}" href="#f${id}">[*${id}]</a></dt>
 <dd>${text}</dd>
-#>> closure:header
-	Closure htmlizerMeta = { String name, String dflt ->
-		return clmap.cl('/htmlize#meta').call(bltxt, name, dflt)
+#>> closure:title
+#: タイトルのHTMLを生成します。
+	// サブタイトルのHTMLを生成します
+	String subtitle = htmlizerMeta.call('サブタイトル', '')
+	if (!subtitle.empty){
+		subtitle = templater.call(templateKey + 'サブタイトル', [text: subtitle])
 	}
-	// タイトル、サブタイトル、公開日、著者名のためのHTMLを返します
-	html = templater.call(templateKey + 'header', [
+	// タイトルのHTMLを生成します
+	html = templater.call(templateKey + 'title', [
 		title: htmlizerMeta.call('タイトル', '（無題）'),
-		subtitle: htmlizerMeta.call('サブタイトル', ''),
-		pubdate: htmlizerMeta.call('公開日', ''),
-		author: htmlizerMeta.call('著者名', ''),
+		subtitle: subtitle,
 	])
+#>> closure:extra
+#: 付帯情報のHTMLを生成します。
+	// 付帯情報の各要素についてHTMLを生成します
+	List extras = []
+	def config = clmap.solve("${clmap.path}/config").config()
+	config.extra.targets.each {
+		String extra = htmlizerMeta.call(it, '')
+		if (!extra.empty){
+			extras << templater.call(templateKey + it, [text: extra])
+		}
+	}
+	// 付帯情報のHTMLを生成します
+	html = extras.join(System.lineSeparator())
 #>> closure:toc
-	// 目次を生成します
+#: 目次のHTMLを生成します。
 	List list = []
 	bltxt.grepNodes('block', '見出し').each { def node ->
 		int level = clmap.cl('/htmlize/headline#level').call(node)
 		list << templater.call(templateKey + 'toc', [
-			text: clmap.cl('/textize').call(node),
+			text: clmap.cl('/htmltextize').call(node),
 			level: level,
 			id: "${level}_${node.serialNo}"
 		])
 	}
 	html = list.join(System.lineSeparator())
 #>> closure:note
+#: 註記のHTMLを生成します。
 	// 註のノードと、そのキーを収集します
 	List noteList = bltxt.grepNodes('inline', '註')
 	List noteKeys = []
 	noteList.each { noteKeys << it.attrs[0] }
 	if (noteKeys.size() == 0) return ''
-	
 	// 註記のノードと、そのキーを収集します
 	List cmntList = bltxt.grepNodes('meta', '註記')
 	List cmntKeys = []
@@ -87,7 +107,6 @@
 		cmntKeys << it.attrs[0]
 		cmntMap[it.attrs[0]] = it
 	}
-	
 	// キーの重複や過不足をチェックします
 	if (noteKeys.unique(false).size() < noteKeys.size()){
 		Map map = [:]
@@ -105,7 +124,6 @@
 		clmap.cl('/util/fprint#warn').call("不要な註記あるいは註の記述漏れがあります。diff=%s", [diff2])
 		return ''
 	}
-	
 	// 註記を生成します
 	List list = []
 	noteKeys.eachWithIndex { String noteKey, int cnt ->
@@ -115,5 +133,59 @@
 		])
 	}
 	html = list.join(System.lineSeparator())
+#>
+
+#> map:navi
+#: ナビゲーションのHTMLを生成します。
+#-args
+	String resultKey
+	List order
+#-return
+	String html
+#-dec
+	import io.github.longfish801.yakumo.YmoConvertException
+#-prefix
+	def templater = clmap.cl('/util#template')
+	String templateKey = "${clmap.path}/data:template#"
+#>> data:template
+#-upper
+<a href=".."><i class="bi bi-arrow-up-circle"></i></a>
+#-index
+<a href="index.html"><i class="bi bi-arrow-up-circle"></i></a>
+#-middle
+<a href="${back}"><i class="bi bi-arrow-left-circle"></i></a>
+<a href="index.html#toc"><i class="bi bi-arrow-up-circle"></i></a>
+<a href="${next}"><i class="bi bi-arrow-right-circle"></i></a>
+#-first
+<a href="index.html#toc"><i class="bi bi-arrow-up-circle"></i></a>
+<a href="${next}"><i class="bi bi-arrow-right-circle"></i></a>
+#-last
+<a href="${back}"><i class="bi bi-arrow-left-circle"></i></a>
+<a href="index.html#toc"><i class="bi bi-arrow-up-circle"></i></a>
+#>> closure
+	if (order == null){
+		return templater.call(templateKey + 'index', [:])
+	}
+	int idx = order.indexOf("${resultKey}.html" as String)
+	if (idx < 0) throw new YmoConvertException("変換結果のファイル名がリストにありません resultKey=${resultKey}, order=${order}")
+	switch (idx){
+		case 0:
+			html = templater.call(templateKey + 'first', [
+				next: order[idx + 1],
+			])
+			break
+		case { it == order.size() - 1 }:
+			html = templater.call(templateKey + 'last', [
+				back: order[idx - 1],
+			])
+			break
+		default:
+			html = templater.call(templateKey + 'middle', [
+				back: order[idx - 1],
+				next: order[idx + 1],
+			])
+	}
+#>> closure:index
+	html = templater.call(templateKey + 'upper', [:])
 #>
 

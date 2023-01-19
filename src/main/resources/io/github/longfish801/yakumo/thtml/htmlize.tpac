@@ -4,7 +4,7 @@
 #>
 
 #> closure
-#:BLNodeをHTML化して返します。
+#: BLNodeをHTML化して返します。
 	html = clmap.cl("node#${node.xmlTag}").call(node)
 #-args
 	BLNode node
@@ -13,6 +13,8 @@
 #>
 
 #> closure:meta
+#: 指定したBLtxt文書内から指定した名前の metaタグを抽出し、
+#: それぞれテキスト化した上で改行コードで結合した結果を返します。
 	List greped = clmap.cl('/util#grep').call(bltxt, 'meta', name, clmap.cl('/htmlize'))
 	result = (greped.empty)? dflt : greped.join(System.lineSeparator())
 #-dec
@@ -49,7 +51,7 @@
 #>> closure:para
 	String parent = (node.parent.xmlTag == 'block')?
 		"${node.parent.xmlTag}_${node.parent.tag}" : node.parent.xmlTag
-	html = clmap.cl("/htmlize/parent#${parent}").call(node, lowers)
+	html = clmap.cl("/htmlize/para#${parent}").call(node, lowers)
 #>> closure:block
 	html = clmap.cl("/htmlize/block#${node.tag}").call(node, lowers)
 #>> closure:inline
@@ -58,7 +60,7 @@
 	html = lowers.join(System.lineSeparator())
 #>
 
-#> map:parent
+#> map:para
 #-args
 	BLNode node
 	List lowers
@@ -73,17 +75,19 @@
 		: '<p>' + lowers.join("<br/>" + System.lineSeparator()) + '</p>'
 #>> closure:block_見出し
 	html = lowers.join("<br/>" + System.lineSeparator())
-#>> closure:block_画像
-	html = lowers.join("<br/>" + System.lineSeparator())
 #>> closure:block_項目
+	html = lowers.join("<br/>" + System.lineSeparator())
+#>> closure:block_用語
+	html = lowers.join("<br/>" + System.lineSeparator())
+#>> closure:block_説明
+	html = lowers.join("<br/>" + System.lineSeparator())
+#>> closure:block_画像
 	html = lowers.join("<br/>" + System.lineSeparator())
 #>> closure:block_引用元
 	html = lowers.join("<br/>" + System.lineSeparator())
-#>> closure:block_生データ
-	html = lowers.join(System.lineSeparator())
-#>> closure:block_整形済
-	html = lowers.join(System.lineSeparator())
 #>> closure:block_コード
+	html = lowers.join(System.lineSeparator())
+#>> closure:block_変換済
 	html = lowers.join(System.lineSeparator())
 #>
 
@@ -103,6 +107,12 @@
 ${text}
 </ul>
 #-項目 <li>${text}</li>
+#-用語説明
+<dl>
+${text}
+</dl>
+#-用語 <dt>${text}</dt>
+#-説明 <dd>${text}</dd>
 #-コラム
 <aside class="alert alert-success" role="alert">
 <% if (title != null){ %><header class="alert-heading"><i class="bi bi-info-circle-fill"></i> ${title}</header><% } %>
@@ -127,6 +137,10 @@ ${text}
 <img src="${path}" class="img-fluid" alt="${alt}">
 <% if (text != null){ %><figcaption>${text}</figcaption><% } %>
 </figure>
+#-行範囲
+<div class="${clazz}">
+${text}
+</div>
 #>> closure
 	clmap.cl('/util/fprint#warn').call("未対応のブロック要素です。tag=%s, node=%s", [node.tag, node.toString()])
 	html = lowers.join()
@@ -140,6 +154,12 @@ ${text}
 #>> closure:箇条書き
 	html = templater.call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
 #>> closure:項目
+	html = templater.call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
+#>> closure:用語説明
+	html = templater.call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
+#>> closure:用語
+	html = templater.call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
+#>> closure:説明
 	html = templater.call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
 #>> closure:コラム
 	html = templater.call(templateKey, [
@@ -163,6 +183,13 @@ ${text}
 		path: node.attrs[1],
 		alt: node.attrs[0]
 	])
+#>> closure:変換済
+	html = (node.attrs[0] == 'html')? clmap.cl('/textize').call(node) : ''
+#>> closure:行範囲
+	html = templater.call(templateKey, [
+		text: lowers.join(lsep),
+		clazz: (node.attrs.size() > 0)? node.attrs[0] : 'base'
+	])
 #>
 
 #> map:inline
@@ -183,6 +210,7 @@ ${text}
 #-訂正 <s>${text}</s>
 #-傍点 <span class="dot">${text}</span>
 #-ルビ <ruby>${text}<rp>［</rp><rt>${ruby}</rt><rp>］</rp></ruby>
+#-範囲 <span class="${clazz}">${text}</span>
 #>> closure
 	clmap.cl('/util/fprint#warn').call("未対応のインライン要素です。tag=%s, node=%s", [node.tag, node.toString()])
 	html = (node.nodes.size() == 0)? "【${node.tag}${node.attrs.toString()}】"
@@ -211,6 +239,11 @@ ${text}
 	html = templater.call(templateKey, [
 		text: text,
 		ruby: node.attrs[0]
+	])
+#>> closure:範囲
+	html = templater.call(templateKey, [
+		text: text,
+		clazz: node.attrs[0]
 	])
 #>
 

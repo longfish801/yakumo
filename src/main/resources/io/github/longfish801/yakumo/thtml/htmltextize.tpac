@@ -1,11 +1,12 @@
-#! clmap:textize
+#! clmap:htmltextize
 #>
 
 #> closure
-#: BLNodeをテキスト化して返します。
-#: タグは無視されます。
-#: 下位にあるmeta, attrs, attrタグはテキスト化の対象外です。
-#: 直接meta, attrs, attrタグを指定した場合はテキスト化します。
+#:BLNodeをテキスト化して返します。
+#:HTML文法上の特殊文字は実体参照に置換します。
+#:titleタグ内や属性値に使用することを想定しています。
+#:下位にあるmeta, attrs, attrタグはテキスト化の対象外です。
+#:直接meta, attrs, attrタグを指定した場合はテキスト化します。
 	text = clmap.cl("node#${node.xmlTag}").call(node)
 #-args
 	BLNode node
@@ -18,7 +19,7 @@
 #> closure:meta
 #: 指定したBLtxt文書内から指定した名前の metaタグを抽出し、
 #: それぞれテキスト化した上で改行コードで結合した結果を返します。
-	List greped = clmap.cl('/util#grep').call(bltxt, 'meta', name, clmap.cl('/textize'))
+	List greped = clmap.cl('/util#grep').call(bltxt, 'meta', name, clmap.cl('/htmltextize'))
 	result = (greped.empty)? dflt : greped.join(System.lineSeparator())
 #-dec
 	import io.github.longfish801.bltxt.BLtxt
@@ -41,7 +42,7 @@
 	clmap.cl('/util/log#trace').call("textize {} tag={}", [node.xmlTag, node.tag])
 	List lowers
 	if (node.nodes != null){
-		lowers = clmap.cl('/util#lowers').call(node, clmap.cl('/textize'))
+		lowers = clmap.cl('/util#lowers').call(node, clmap.cl('/htmltextize'))
 	}
 #>> closure
 	throw new UnsupportedOperationException("未対応のタグです。xmlTag=${node.xmlTag}, node=${node.toString()}")
@@ -60,7 +61,11 @@
 #>> closure:attrs
 	text = lowers.join(System.lineSeparator())
 #>> closure:attr
-	text = node.text
+	text = StringEscapeUtils.escapeHtml4(node.text)
+#-dec
+	import org.apache.commons.text.StringEscapeUtils
 #>> closure:text
-	text = node.text
+	text = StringEscapeUtils.escapeHtml4(node.text)
+#-dec
+	import org.apache.commons.text.StringEscapeUtils
 #>

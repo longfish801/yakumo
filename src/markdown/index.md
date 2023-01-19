@@ -68,7 +68,8 @@ return writer.toString()
 
 * [Groovydoc](groovydoc/)
 * [使い方](howto.html)
-* [yakumo記法](notation.html)
+* [yakumo記法](fyakumo.html)
+* [HTML化](thtml.html)
 
 ## GitHubリポジトリ
 
@@ -113,3 +114,7 @@ dependencies {
 1.1.04
 : clmap 2.1.00に対応しました。
 : thtmlの clmapを複数の資材(tbase, ttext, thtml)に分割しました。
+
+1.2.01
+: ブロック要素として用語説明、変換済に対応しました。
+: ドキュメントをサンプル資材にあわせて構成を見直しました。

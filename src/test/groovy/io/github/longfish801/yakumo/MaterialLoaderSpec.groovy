@@ -19,7 +19,7 @@ class MaterialLoaderSpec extends Specification {
 	@Shared MaterialLoader loader
 	
 	def setup(){
-		loader = new MaterialLoader()
+		loader = new MaterialLoader(new Yakumo())
 	}
 	
 	def 'material - exception'(){

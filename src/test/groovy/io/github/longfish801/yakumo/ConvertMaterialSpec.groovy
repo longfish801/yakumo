@@ -99,13 +99,19 @@ class ConvertMaterialSpec extends Specification implements GropedResource {
 		Map bltxtMap
 		
 		when:
-		[	'tbase/util.tpac',
-			'ttext/textize.tpac',
-			'thtml/htmlize.tpac',
-			'thtml/thtml.tpac',
-		].each { material.clmap(grope(it)) }
-		material.clmapProp('/util', 'templateHandler', material.templateHandler)
-		material.template('default', grope('thtml/default.html'))
+		material.clmap('''\
+			#! clmap:thtml
+			#> closure
+				binds = [ text: bltxtMap[resultKey].toString() ]
+			#-args
+				String resultKey
+				Map bltxtMap
+				Map appendMap
+			#-return
+				Map binds
+			'''.stripIndent())
+		
+		material.template('default', '${text}')
 		writer1 = new StringWriter()
 		writer2 = new StringWriter()
 		script = new ConvertScript()
@@ -119,8 +125,8 @@ class ConvertMaterialSpec extends Specification implements GropedResource {
 		]
 		material.format(script, bltxtMap)
 		then:
-		writer1.toString().indexOf('<h2><a name="id2_1"></a>こんにちは。</h2>') > 0
-		writer2.toString().indexOf('<h3><a name="id3_1"></a>さようなら。</h3>') > 0
+		writer1.toString() == '【＝見出し】こんにちは。'
+		writer2.toString() == '【＝見出し：2】さようなら。'
 	}
 	
 	def 'format  - exception'(){

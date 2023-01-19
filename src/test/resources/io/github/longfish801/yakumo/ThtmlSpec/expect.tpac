@@ -37,6 +37,17 @@
 </ul>
 #>
 
+#>> dl
+<dl>
+<dt>甘口</dt>
+<dd>いちばん辛みが穏やか。子供向け。</dd>
+<dt>中辛</dt>
+<dd>中くらいの辛さ。一般的。</dd>
+<dt>大辛</dt>
+<dd>とても辛い。マニアック。</dd>
+</dl>
+#>
+
 #>> column
 <aside class="alert alert-success" role="alert">
 
@@ -81,6 +92,13 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 </figure>
 #>
 
+#>> complete
+<table>
+<tr><th>好きなおかず</th><th>好きなごはん</th></tr>
+<tr><td>カレー</td><td>ライス</td></tr>
+</table>
+#>
+
 #>> note
 <p>　XML<sup><a id="f1" href="#t1">*1</a></sup>をHTML<sup><a id="f2" href="#t2">*2</a></sup>に変換します。</p>
 #>
@@ -120,15 +138,14 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 #>
 
 #> bind
-#>> header
-<div class="col-lg-8">
+#>> title
 <h1>円周率について</h1>
 <div id="subtitle">著名な語呂合わせ</div>
-</div>
-<div class="col-lg-4 text-end">
-<div id="pubdate">公開日 2022.02.03</div>
-<div id="author">山田太郎</div>
-</div>
+#>
+
+#>> extra
+<li>公開日 2022.02.03</li>
+<li>山田太郎</li>
 #>
 
 #>> toc
@@ -142,4 +159,33 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 <dd>　eXtensible Markup Languageの略です。</dd>
 <dt><a name="t2" href="#f2">[*2]</a></dt>
 <dd>　Hyper Text Markup Languageの略です。</dd>
+#>
+
+#> navi
+#>> index-noorder
+<a href=".."><i class="bi bi-arrow-up-circle"></i></a>
+#>
+
+#>> some-noorder
+<a href="index.html"><i class="bi bi-arrow-up-circle"></i></a>
+#>
+
+#>> index-order
+<a href=".."><i class="bi bi-arrow-up-circle"></i></a>
+#>
+
+#>> bgn-order
+<a href="index.html#toc"><i class="bi bi-arrow-up-circle"></i></a>
+<a href="some2.html"><i class="bi bi-arrow-right-circle"></i></a>
+#>
+
+#>> mdl-order
+<a href="some1.html"><i class="bi bi-arrow-left-circle"></i></a>
+<a href="index.html#toc"><i class="bi bi-arrow-up-circle"></i></a>
+<a href="some3.html"><i class="bi bi-arrow-right-circle"></i></a>
+#>
+
+#>> end-order
+<a href="some2.html"><i class="bi bi-arrow-left-circle"></i></a>
+<a href="index.html#toc"><i class="bi bi-arrow-up-circle"></i></a>
 #>

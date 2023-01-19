@@ -17,7 +17,7 @@ class Yakumo implements GropedResource {
 	/** 自クラス */
 	static final Class clazz = Yakumo.class
 	/** MaterialLoader */
-	MaterialLoader loader = new MaterialLoader(yakumo: this)
+	MaterialLoader loader = new MaterialLoader(this)
 	/** ConvertMaterial */
 	ConvertMaterial material = new ConvertMaterial()
 	/** ConvertScript */

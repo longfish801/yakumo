@@ -7,9 +7,11 @@ package io.github.longfish801.yakumo
 
 import groovy.util.logging.Slf4j
 import io.github.longfish801.bltxt.BLtxt
+import io.github.longfish801.clmap.Clmap
 import io.github.longfish801.clmap.ClmapServer
 import io.github.longfish801.gonfig.GropedResource
 import io.github.longfish801.tpac.TpacServer
+import io.github.longfish801.yakumo.YmoConst as cnst
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Timeout
@@ -27,6 +29,8 @@ class ThtmlSpec extends Specification implements GropedResource {
 	@Shared Closure getHtmlized
 	/** bind変数取得のためクロージャ */
 	@Shared Closure getBind
+	/** ナビゲーションリンク取得のためクロージャ */
+	@Shared Closure getNavi
 	/** 期待する結果を取得するクロージャ */
 	@Shared Closure getExpect
 	
@@ -42,23 +46,15 @@ class ThtmlSpec extends Specification implements GropedResource {
 		teaServer.soak(new File(testDir, 'expect.tpac'))
 		def decExpect = teaServer['dec:expect']
 		
-		// clmap文書を読みこみます
-		def clmapServer = new ClmapServer()
-		[	'tbase/util.tpac',
-			'ttext/textize.tpac',
-			'thtml/htmlize.tpac',
-			'thtml/thtml.tpac',
-		].each { clmapServer.soak(grope(it)) }
-		def clmap = clmapServer['clmap:thtml']
-		
-		// テンプレートを読みこみます
-		TemplateHandler templateHandler = new TemplateHandler()
-		templateHandler.set('default', grope('thtml/default.html'))
-		
-		// 大域変数を設定します
-		clmap.cl('/util').properties['templateHandler'] = templateHandler
-		clmap.cl('/util').properties['fprint'] = new Footprints()
-		clmap.cl('/util').properties['resultKey'] = 'someresult'
+		// 変換資材を読み込みます
+		MaterialLoader loader = new MaterialLoader(new Yakumo())
+		loader.material('thtml')
+		Footprints fprint = new Footprints()
+		loader.yakumo.material.clmapServer.decs.values().each { Clmap clmap ->
+			clmap.properties[cnst.clmap.footprint] = fprint
+		}
+		def clmap = loader.yakumo.material.clmapServer['clmap:thtml']
+		clmap.cl('/util').properties['resultKey'] = 'ThtmlSpec'
 		
 		// HTML化のためクロージャです
 		getHtmlized = { String parentKey, String childKey ->
@@ -69,6 +65,10 @@ class ThtmlSpec extends Specification implements GropedResource {
 		getBind = { String parentKey, String childKey ->
 			String text = decTarget.solve("${parentKey}/${childKey}").dflt.join(System.lineSeparator())
 			return clmap.cl("bind#${childKey}").call(new BLtxt(text)).denormalize()
+		}
+		// ナビゲーションリンク取得のためクロージャです
+		getNavi = { String childKey, String resultKey, List order ->
+			return clmap.cl("navi#${resultKey}").call(resultKey, order).denormalize()
 		}
 		// 期待する変換結果を返すクロージャです
 		getExpect = { String parentKey, String childKey ->
@@ -88,12 +88,14 @@ class ThtmlSpec extends Specification implements GropedResource {
 		'block'	| 'spechar'
 		'block'	| 'head'
 		'block'	| 'list'
+		'block'	| 'dl'
 		'block'	| 'column'
 		'block'	| 'column:header'
 		'block'	| 'attention'
 		'block'	| 'blockquote'
 		'block'	| 'code'
 		'block'	| 'figure'
+		'block'	| 'complete'
 		'block'	| 'note'
 		'inline'	| 'link'
 		'inline'	| 'strong'
@@ -113,8 +115,25 @@ class ThtmlSpec extends Specification implements GropedResource {
 		
 		where:
 		parentKey	| childKey
-		'bind'	| 'header'
+		'bind'	| 'title'
+		'bind'	| 'extra'
 		'bind'	| 'toc'
 		'bind'	| 'note'
+	}
+	
+	@Timeout(10)
+	@Unroll
+	def 'navi'(){
+		expect:
+		getNavi(childKey, resultKey, order) == getExpect('navi', childKey)
+		
+		where:
+		childKey		| resultKey	| order
+		'index-noorder'	| 'index'	| null
+		'some-noorder'	| 'some'	| null
+		'index-order'	| 'index'	| [ 'some1.html', 'some2.html', 'some3.html' ]
+		'bgn-order'		| 'some1'	| [ 'some1.html', 'some2.html', 'some3.html' ]
+		'mdl-order'		| 'some2'	| [ 'some1.html', 'some2.html', 'some3.html' ]
+		'end-order'		| 'some3'	| [ 'some1.html', 'some2.html', 'some3.html' ]
 	}
 }

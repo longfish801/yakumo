@@ -14,29 +14,45 @@ body {
 	text-align: justify;
 	word-wrap: break-word;
 }
+p:first-child {
+	margin-top: 0rem;
+}
+p:not(:first-child) {
+	margin-top: 1.5rem;
+}
 div#subtitle {
 	font-size: 1.5rem;
 }
-div#author, div#pubdate {
-	line-height: 1.5em;
+ul#extra > li {
+	list-style-type: none;
 }
-h2, h3, h4 {
+nav#navi {
+	font-size: 2rem;
+	margin: 0.5rem 0rem;
+}
+h2, h3, h4, h5, h6 {
 	padding: 1rem 0;
 }
-nav > ul li {
+ul#toc > li {
 	line-height: 1.5em;
 }
 li.toc_h2 {
 	margin-left: 0rem;
 }
 li.toc_h3 {
-	margin-left: 2rem;
+	margin-left: 1rem;
 }
 li.toc_h4 {
+	margin-left: 2rem;
+}
+li.toc_h5 {
+	margin-left: 3rem;
+}
+li.toc_h6 {
 	margin-left: 4rem;
 }
 blockquote {
-	padding: 1rem;
+	padding: 1.5rem 1rem 1rem;
 	background-color: #ffffcc;
 }
 blockquote > footer {
@@ -64,12 +80,6 @@ span.dot {
 }
 -->
 </style>
-<script>
-function backPage(){
-	let url = window.location.href;
-	window.location.href = (url.endsWith('/') || url.endsWith('index.html'))? '..' : 'index.html';
-}
-</script>
 <title>おいしいカレーの作り方</title>
 </head>
 <body class="container">
@@ -79,16 +89,20 @@ function backPage(){
 <h1>おいしいカレーの作り方</h1>
 <div id="subtitle">甘党にスパイスを</div>
 </div>
-<div class="col-lg-4 text-end">
-<div id="pubdate">公開日 2031.12.30</div>
 
+<div class="col-lg-4 text-end">
+<ul id="extra">
+<li>公開日 2031.12.30</li>
+</ul>
 </div>
-</header><!-- endo of row -->
+
+</header>
 
 <div class="row justify-content-center">
 
+
 <nav class="col-lg-4">
-<ul class="nav flex-column">
+<ul id="toc" class="nav flex-column">
 <li class="nav-item toc_h2"><a href="#id2_1" class="nav-link">はじめに</a></li>
 <li class="nav-item toc_h2"><a href="#id2_2" class="nav-link">おいしいカレーはまずサラダから</a></li>
 <li class="nav-item toc_h3"><a href="#id3_3" class="nav-link">カレーショップに出発進行</a></li>
@@ -97,6 +111,7 @@ function backPage(){
 <li class="nav-item toc_h2"><a href="#id2_6" class="nav-link">謝辞</a></li>
 </ul>
 </nav>
+
 
 <main class="col-lg-8">
 <aside class="alert alert-danger" role="alert">
@@ -125,7 +140,25 @@ function backPage(){
 <li>空の青さに感動したとき。</li>
 </ul>
 
-<p>　まあ、人それぞれですよね。</p>
+<p>　まあ、人それぞれですよね。<br/>
+　以下のアンケート回答はいかがでしょうか。</p>
+
+<table class="table">
+<tr><th>好きなおかず</th><th>好きなごはん</th></tr>
+<tr><td>カレー</td><td>ライス</td></tr>
+</table>
+
+<p>　なんの参考にもなりませんね。<br/>
+　カレーの辛さには以下の種類があります。</p>
+
+<dl>
+<dt>甘口</dt>
+<dd>いちばん辛みが穏やか。子供向け。</dd>
+<dt>中辛</dt>
+<dd>中くらいの辛さ。一般的。</dd>
+<dt>大辛</dt>
+<dd>とても辛い。マニアック。</dd>
+</dl>
 
 <h3><a name="id3_3"></a>カレーショップに出発進行</h3>
 
@@ -198,10 +231,11 @@ println 'Hello, Curry World!'
 </div><!-- end of row -->
 
 <footer class="row justify-content-center p-3">
-<nav class="col-lg-12 text-end">
-<a class="btn btn-primary" href="index.html" onclick="backPage();">戻る</a>
+<nav id="navi" class="col-lg-12 text-end">
+<a href="index.html"><i class="bi bi-arrow-up-circle"></i></a>
 </nav>
-</footer><!-- end of row -->
+<hr/>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 
