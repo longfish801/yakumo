@@ -1,18 +1,19 @@
 #! dec:expect
-#> block
-#>> paragraph
+#> other
+#>> 段落
 <p>　おいしいカレーを作るには隠し味が大切です。<br/>
 　隠し味にもいろいろなものがあります。</p>
 
 <p>　一般家庭で良く使われる隠し味を試してみましょう。</p>
 #>
 
-#>> spechar
+#>> 平文
 <p>　もし、あのとき&quot;あれ&quot;があったなら。<br/>
 　極上の&lt;カレー&gt;になっていたかもしれない。</p>
 #>
 
-#>> head
+#> block
+#>> 見出し
 <h2><a name="id2_1"></a>おいしいカレーの作り方</h2>
 
 <h3><a name="id3_2"></a>材料の準備</h3>
@@ -20,7 +21,7 @@
 <h4><a name="id4_3"></a>牛の飼い方</h4>
 #>
 
-#>> list
+#>> 箇条書き
 <ul>
 <li>じゃがいも</li>
 <li>ニンジン</li>
@@ -37,7 +38,7 @@
 </ul>
 #>
 
-#>> dl
+#>> 用語説明
 <dl>
 <dt>甘口</dt>
 <dd>いちばん辛みが穏やか。子供向け。</dd>
@@ -48,14 +49,21 @@
 </dl>
 #>
 
-#>> column
+#>> 画像
+<figure class="text-center">
+<img src="cutecat.png" class="img-fluid" alt="猫ちゃん">
+<figcaption>猫ちゃん、可愛い～</figcaption>
+</figure>
+#>
+
+#>> コラム
 <aside class="alert alert-success" role="alert">
 
 <p>　日本人の四割は血液型がＯ型です。</p>
 </aside>
 #>
 
-#>> column:header
+#>> コラム:小見出し
 <aside class="alert alert-success" role="alert">
 <header class="alert-heading"><i class="bi bi-info-circle-fill"></i> ８月３１日はなんの日？</header>
 <p>　８月３１日は野菜の日です。<br/>
@@ -63,14 +71,14 @@
 </aside>
 #>
 
-#>> attention
+#>> 注意
 <aside class="alert alert-danger" role="alert">
 <header class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> 中火とは</header>
 <p>　中火とは、フライパンの底に炎の先端がちょうど届くくらいの状態を指します。</p>
 </aside>
 #>
 
-#>> blockquote
+#>> 引用
 <blockquote>
 <p>　山路を登りながら、こう考えた。<br/>
 　智に働けば角が立つ。情に棹させば流される。意地を通せば窮屈だ。とかくに人の世は住みにくい。</p>
@@ -78,59 +86,62 @@
 </blockquote>
 #>
 
-#>> code
+#>> コード
 <pre>
 println &quot;Hello, World!&quot;;
 println &quot;This is sample code of how to hello to all of the world, which is executed &quot; + Date().format(&quot;yyyy-MM-dd'T'HH:mm:ss.SSSZ&quot;);
 </pre>
 #>
 
-#>> figure
-<figure class="text-center">
-<img src="cutecat.png" class="img-fluid" alt="猫ちゃん">
-<figcaption>猫ちゃん、可愛い～</figcaption>
-</figure>
-#>
-
-#>> complete
+#>> 変換済
 <table>
 <tr><th>好きなおかず</th><th>好きなごはん</th></tr>
 <tr><td>カレー</td><td>ライス</td></tr>
 </table>
 #>
 
-#>> note
-<p>　XML<sup><a id="f1" href="#t1">*1</a></sup>をHTML<sup><a id="f2" href="#t2">*2</a></sup>に変換します。</p>
+#>> 行範囲
+<div class="big">
+<p>　宵越しのカレーは美味しい。</p>
+</div>
 #>
 
 #> inline
-#>> link
+#>> 註
+<p>　XML<sup><a id="f1" href="#t1">*1</a></sup>をHTML<sup><a id="f2" href="#t2">*2</a></sup>に変換します。</p>
+#>
+
+#>> リンク
 <p>　詳しくは<a href="https://www.google.com/">ネット検索</a>してください。<br/>
 　<a href="https://www.google.com/">https://www.google.com/</a>でネット検索できます。</p>
 #>
 
-#>> strong
+#>> 重要
 <p>　間違えて<strong>自爆スイッチ</strong>を押さないでください。</p>
 #>
 
-#>> small
+#>> 補足
 <p>　もちろん本当<small>かもしれない</small>ですよ。</p>
 #>
 
-#>> strike
+#>> 訂正
 <p>　富士山の標高は<s>３７７７メートル</s>３７７６メートルです。</p>
 #>
 
-#>> verinhori
+#>> 縦中横
 <p>　シェイクスピア全集の第10巻に記述されています。</p>
 #>
 
-#>> dot
+#>> 傍点
 <p>　まだ<span class="dot">午前三時</span>じゃないか。</p>
 #>
 
-#>> ruby
+#>> ルビ
 <p>　<ruby>出納<rp>［</rp><rt>すいとう</rt><rp>］</rp></ruby>係は言った。</p>
+#>
+
+#>> 範囲
+<p>　今夜は<span class="small">チキンカレー</span>よ。</p>
 #>
 
 #>> nosuch

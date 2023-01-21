@@ -442,10 +442,33 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 </table>
 ```
 
-### 註、註記
+### 行範囲
+
+　特殊な表示をしたい行の範囲を表します。
+　属性には範囲の種類を指定してください。
+
+```
+【－行範囲：big】
+　宵越しのカレーは美味しい。
+【行範囲－】
+```
+
+　以下のHTMLに変換します。
+　スタイルシートと組み合わせることで期待する表示ができます。
+　class属性の値には属性に指定した値が使われます。
+
+```
+<div class="big">
+<p>　宵越しのカレーは美味しい。</p>
+</div>
+```
+
+## インライン要素
+### 註
 
 　註は文中タグで記述してください。
 　一番目の属性に、紐付けのため共通する文字列を指定してください。
+　註に対する註記の書き方については [註記](#註記) を参照してください。
 
 ```
 　XML【註：XML】をHTML【註：HTML】に変換します。
@@ -457,7 +480,6 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 <p>　XML<sup><a id="f1" href="#t1">*1</a></sup>をHTML<sup><a id="f2" href="#t2">*2</a></sup>に変換します。</p>
 ```
 
-## インライン要素
 ### リンク
 
 　以下のbltxt文書があったとします。
@@ -557,4 +579,21 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 
 ```
 <p>　<ruby>出納<rp>［</rp><rt>すいとう</rt><rp>］</rp></ruby>係は言った。</p>
+```
+
+### 範囲
+
+　行内で特殊な表示をしたい範囲を表します。
+　属性には範囲の種類を指定してください。
+
+```
+　今夜は【｜範囲：small】チキンカレー【範囲｜】よ。
+```
+
+　以下のHTMLに変換します。
+　スタイルシートと組み合わせることで期待する表示ができます。
+　class属性の値には属性に指定した値が使われます。
+
+```
+<p>　今夜は<span class="small">チキンカレー</span>よ。</p>
 ```
