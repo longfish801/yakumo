@@ -7,6 +7,7 @@ package io.github.longfish801.yakumo
 
 import groovy.util.logging.Slf4j
 import io.github.longfish801.gonfig.GropedResource
+import io.github.longfish801.yakumo.YmoConst as cnst
 
 /**
  * DSLに基づき、テキストを変換します。
@@ -38,7 +39,7 @@ class Yakumo implements GropedResource {
 	def run(File file, Map vars){
 		DelegatingScript script = (DelegatingScript) loader.shell.parse(file)
 		script.setDelegate(this)
-		script.setProperty('scriptFile', file)
+		script.setProperty(cnst.convert.scriptFile, file)
 		vars?.each { script.setProperty(it.key, it.value) }
 		return script.run()
 	}

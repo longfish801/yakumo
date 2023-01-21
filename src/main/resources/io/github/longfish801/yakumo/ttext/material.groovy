@@ -11,5 +11,5 @@ load {
 // テキスト形式へ変換するための資材を設定します
 material {
 	// clmapスクリプトを設定します
-	clmap grope('ttext/textize.tpac')
+	clmap grope("${convName}/textize.tpac")
 }

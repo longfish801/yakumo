@@ -67,8 +67,9 @@ class MaterialLoader implements GropedResource {
 	}
 	
 	/**
-	 * 変換資材（リソース）を設定します。
-	 * @param convName 資材スクリプトの格納フォルダへのリソースパス
+	 * 変換資材（リソース）を設定します。<br/>
+	 * プロパティとして変換資材名を名前 "convName"で設定します。
+	 * @param convName 変換資材名（資材スクリプトの格納フォルダへのリソースパス）
 	 * @throws YmoConvertException リソースパスに相当する変換資材がありません。
 	 */
 	void material(String convName){
@@ -77,11 +78,25 @@ class MaterialLoader implements GropedResource {
 		if (url == null) throw new YmoConvertException(String.format(msgs.exc.noSuchMaterialResource, path))
 		DelegatingScript script = (DelegatingScript) shell.parse(url.toURI())
 		script.setDelegate(this.yakumo)
+		// すでにプロパティが設定済であれば既存の値を保存しておきます
+		String orgConvName
+		try {
+			orgConvName = script.getProperty(cnst.material.convName)
+		} catch (MissingPropertyException exc){
+			// なにもしません
+		}
+		script.setProperty(cnst.material.convName, convName)
+		// 資材スクリプトを実行します
 		script.run()
+		// プロパティを既存の値に戻します
+		if (orgConvName != null){
+			script.setProperty(cnst.material.convName, orgConvName)
+		}
 	}
 	
 	/**
-	 * 資材スクリプト（ファイル）を設定します。
+	 * 資材スクリプト（ファイル）を設定します。<br/>
+	 * プロパティとして資材スクリプトの格納フォルダを名前 "convDir"で設定します。
 	 * @param convDir 資材スクリプトの格納フォルダ
 	 * @throws YmoConvertException 資材スクリプトの格納フォルダに相当する変換資材がありません。
 	 */
@@ -90,7 +105,19 @@ class MaterialLoader implements GropedResource {
 		if (!file.canRead()) throw new YmoConvertException(String.format(msgs.exc.noSuchMaterialFile, file.absolutePath))
 		DelegatingScript script = (DelegatingScript) shell.parse(file)
 		script.setDelegate(this.yakumo)
-		script.setProperty(convDir.name + cnst.material.dirSuffix, convDir)
+		// すでにプロパティが設定済であれば既存の値を保存しておきます
+		String orgConvDir
+		try {
+			orgConvDir = script.getProperty(cnst.material.convDir)
+		} catch (MissingPropertyException exc){
+			// なにもしません
+		}
+		script.setProperty(cnst.material.convDir, convDir)
+		// 資材スクリプトを実行します
 		script.run()
+		// プロパティを既存の値に戻します
+		if (orgConvDir != null){
+			script.setProperty(cnst.material.convDir, orgConvDir)
+		}
 	}
 }

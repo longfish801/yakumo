@@ -15,8 +15,16 @@ clmap {
 material {
 	// ファイル名
 	fileName = 'material.groovy'
-	// 資材スクリプトの格納フォルダの変数名の接尾辞
-	dirSuffix = 'Dir'
+	// 変換資材名の変数名
+	convName = 'convName'
+	// 資材スクリプトがあるフォルダの変数名
+	convDir = 'convDir'
+}
+
+// 変換スクリプト
+convert {
+	// 変換スクリプトファイルの変数名
+	scriptFile = 'scriptFile'
 }
 
 // 変換対象

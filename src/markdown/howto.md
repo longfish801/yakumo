@@ -76,9 +76,11 @@ materialメソッド
 
 　資材スクリプトでは以下のバインド変数を利用できます。
 
-${convName}Dir
+convName
+: 変換資材名。変換資材がリソースの場合のみ。
+
+convDir
 : 資材スクリプト格納フォルダ（java.io.File）。変換資材がフォルダの場合のみ。
-: ${convName}は変換資材名に置き換えること。
 
 ### loadメソッド
 
@@ -133,9 +135,10 @@ relatedメソッド
 ### バインド変数
 
 　変換スクリプトでは以下のバインド変数を利用できます。
+　[Yakumo#runメソッド](groovydoc/io/github/longfish801/yakumo/Yakumo.html#run(java.io.File,%20java.util.Map)) に引数 varsで渡した変数名、変数値もバインドされます。
 
-script
-: 変換スクリプト（java.io.File）
+scriptFile
+: 変換スクリプトファイル（java.io.File）
 
 ### scriptメソッド
 
