@@ -5,6 +5,7 @@
  */
 package io.github.longfish801.yakumo
 
+import groovy.util.logging.Slf4j
 import io.github.longfish801.bltxt.BLtxt
 import io.github.longfish801.gonfig.GropedResource
 import io.github.longfish801.yakumo.YmoMsg as msgs
@@ -16,6 +17,7 @@ import spock.lang.Specification
  * ConvertMaterialのテスト。
  * @author io.github.longfish801
  */
+@Slf4j('LOG')
 class ConvertMaterialSpec extends Specification implements GropedResource {
 	/** 自クラス */
 	static final Class clazz = ConvertMaterialSpec.class
@@ -35,8 +37,8 @@ class ConvertMaterialSpec extends Specification implements GropedResource {
 		
 		when:
 		material.clmap(script)
-		material.clmapProp('thtml', 'boo', 'foo')
-		material.clmapProp('thtml', 'some', 'goo', 'gaa')
+		material.clmapProp('/thtml', 'boo', 'foo')
+		material.clmapProp('/thtml/some', 'goo', 'gaa')
 		then:
 		material.clmapServer['clmap:thtml'].properties.boo == 'foo'
 		material.clmapServer['clmap:thtml'].cl('some').properties.goo == 'gaa'
@@ -47,7 +49,7 @@ class ConvertMaterialSpec extends Specification implements GropedResource {
 		IllegalArgumentException exc
 		
 		when:
-		material.clmapProp('thtml', 'nosuch', 'boo', 'foo')
+		material.clmapProp('/thtml/nosuch', 'boo', 'foo')
 		then:
 		exc = thrown(IllegalArgumentException)
 		exc.message == String.format(msgs.exc.noClmap, '/thtml/nosuch')
@@ -97,9 +99,19 @@ class ConvertMaterialSpec extends Specification implements GropedResource {
 		Map bltxtMap
 		
 		when:
-		material.template('default', grope('thtml/default.html'))
-		material.clmap(grope('thtml/thtml.tpac'))
-		material.clmapProp('thtml', 'template', 'templateHandler', material.templateHandler)
+		material.clmap('''\
+			#! clmap:thtml
+			#> closure
+				binds = [ text: bltxtMap[resultKey].toString() ]
+			#-args
+				String resultKey
+				Map bltxtMap
+				Map appendMap
+			#-return
+				Map binds
+			'''.stripIndent())
+		
+		material.template('default', '${text}')
 		writer1 = new StringWriter()
 		writer2 = new StringWriter()
 		script = new ConvertScript()
@@ -113,8 +125,8 @@ class ConvertMaterialSpec extends Specification implements GropedResource {
 		]
 		material.format(script, bltxtMap)
 		then:
-		writer1.toString().indexOf('<h2><a name="id2_1"></a>こんにちは。</h2>') > 0
-		writer2.toString().indexOf('<h3><a name="id3_1"></a>さようなら。</h3>') > 0
+		writer1.toString() == '【＝見出し】こんにちは。'
+		writer2.toString() == '【＝見出し：2】さようなら。'
 	}
 	
 	def 'format  - exception'(){
@@ -132,7 +144,7 @@ class ConvertMaterialSpec extends Specification implements GropedResource {
 		material.format(script, [:])
 		then:
 		exc = thrown(IllegalStateException)
-		exc.message == 'java.lang.IllegalStateException: ' + String.format(msgs.exc.noClmapForResult, 'key1', 'noSuch')
+		exc.message == String.format(msgs.exc.noClmapForResult, 'key1', 'noSuch')
 		
 		when:
 		material.clmap('#! clmap:thtml')

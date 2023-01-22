@@ -14,7 +14,7 @@ plugins {
 
 defaultTasks 'fix'
 group = 'io.github.longfish801'
-version = '1.2.00'
+version = '1.3.00'
 
 // mavenローカルリポジトリへのパスが設定されているか確認します
 if (System.properties.mavenPath == null || System.properties.mavenPath.empty){
@@ -29,9 +29,9 @@ repositories {
 
 dependencies {
 	api 'io.github.longfish801:bltxt:1.2.00'
-	api 'io.github.longfish801:clmap:1.2.00'
+	api 'io.github.longfish801:clmap:2.1.00'
 	api 'io.github.longfish801:gonfig:1.1.00'
-	api 'io.github.longfish801:switem:1.2.00'
+	api 'io.github.longfish801:switem:1.3.00'
 	implementation 'commons-io:commons-io:2.11.0'
 	implementation 'org.apache.commons:commons-lang3:3.12.0'
 	implementation 'org.apache.commons:commons-text:1.9'
@@ -108,61 +108,3 @@ tasks.register('publishDoc'){
 tasks.register('release'){
 	dependsOn 'publish', 'publishDoc'
 }
-
-jacocoTestReport {
-	reports { html.destination file("${buildDir}/jacocoHtml") }
-}
-jacocoTestReport.dependsOn 'test'
-
-groovydoc {
-	overviewText = resources.text.fromFile('src/main/resources/overview.html')
-	[
-		'http://docs.oracle.com/javase/8/docs/api/' : 'java.,javax.,org.xml.',
-		'https://docs.groovy-lang.org/latest/html/api/' : 'groovy.,org.codehaus.groovy.'
-	].each { link(it.key, it.value) }
-}
-
-generateHtml {
-	inputDirectory = file('src/markdown')
-	headerHtmlFile = file('src/markdown/template/header.html')
-	footerHtmlFile = file('src/markdown/template/footer.html')
-	pegdownExtensions = 'TOC,ANCHORLINKS,EXTANCHORLINKS,HARDWRAPS,FENCED_CODE_BLOCKS,DEFINITIONS,TABLES'
-}
-
-publishing {
-	publications {
-		mavenJava(MavenPublication) { from components.java }
-	}
-	repositories {
-		maven { url mavenPath }
-	}
-}
-
-// サンプルを実行します
-task execSamples(type: JavaExec) {
-	mainClass = 'Sample'
-	classpath = sourceSets.test.runtimeClasspath
-}
-
-// フィックスします
-task fix(dependsOn: [clean, jacocoTestReport, execSamples, groovydoc, generateHtml]){ }
-
-// ドキュメントをローカルのmavenリポジトリに出力します
-task deleteDoc(type: Delete){
-	delete "${mavenPath}/${project.name}"
-}
-task publishDoc(dependsOn: [deleteDoc, groovydoc, generateHtml]){
-	doLast {
-		copy {
-			from 'build/html'
-			into "${mavenPath}/${project.name}"
-		}
-		copy {
-			from 'build/docs/groovydoc'
-			into "${mavenPath}/${project.name}/groovydoc"
-		}
-	}
-}
-
-// リリースします
-task release(dependsOn: [publish, publishDoc]){ }

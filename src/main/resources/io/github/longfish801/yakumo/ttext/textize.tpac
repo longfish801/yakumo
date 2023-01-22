@@ -1,0 +1,66 @@
+#! clmap:textize
+#>
+
+#> closure
+#: BLNodeをテキスト化して返します。
+#: タグは無視されます。
+#: 下位にあるmeta, attrs, attrタグはテキスト化の対象外です。
+#: 直接meta, attrs, attrタグを指定した場合はテキスト化します。
+	text = clmap.cl("node#${node.xmlTag}").call(node)
+#-args
+	BLNode node
+#-dec
+	import io.github.longfish801.bltxt.node.BLNode
+#-return
+	String text
+#>
+
+#> closure:meta
+#: 指定したBLtxt文書内から指定した名前の metaタグを抽出し、
+#: それぞれテキスト化した上で改行コードで結合した結果を返します。
+	List greped = clmap.cl('/util#grep').call(bltxt, 'meta', name, clmap.cl('/textize'))
+	result = (greped.empty)? dflt : greped.join(System.lineSeparator())
+#-dec
+	import io.github.longfish801.bltxt.BLtxt
+#-args
+	BLtxt bltxt
+	String name
+	String dflt
+#-return
+	String result
+#>
+
+#> map:node
+#-dec
+	import io.github.longfish801.bltxt.node.BLNode
+#-args
+	BLNode node
+#-return
+	String text
+#-prefix
+	clmap.cl('/util/log#trace').call("textize {} tag={}", [node.xmlTag, node.tag])
+	List lowers
+	if (node.nodes != null){
+		lowers = clmap.cl('/util#lowers').call(node, clmap.cl('/textize'))
+	}
+#>> closure
+	throw new UnsupportedOperationException("未対応のタグです。xmlTag=${node.xmlTag}, node=${node.toString()}")
+#>> closure:bltxt
+	text = lowers.join(System.lineSeparator())
+#>> closure:block
+	text = lowers.join(System.lineSeparator())
+#>> closure:para
+	text = lowers.join(System.lineSeparator())
+#>> closure:meta
+	text = lowers.join(System.lineSeparator())
+#>> closure:line
+	text = lowers.join()
+#>> closure:inline
+	text = lowers.join()
+#>> closure:attrs
+	text = lowers.join(System.lineSeparator())
+#>> closure:attr
+	text = node.text
+#>> closure:text
+	text = node.text
+#>

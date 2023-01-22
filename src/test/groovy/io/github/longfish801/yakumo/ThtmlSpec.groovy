@@ -5,10 +5,13 @@
  */
 package io.github.longfish801.yakumo
 
+import groovy.util.logging.Slf4j
 import io.github.longfish801.bltxt.BLtxt
+import io.github.longfish801.clmap.Clmap
 import io.github.longfish801.clmap.ClmapServer
 import io.github.longfish801.gonfig.GropedResource
 import io.github.longfish801.tpac.TpacServer
+import io.github.longfish801.yakumo.YmoConst as cnst
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Timeout
@@ -18,6 +21,7 @@ import spock.lang.Unroll
  * thtml変換資材のテスト。
  * @author io.github.longfish801
  */
+@Slf4j('LOG')
 class ThtmlSpec extends Specification implements GropedResource {
 	/** 自クラス */
 	static final Class clazz = ThtmlSpec.class
@@ -25,6 +29,8 @@ class ThtmlSpec extends Specification implements GropedResource {
 	@Shared Closure getHtmlized
 	/** bind変数取得のためクロージャ */
 	@Shared Closure getBind
+	/** ナビゲーションリンク取得のためクロージャ */
+	@Shared Closure getNavi
 	/** 期待する結果を取得するクロージャ */
 	@Shared Closure getExpect
 	
@@ -40,25 +46,29 @@ class ThtmlSpec extends Specification implements GropedResource {
 		teaServer.soak(new File(testDir, 'expect.tpac'))
 		def decExpect = teaServer['dec:expect']
 		
-		// clmap文書を読みこみます
-		def clmap = new ClmapServer().soak(grope('thtml/thtml.tpac'))['clmap:thtml']
-		
-		// テンプレートを読みこみます
-		TemplateHandler templateHandler = new TemplateHandler()
-		templateHandler.set('default', grope('thtml/default.html'))
-		clmap.properties['resultKey'] = 'someresult'
-		clmap.properties['fprint'] = new Footprints()
-		clmap.cl('/thtml/template').properties['templateHandler'] = templateHandler
+		// 変換資材を読み込みます
+		MaterialLoader loader = new MaterialLoader(new Yakumo())
+		loader.material('thtml')
+		Footprints fprint = new Footprints()
+		loader.yakumo.material.clmapServer.decs.values().each { Clmap clmap ->
+			clmap.properties[cnst.clmap.footprint] = fprint
+		}
+		def clmap = loader.yakumo.material.clmapServer['clmap:thtml']
+		clmap.cl('/util').properties['resultKey'] = 'ThtmlSpec'
 		
 		// HTML化のためクロージャです
 		getHtmlized = { String parentKey, String childKey ->
 			String text = decTarget.solve("${parentKey}/${childKey}").dflt.join(System.lineSeparator())
-			return clmap.cl('htmlize#dflt').call(new BLtxt(text).root).denormalize()
+			return clmap.cl('/htmlize').call(new BLtxt(text).root).denormalize()
 		}
 		// bind変数取得のためクロージャです
 		getBind = { String parentKey, String childKey ->
 			String text = decTarget.solve("${parentKey}/${childKey}").dflt.join(System.lineSeparator())
 			return clmap.cl("bind#${childKey}").call(new BLtxt(text)).denormalize()
+		}
+		// ナビゲーションリンク取得のためクロージャです
+		getNavi = { String childKey, String resultKey, List order ->
+			return clmap.cl("navi#${resultKey}").call(resultKey, order).denormalize()
 		}
 		// 期待する変換結果を返すクロージャです
 		getExpect = { String parentKey, String childKey ->
@@ -74,24 +84,28 @@ class ThtmlSpec extends Specification implements GropedResource {
 		
 		where:
 		parentKey	| childKey
-		'block'	| 'paragraph'
-		'block'	| 'spechar'
-		'block'	| 'head'
-		'block'	| 'list'
-		'block'	| 'column'
-		'block'	| 'column:header'
-		'block'	| 'attention'
-		'block'	| 'blockquote'
-		'block'	| 'code'
-		'block'	| 'figure'
-		'block'	| 'note'
-		'inline'	| 'link'
-		'inline'	| 'strong'
-		'inline'	| 'small'
-		'inline'	| 'strike'
-		'inline'	| 'verinhori'
-		'inline'	| 'dot'
-		'inline'	| 'ruby'
+		'other'	| '平文'
+		'other'	| '段落'
+		'block'	| '見出し'
+		'block'	| '箇条書き'
+		'block'	| '用語説明'
+		'block'	| '画像'
+		'block'	| 'コラム'
+		'block'	| 'コラム:小見出し'
+		'block'	| '注意'
+		'block'	| '引用'
+		'block'	| 'コード'
+		'block'	| '変換済'
+		'block'	| '行範囲'
+		'inline'	| '註'
+		'inline'	| 'リンク'
+		'inline'	| '重要'
+		'inline'	| '補足'
+		'inline'	| '訂正'
+		'inline'	| '縦中横'
+		'inline'	| '傍点'
+		'inline'	| 'ルビ'
+		'inline'	| '範囲'
 		'inline'	| 'nosuch'
 	}
 	
@@ -104,9 +118,24 @@ class ThtmlSpec extends Specification implements GropedResource {
 		where:
 		parentKey	| childKey
 		'bind'	| 'title'
-		'bind'	| 'header'
+		'bind'	| 'extra'
 		'bind'	| 'toc'
-		'bind'	| 'bodytext'
 		'bind'	| 'note'
+	}
+	
+	@Timeout(10)
+	@Unroll
+	def 'navi'(){
+		expect:
+		getNavi(childKey, resultKey, order) == getExpect('navi', childKey)
+		
+		where:
+		childKey		| resultKey	| order
+		'index-noorder'	| 'index'	| null
+		'some-noorder'	| 'some'	| null
+		'index-order'	| 'index'	| [ 'some1.html', 'some2.html', 'some3.html' ]
+		'bgn-order'		| 'some1'	| [ 'some1.html', 'some2.html', 'some3.html' ]
+		'mdl-order'		| 'some2'	| [ 'some1.html', 'some2.html', 'some3.html' ]
+		'end-order'		| 'some3'	| [ 'some1.html', 'some2.html', 'some3.html' ]
 	}
 }
