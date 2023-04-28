@@ -310,7 +310,7 @@
 
 ```
 <figure class="text-center">
-<img src="cutecat.png" class="img-fluid" alt="猫ちゃん">
+<a href="cutecat.png"><img src="cutecat.png" class="img-fluid" alt="猫ちゃん"></a>
 <figcaption>猫ちゃん、可愛い～</figcaption>
 </figure>
 ```
@@ -496,6 +496,21 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 　<a href="https://www.google.com/">https://www.google.com/</a>でネット検索できます。</p>
 ```
 
+### 注目
+
+　以下のbltxt文書があったとします。
+
+```
+　危ない！ それは【｜注目】自爆スイッチ【注目｜】だ！
+```
+
+　以下のHTMLに変換します。
+　ブラウザでの表示は .attentionセレクタの定義に依存します。
+
+```
+<p>　危ない！ それは<span class="attention">自爆スイッチ</span>だ！</p>
+```
+
 ### 重要
 
 　以下のbltxt文書があったとします。
@@ -505,6 +520,7 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 ```
 
 　以下のHTMLに変換します。
+　一般的なブラウザでは太字で表示されます。
 
 ```
 <p>　間違えて<strong>自爆スイッチ</strong>を押さないでください。</p>
@@ -519,9 +535,25 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 ```
 
 　以下のHTMLに変換します。
+　一般的なブラウザでは小さめの文字で表示されます。
 
 ```
 <p>　もちろん本当<small>かもしれない</small>ですよ。</p>
+```
+
+### 特記
+
+　以下のbltxt文書があったとします。
+
+```
+　まあ、真実は【｜特記】in the bush【特記｜】ですが。
+```
+
+　以下のHTMLに変換します。
+　一般的なブラウザでは斜体で表示されます。
+
+```
+<p>　まあ、真実は<i>in the bush</i>ですが。</p>
 ```
 
 ### 訂正
@@ -533,9 +565,40 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 ```
 
 　以下のHTMLに変換します。
+　一般的なブラウザでは打消し線で表示されます。
 
 ```
 <p>　富士山の標高は<s>３７７７メートル</s>３７７６メートルです。</p>
+```
+
+### 上付き
+
+　以下のbltxt文書があったとします。
+
+```
+　まあね、大人【｜上付き】2【上付き｜】があるんですよ。
+```
+
+　以下のHTMLに変換します。
+　一般的なブラウザでは上付き文字で表示されます。
+
+```
+<p>　まあね、大人<sup>2</sup>があるんですよ。</p>
+```
+
+### 下付き
+
+　以下のbltxt文書があったとします。
+
+```
+　人生にはH【｜下付き】2【下付き｜】Oが不可欠だ。
+```
+
+　以下のHTMLに変換します。
+　一般的なブラウザでは下付き文字で表示されます。
+
+```
+<p>　人生にはH<sub>2</sub>Oが不可欠だ。</p>
 ```
 
 ### 縦中横
@@ -561,7 +624,7 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 ```
 
 　以下のHTMLに変換します。
-　傍点のためのHTMLタグは無いため、spanタグを利用しています。
+　ブラウザでの表示は .dotセレクタの定義に依存します。
 
 ```
 <p>　まだ<span class="dot">午前三時</span>じゃないか。</p>
@@ -576,6 +639,7 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 ```
 
 　以下のHTMLに変換します。
+　一般的なブラウザではルビとして表示されます。
 
 ```
 <p>　<ruby>出納<rp>［</rp><rt>すいとう</rt><rp>］</rp></ruby>係は言った。</p>
@@ -592,7 +656,7 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 
 　以下のHTMLに変換します。
 　スタイルシートと組み合わせることで期待する表示ができます。
-　class属性の値には属性に指定した値が使われます。
+　属性に指定した値は class属性に使われます。
 
 ```
 <p>　今夜は<span class="small">チキンカレー</span>よ。</p>

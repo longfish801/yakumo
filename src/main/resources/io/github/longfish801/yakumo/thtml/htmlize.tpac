@@ -134,7 +134,7 @@ ${text}
 </pre>
 #-画像
 <figure class="text-center">
-<img src="${path}" class="img-fluid" alt="${alt}">
+<a href="${path}"><img src="${path}" class="img-fluid" alt="${alt}"></a>
 <% if (text != null){ %><figcaption>${text}</figcaption><% } %>
 </figure>
 #-行範囲
@@ -205,9 +205,13 @@ ${text}
 #>> data:template
 #-註 <sup><a id="f${id}" href="#t${id}">*${id}</a></sup>
 #-リンク <a href="${url}">${text}</a>
+#-注目 <span class="attention">${text}</span>
 #-重要 <strong>${text}</strong>
 #-補足 <small>${text}</small>
+#-特記 <i>${text}</i>
 #-訂正 <s>${text}</s>
+#-上付き <sup>${text}</sup>
+#-下付き <sub>${text}</sub>
 #-傍点 <span class="dot">${text}</span>
 #-ルビ <ruby>${text}<rp>［</rp><rt>${ruby}</rt><rp>］</rp></ruby>
 #-範囲 <span class="${clazz}">${text}</span>
@@ -225,11 +229,19 @@ ${text}
 		text: text,
 		url: node.attrs[0]
 	])
+#>> closure:注目
+	html = templater.call(templateKey, [ text: text ])
 #>> closure:重要
 	html = templater.call(templateKey, [ text: text ])
 #>> closure:補足
 	html = templater.call(templateKey, [ text: text ])
+#>> closure:特記
+	html = templater.call(templateKey, [ text: text ])
 #>> closure:訂正
+	html = templater.call(templateKey, [ text: text ])
+#>> closure:上付き
+	html = templater.call(templateKey, [ text: text ])
+#>> closure:下付き
 	html = templater.call(templateKey, [ text: text ])
 #>> closure:縦中横
 	html = text

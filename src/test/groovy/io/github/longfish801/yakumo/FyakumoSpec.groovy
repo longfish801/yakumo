@@ -59,12 +59,12 @@ class FyakumoSpec extends Specification implements GropedResource {
 		
 		where:
 		parentKey | childKey
-		'block' | 'head'
-		'block' | 'list'
-		'block' | 'list:misc'
-		'block' | 'blockquote'
-		'block' | 'code'
-		'block' | 'masking'
+		'block' | '見出し'
+		'block' | '箇条書き'
+		'block' | '箇条書き:入れ子'
+		'block' | '引用'
+		'block' | 'コード'
+		'block' | 'マスキング'
 	}
 	
 	@Timeout(10)
@@ -75,13 +75,17 @@ class FyakumoSpec extends Specification implements GropedResource {
 		
 		where:
 		parentKey | childKey
-		'inline' | 'link'
-		'inline' | 'link:oneline'
-		'inline' | 'strong'
-		'inline' | 'small'
-		'inline' | 'strike'
-		'inline' | 'rotate'
-		'inline' | 'dot'
-		'inline' | 'ruby'
+		'inline' | 'リンク'
+		'inline' | 'リンク:一行'
+		'inline' | '注目'
+		'inline' | '重要'
+		'inline' | '補足'
+		'inline' | '特記'
+		'inline' | '訂正'
+		'inline' | '上付き'
+		'inline' | '下付き'
+		'inline' | '縦中横'
+		'inline' | '傍点'
+		'inline' | 'ルビ'
 	}
 }
