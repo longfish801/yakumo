@@ -7,8 +7,11 @@
 // HTML形式へ変換するための資材を設定します
 material {
 	// clmapスクリプトを設定します
-	clmap grope("${convName}/util.tpac")
+	clmap grope("${convName}/bltxt.tpac")
+	clmap grope("${convName}/logging.tpac")
+	clmap grope("${convName}/template.tpac")
+	clmap grope("${convName}/type.tpac")
 	
 	// テンプレート利用を大域変数としてバインドします
-	clmapProp '/util', 'templateHandler', templateHandler
+	clmapProp '/tbase.template', 'templateHandler', templateHandler
 }

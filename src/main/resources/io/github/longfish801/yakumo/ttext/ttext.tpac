@@ -1,4 +1,5 @@
-#! clmap:textize
+#! clmap:ttext
+#: BLtxt文書の各ノードをテキスト化します。
 #>
 
 #> closure
@@ -18,7 +19,7 @@
 #> closure:meta
 #: 指定したBLtxt文書内から指定した名前の metaタグを抽出し、
 #: それぞれテキスト化した上で改行コードで結合した結果を返します。
-	List greped = clmap.cl('/util#grep').call(bltxt, 'meta', name, clmap.cl('/textize'))
+	List greped = clmap.cl('/tbase.bltxt#grep').call(bltxt, 'meta', name, clmap.cl('/ttext'))
 	result = (greped.empty)? dflt : greped.join(System.lineSeparator())
 #-dec
 	import io.github.longfish801.bltxt.BLtxt
@@ -38,10 +39,10 @@
 #-return
 	String text
 #-prefix
-	clmap.cl('/util/log#trace').call("textize {} tag={}", [node.xmlTag, node.tag])
+	clmap.cl('/tbase.logging/log#trace').call("textize {} tag={}", [node.xmlTag, node.tag])
 	List lowers
 	if (node.nodes != null){
-		lowers = clmap.cl('/util#lowers').call(node, clmap.cl('/textize'))
+		lowers = clmap.cl('/tbase.bltxt#lowers').call(node, clmap.cl('/ttext'))
 	}
 #>> closure
 	throw new UnsupportedOperationException("未対応のタグです。xmlTag=${node.xmlTag}, node=${node.toString()}")

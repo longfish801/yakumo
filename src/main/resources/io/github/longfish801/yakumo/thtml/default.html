@@ -1,3 +1,9 @@
+<%
+	def bltxt = bltxtMap[resultKey]
+	def htmltextize = clmap.cl('/thtml.textize')
+	def onedoc = clmap.cl('/thtml.meta/onedoc')
+	def navi = clmap.cl("/thtml.meta/navi#${resultKey}")
+%>
 <!doctype html>
 <html lang="ja">
 <head>
@@ -84,18 +90,18 @@ span.dot {
 }
 -->
 </style>
-<title>${headTitle}</title>
+<title><%= htmltextize.cl('#meta').call(bltxt, 'タイトル', '（無題）') %></title>
 </head>
 <body class="container">
 
 <header class="row px-3 py-5">
 <div class="col-lg-8">
-${title}
+<%= onedoc.cl('#title').call(bltxt) %>
 </div>
-<% if (!extra.empty){ %>
+<% if (onedoc.cl('need#extra').call(bltxt)){ %>
 <div class="col-lg-4 text-end">
 <ul id="extra">
-${extra}
+<%= onedoc.cl('#extra').call(bltxt) %>
 </ul>
 </div>
 <% } %>
@@ -103,28 +109,30 @@ ${extra}
 
 <div class="row justify-content-center">
 
-<% if (!toc.empty){ %>
+<% if (onedoc.cl('need#toc').call(bltxt)){ %>
 <nav class="col-lg-4">
 <ul id="toc" class="nav flex-column">
-${toc}
+<%= onedoc.cl('#toc').call(bltxt) %>
 </ul>
 </nav>
 <% } %>
 
 <main class="col-lg-8">
-${bodytext}
-<% if (!note.empty){ %><aside>
+<%= clmap.cl('/thtml.htmlize').call(bltxt.root) %>
+<% if (onedoc.cl('need#note').call(bltxt)){ %>
+<aside>
 <dl id="note">
-${note}
+<%= onedoc.cl('#note').call(bltxt) %>
 </dl>
-</aside><% } %>
+</aside>
+<% } %>
 </main>
 
 </div><!-- end of row -->
 
 <footer class="row justify-content-center p-3">
 <nav id="navi" class="col-lg-12 text-end">
-${navi}
+<%= navi.call(resultKey, appendMap['order']) %>
 </nav>
 <hr/>
 </footer>

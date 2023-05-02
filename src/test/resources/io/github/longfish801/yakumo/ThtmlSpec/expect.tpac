@@ -164,7 +164,7 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 <p>　これは【未対応：未対応のインライン要素】です。</p>
 #>
 
-#> bind
+#> onedoc
 #>> title
 <h1>円周率について</h1>
 <div id="subtitle">著名な語呂合わせ</div>

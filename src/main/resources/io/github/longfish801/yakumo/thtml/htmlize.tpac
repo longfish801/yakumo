@@ -1,4 +1,5 @@
-#! clmap:htmlize
+#! clmap:thtml.htmlize
+#: BLtxt文書の各ノードを HTML化します。
 #-dec
 	import io.github.longfish801.bltxt.node.BLNode
 #>
@@ -15,7 +16,7 @@
 #> closure:meta
 #: 指定したBLtxt文書内から指定した名前の metaタグを抽出し、
 #: それぞれテキスト化した上で改行コードで結合した結果を返します。
-	List greped = clmap.cl('/util#grep').call(bltxt, 'meta', name, clmap.cl('/htmlize'))
+	List greped = clmap.cl('/tbase.bltxt#grep').call(bltxt, 'meta', name, clmap.cl('/thtml.htmlize'))
 	result = (greped.empty)? dflt : greped.join(System.lineSeparator())
 #-dec
 	import io.github.longfish801.bltxt.BLtxt
@@ -33,10 +34,10 @@
 #-return
 	String html
 #-prefix
-	clmap.cl('/util/log#trace').call("htmlize {} tag={}", [node.xmlTag, node.tag])
+	clmap.cl('/tbase.logging/log#trace').call("htmlize {} tag={}", [node.xmlTag, node.tag])
 	List lowers
 	if (node.nodes != null){
-		lowers = clmap.cl('/util#lowers').call(node, clmap.cl('/htmlize'))
+		lowers = clmap.cl('/tbase.bltxt#lowers').call(node, clmap.cl('/thtml.htmlize'))
 	}
 #>> closure
 	throw new UnsupportedOperationException("未対応のタグです。xmlTag=${node.xmlTag}, node=${node.toString()}")
@@ -51,11 +52,11 @@
 #>> closure:para
 	String parent = (node.parent.xmlTag == 'block')?
 		"${node.parent.xmlTag}_${node.parent.tag}" : node.parent.xmlTag
-	html = clmap.cl("/htmlize/para#${parent}").call(node, lowers)
+	html = clmap.cl("/thtml.htmlize/para#${parent}").call(node, lowers)
 #>> closure:block
-	html = clmap.cl("/htmlize/block#${node.tag}").call(node, lowers)
+	html = clmap.cl("/thtml.htmlize/block#${node.tag}").call(node, lowers)
 #>> closure:inline
-	html = clmap.cl("/htmlize/inline#${node.tag}").call(node, lowers)
+	html = clmap.cl("/thtml.htmlize/inline#${node.tag}").call(node, lowers)
 #>> closure:meta
 	html = lowers.join(System.lineSeparator())
 #>
@@ -98,7 +99,7 @@
 #-return
 	String html
 #-prefix
-	def templater = clmap.cl('/util#template')
+	def templater = clmap.cl('/tbase.template#apply')
 	String templateKey = "${clmap.path}/data:template#${node.tag}"
 #>> data:template
 #-見出し <h${level}><a name="${id}"></a>${text}</h${level}>
@@ -142,10 +143,10 @@ ${text}
 ${text}
 </div>
 #>> closure
-	clmap.cl('/util/fprint#warn').call("未対応のブロック要素です。tag=%s, node=%s", [node.tag, node.toString()])
+	clmap.cl('/tbase.logging/fprint#warn').call("未対応のブロック要素です。tag=%s, node=%s", [node.tag, node.toString()])
 	html = lowers.join()
 #>> closure:見出し
-	int level = clmap.cl('/htmlize/headline#level').call(node)
+	int level = clmap.cl('/thtml.htmlize/headline#level').call(node)
 	html = templater.call(templateKey, [
 		text: lowers.join(),
 		level: level,
@@ -184,7 +185,7 @@ ${text}
 		alt: node.attrs[0]
 	])
 #>> closure:変換済
-	html = (node.attrs[0] == 'html')? clmap.cl('/textize').call(node) : ''
+	html = (node.attrs[0] == 'html')? clmap.cl('/ttext').call(node) : ''
 #>> closure:行範囲
 	html = templater.call(templateKey, [
 		text: lowers.join(lsep),
@@ -199,7 +200,7 @@ ${text}
 #-return
 	String html
 #-prefix
-	def templater = clmap.cl('/util#template')
+	def templater = clmap.cl('/tbase.template#apply')
 	String templateKey = "${clmap.path}/data:template#${node.tag}"
 	String text = (lowers != null)? lowers.join() : ''
 #>> data:template
@@ -216,7 +217,7 @@ ${text}
 #-ルビ <ruby>${text}<rp>［</rp><rt>${ruby}</rt><rp>］</rp></ruby>
 #-範囲 <span class="${clazz}">${text}</span>
 #>> closure
-	clmap.cl('/util/fprint#warn').call("未対応のインライン要素です。tag=%s, node=%s", [node.tag, node.toString()])
+	clmap.cl('/tbase.logging/fprint#warn').call("未対応のインライン要素です。tag=%s, node=%s", [node.tag, node.toString()])
 	html = (node.nodes.size() == 0)? "【${node.tag}${node.attrs.toString()}】"
 		: "【｜${node.tag}${node.attrs.toString()}】${text}【${node.tag}｜】"
 #>> closure:註
@@ -267,7 +268,7 @@ increment = 1
 	def config = clmap.solve("${clmap.path}/config").config()
 	level = config.dflt
 	if (node.attrs.size() > 0){
-		level = clmap.cl('/util#parseInt').call(node.attrs[0], '見出しレベル') + config.increment
+		level = clmap.cl('/tbase.type#parseInt').call(node.attrs[0], '見出しレベル') + config.increment
 	}
 #-args
 	BLNode node

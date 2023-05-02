@@ -8,19 +8,19 @@
 　各処理と変換資材との対応は以下のとおりです。
 
 メタ要素（bltxt文書のmetaタグ）をHTMLに変換
-: 変換資材thtml内のthtml.tpac上のクロージャパス /thtml/bind, /thtml/navi
+: 変換資材thtml内のthtml.tpac上のクロージャパス /thtml.meta
 
 平文（bltxt文書のtextタグ）をHTMLに変換
-: 変換資材thtml内のhtmlize.tpac上のクロージャパス /htmlize/node#text
+: 変換資材thtml内のhtmlize.tpac上のクロージャパス /thtml.htmlize/node#text
 
 段落（bltxt文書のparaタグ）をHTMLに変換
-: 変換資材thtml内のhtmlize.tpac上のクロージャパス /htmlize/node#para
+: 変換資材thtml内のhtmlize.tpac上のクロージャパス /thtml.htmlize/node#para
 
 ブロック要素（bltxt文書のparaタグ）をHTMLに変換
-: 変換資材thtml内のhtmlize.tpac上のクロージャパス /htmlize/node#block
+: 変換資材thtml内のhtmlize.tpac上のクロージャパス /thtml.htmlize/node#block
 
 インライン要素（bltxt文書のparaタグ）をHTMLに変換
-: 変換資材thtml内のhtmlize.tpac上のクロージャパス /htmlize/node#inline
+: 変換資材thtml内のhtmlize.tpac上のクロージャパス /thtml.htmlize/node#inline
 
 ## メタ要素
 

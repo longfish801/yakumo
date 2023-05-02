@@ -1,0 +1,43 @@
+#! clmap:tbase.logging
+#: ログ出力に関する処理です。
+#-dec
+	import io.github.longfish801.yakumo.YmoConvertException
+#>
+
+#> map:log
+#: ログを出力します。
+#-args
+	String message
+	List embeddeds
+#-dec
+	import org.slf4j.LoggerFactory
+#-prefix
+	if (resultKey == null) throw new YmoConvertException("resultKeyがバインドされていません。")
+	def LOG = LoggerFactory.getLogger('io.github.longfish801.yakumo.thtml.util')
+#>> closure:trace
+	LOG.trace("[${resultKey}] ${message}", *embeddeds)
+#>> closure:debug
+	LOG.debug("[${resultKey}] ${message}", *embeddeds)
+#>> closure:info
+	LOG.info("[${resultKey}] ${message}", *embeddeds)
+#>> closure:warn
+	LOG.warn("[${resultKey}] ${message}", *embeddeds)
+#>
+
+#> map:fprint
+#: 足跡からログを出力します。
+#-args
+	String message
+	List embeddeds
+#-prefix
+	if (resultKey == null) throw new YmoConvertException("resultKeyがバインドされていません。")
+	message = String.format("[${resultKey}] ${message}", *embeddeds)
+#>> closure:trace
+	fprint.trace(message)
+#>> closure:debug
+	fprint.debug(message)
+#>> closure:info
+	fprint.info(message)
+#>> closure:warn
+	fprint.warn(message)
+#>
