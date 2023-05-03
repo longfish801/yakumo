@@ -26,12 +26,11 @@
 
 ### タイトル
 
-　タイトル、サブタイトルは、含意タグで指定します。
+　タイトルは、含意タグで指定します。
 　省略可能です。
 
 ```
 【＃タイトル】円周率について
-【＃サブタイトル】著名な語呂合わせ
 ```
 
 　以下のHTMLに変換します。
@@ -39,7 +38,21 @@
 
 ```
 <h1>円周率について</h1>
-<div id="subtitle">著名な語呂合わせ</div>
+```
+
+### サブタイトル
+
+　サブタイトルは、含意タグで指定します。
+　省略可能です。
+
+```
+【＃サブタイトル】著名な語呂合わせ
+```
+
+　以下のHTMLに変換します。
+
+```
+<li>著名な語呂合わせ</li>
 ```
 
 ### 付帯情報
@@ -73,9 +86,9 @@
 　以下のHTMLに変換します。
 
 ```
-<li class="nav-item toc_h2"><a href="#id2_1" class="nav-link">おいしいカレーの作り方</a></li>
-<li class="nav-item toc_h3"><a href="#id3_2" class="nav-link">材料の準備</a></li>
-<li class="nav-item toc_h4"><a href="#id4_3" class="nav-link">牛の飼い方</a></li>
+<li class="nav-item ps-0"><a href="#id2_1" class="nav-link">おいしいカレーの作り方</a></li>
+<li class="nav-item ps-1"><a href="#id3_2" class="nav-link">材料の準備</a></li>
+<li class="nav-item ps-2"><a href="#id4_3" class="nav-link">牛の飼い方</a></li>
 ```
 
 ### 註記
@@ -202,11 +215,12 @@
 　タイトルを h1とする関係上、レベル1が h2、レベル2が h3……となります。
 　目次からページ内リンクで移動できるよう、aタグを挿入します。
 　name属性は、bltxt文書を XML化したときの snum属性を利用します。
+　また行末に、ヘッダ(#header)へ戻るためのリンクを付与します。
 
 ```
-<h2><a name="1">おいしいカレーの作り方</a></h2>
-<h3><a name="2">材料の準備</a></h3>
-<h4><a name="3">牛の飼い方</a></h4>
+<h2><a name="id2_1"></a>おいしいカレーの作り方 <div class="float-end fs-6"><a href="#header"><i class="bi bi-chevron-double-up"></i></a></div></h2>
+<h3><a name="id3_2"></a>材料の準備 <div class="float-end fs-6"><a href="#header"><i class="bi bi-chevron-double-up"></i></a></div></h3>
+<h4><a name="id4_3"></a>牛の飼い方 <div class="float-end fs-6"><a href="#header"><i class="bi bi-chevron-double-up"></i></a></div></h4>
 ```
 
 ### 箇条書き
@@ -347,7 +361,7 @@
 
 ```
 <aside class="alert alert-success" role="alert">
-<header class="alert-heading"><i class="bi bi-info-circle-fill"></i> ８月３１日はなんの日？</header>
+<header class="alert-heading text-center"><i class="bi bi-info-circle-fill"></i> ８月３１日はなんの日？</header>
 <p>　８月３１日は野菜の日です。<br/>
 　野菜を食べましょう。</p>
 </aside>
@@ -369,7 +383,7 @@
 
 ```
 <aside class="alert alert-danger" role="alert">
-<header class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> 中火とは</header>
+<header class="alert-heading text-center"><i class="bi bi-exclamation-triangle-fill"></i> 中火とは</header>
 <p>　中火とは、フライパンの底に炎の先端がちょうど届くくらいの状態を指します。</p>
 </aside>
 ```
@@ -390,11 +404,15 @@
 　以下のHTMLに変換します。
 
 ```
-<blockquote>
+<figure>
+<blockquote class="blockquote p-3">
 <p>　山路を登りながら、こう考えた。<br/>
 　智に働けば角が立つ。情に棹させば流される。意地を通せば窮屈だ。とかくに人の世は住みにくい。</p>
-<footer><cite>夏目漱石『草枕』</cite></footer>
 </blockquote>
+<figcaption class="blockquote-footer text-end">
+<cite>夏目漱石『草枕』</cite>
+</figcaption>
+</figure>
 ```
 
 ### コード
@@ -412,10 +430,8 @@ println "This is sample code of how to hello to all of the world, which is execu
 　preタグを生成します。
 
 ```
-<pre>
-println &quot;Hello, World!&quot;;
-println &quot;This is sample code of how to hello to all of the world, which is executed &quot; + Date().format(&quot;yyyy-MM-dd'T'HH:mm:ss.SSSZ&quot;);
-</pre>
+<pre class="code px-3"><code>println &quot;Hello, World!&quot;;
+println &quot;This is sample code of how to hello to all of the world, which is executed &quot; + Date().format(&quot;yyyy-MM-dd'T'HH:mm:ss.SSSZ&quot;);</code></pre>
 ```
 
 ### 変換済

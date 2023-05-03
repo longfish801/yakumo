@@ -121,7 +121,7 @@ class ThtmlSpec extends Specification implements GropedResource {
 		
 		where:
 		parentKey	| childKey
-		'onedoc'	| 'title'
+		'onedoc'	| 'subtitle'
 		'onedoc'	| 'extra'
 		'onedoc'	| 'toc'
 		'onedoc'	| 'note'

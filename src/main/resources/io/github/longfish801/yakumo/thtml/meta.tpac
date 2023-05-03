@@ -17,46 +17,30 @@
 	def templater = clmap.cl('/tbase.template#apply')
 	String templateKey = "${clmap.path}/data:template#"
 #>> config
-title {
-	dflt = [ 'タイトル': '（無題）' ]
-	targets = [ 'タイトル', 'サブタイトル' ]
-}
-extra {
-	targets = [ '公開日', '著者名' ]
-}
+subtitle = [ 'サブタイトル' ]
+extra = [ '公開日', '著者名' ]
 #>> data:template
-#-タイトル <h1>${text}</h1>
-#-サブタイトル <div id="subtitle">${text}</div>
+#-サブタイトル <li>${text}</li>
 #-公開日 <li>公開日 ${text}</li>
 #-著者名 <li>${text}</li>
-#-toc <li class="nav-item toc_h${level}"><a href="#id${id}" class="nav-link">${text}</a></li>
+#-toc <li class="nav-item ps-${level - 2}"><a href="#id${id}" class="nav-link">${text}</a></li>
 #-note
 <dt><a name="t${id}" href="#f${id}">[*${id}]</a></dt>
 <dd>${text}</dd>
-#>> closure:title
-#: タイトルのHTMLを生成します。
-	// タイトルの各要素についてHTMLを生成します
-	List titles = []
+#>> closure:subtitle
+#: サブタイトルのHTMLを生成します。
 	def config = clmap.solve("${clmap.path}/config").config()
-	config.title.targets.each {
-		String dflt = (config.title.dflt[it] == null)? '' : config.title.dflt[it]
-		String title = htmlizerMeta.call(it, dflt)
-		if (!title.empty){
-			titles << templater.call(templateKey + it, [text: title])
-		}
-	}
-	html = titles.join(System.lineSeparator())
+	html = config.subtitle.collect { String target ->
+		String text = htmlizerMeta.call(target, '')
+		return (text.empty)? '' : templater.call(templateKey + target, [text: text])
+	}.findAll { !it.empty }.join(System.lineSeparator())
 #>> closure:extra
 #: 付帯情報のHTMLを生成します。
-	List extras = []
 	def config = clmap.solve("${clmap.path}/config").config()
-	config.extra.targets.each {
-		String extra = htmlizerMeta.call(it, '')
-		if (!extra.empty){
-			extras << templater.call(templateKey + it, [text: extra])
-		}
-	}
-	html = extras.join(System.lineSeparator())
+	html = config.extra.collect { String target ->
+		String text = htmlizerMeta.call(target, '')
+		return (text.empty)? '' : templater.call(templateKey + target, [text: text])
+	}.findAll { !it.empty }.join(System.lineSeparator())
 #>> closure:toc
 #: 目次のHTMLを生成します。
 	List list = []
@@ -114,9 +98,12 @@ extra {
 #: HTML部品の生成が必要か判定します。
 #-return
 	boolean judge
+#>>> closure:subtitle
+	def config = clmap.solve("../config").config()
+	judge = config.subtitle.any { bltxt.grepNodes('meta', it).size() > 0 }
 #>>> closure:extra
 	def config = clmap.solve("../config").config()
-	judge = config.extra.targets.any { bltxt.grepNodes('meta', it).size() > 0 }
+	judge = config.extra.any { bltxt.grepNodes('meta', it).size() > 0 }
 #>>> closure:toc
 	judge = (bltxt.grepNodes('block', '見出し').size() > 0)? true : false
 #>>> closure:note

@@ -102,7 +102,7 @@
 	def templater = clmap.cl('/tbase.template#apply')
 	String templateKey = "${clmap.path}/data:template#${node.tag}"
 #>> data:template
-#-見出し <h${level}><a name="${id}"></a>${text}</h${level}>
+#-見出し <h${level}><a name="${id}"></a>${text} <div class="float-end fs-6"><a href="#header"><i class="bi bi-chevron-double-up"></i></a></div></h${level}>
 #-箇条書き
 <ul>
 ${text}
@@ -116,23 +116,32 @@ ${text}
 #-説明 <dd>${text}</dd>
 #-コラム
 <aside class="alert alert-success" role="alert">
-<% if (title != null){ %><header class="alert-heading"><i class="bi bi-info-circle-fill"></i> ${title}</header><% } %>
+<% if (title != null){ %><header class="alert-heading text-center"><i class="bi bi-info-circle-fill"></i> ${title}</header><% } %>
 ${text}
 </aside>
 #-注意
 <aside class="alert alert-danger" role="alert">
-<% if (title != null){ %><header class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> ${title}</header><% } %>
+<% if (title != null){ %><header class="alert-heading text-center"><i class="bi bi-exclamation-triangle-fill"></i> ${title}</header><% } %>
 ${text}
 </aside>
 #-引用
-<blockquote>
+<figure>
+<blockquote class="blockquote p-3">
 ${text}
 </blockquote>
-#-引用元 <footer><cite>${text}</cite></footer>
-#-コード
-<pre>
+</figure>
+#-引用元あり引用
+<figure>
+<blockquote class="blockquote p-3">
 ${text}
-</pre>
+</blockquote>
+${source}
+</figure>
+#-引用元
+<figcaption class="blockquote-footer text-end">
+<cite>${text}</cite>
+</figcaption>
+#-コード <pre class="code px-3"><code>${text}</code></pre>
 #-画像
 <figure class="text-center">
 <a href="${path}"><img src="${path}" class="img-fluid" alt="${alt}"></a>
@@ -173,7 +182,18 @@ ${text}
 		title: (node.attrs.size() > 0)? node.attrs[0] : null
 	])
 #>> closure:引用
-	html = templater.call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
+	if (lowers.last().startsWith('<figcaption ')){
+		// 引用元の記述がある場合
+		html = templater.call("${clmap.path}/data:template#引用元あり引用", [
+			source: lowers.removeLast(),
+			text: lowers.join(System.lineSeparator()),
+		])
+	} else {
+		// 引用元の記述がない場合
+		html = templater.call(templateKey, [
+			text: lowers.join(System.lineSeparator())
+		])
+	}
 #>> closure:引用元
 	html = templater.call(templateKey, [ text: lowers.join() ])
 #>> closure:コード

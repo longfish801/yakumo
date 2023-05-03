@@ -147,8 +147,7 @@ println "This is sample code of how to hello to all of the world, which is execu
 　これは【未対応：未対応のインライン要素】です。
 
 #> onedoc
-#>> title
-【＃タイトル】円周率について
+#>> subtitle
 【＃サブタイトル】著名な語呂合わせ
 
 #>> extra
