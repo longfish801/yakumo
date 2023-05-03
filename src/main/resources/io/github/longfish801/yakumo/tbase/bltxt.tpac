@@ -1,0 +1,35 @@
+#! clmap:tbase.bltxt
+#: BLtxt文書を操作するための汎用的な処理です。
+#>
+
+#> closure:grep
+#: 指定したタグと名前が一致するノードの各要素を callbackで変換したリストを返します。
+#: callbackは callメソッドで引数としてノードを渡せるオブジェクトを渡してください。
+	greped =  bltxt.grepNodes(tag, name).collect { callback.call(it) }
+#-dec
+	import io.github.longfish801.bltxt.BLtxt
+#-args
+	BLtxt bltxt
+	String tag
+	String name
+	def callback
+#-return
+	List greped
+#>
+
+#> closure:lowers
+#: nodeについて metaタグ以外の下位のノードを callbackで変換したリストを返します。
+#: callbackは callメソッドで引数としてノードを渡せるオブジェクトを渡してください。
+	lowers = node.nodes.findAll {
+		it.xmlTag != 'meta'
+	}.collect {
+		callback.call(it)
+	}
+#-dec
+	import io.github.longfish801.bltxt.node.BLNode
+#-args
+	BLNode node
+	def callback
+#-return
+	List lowers
+#>

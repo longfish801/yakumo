@@ -1,3 +1,8 @@
+<%
+	def bltxt = bltxtMap[resultKey]
+	def onedoc = clmap.cl('/thtml.meta/onedoc')
+	def navi = clmap.cl("/thtml.meta/navi#${resultKey}")
+%>
 <!doctype html>
 <html lang="ja">
 <head>
@@ -13,64 +18,35 @@ body {
 	line-height: 2.3rem;
 	text-align: justify;
 	word-wrap: break-word;
+	background-color: #f0f0f0;
 }
-p:first-child {
-	margin-top: 0rem;
+header#header {
+	background-color: #f0f0f0;
 }
-p:not(:first-child) {
-	margin-top: 1.5rem;
+footer#footer {
+	background-color: #f0f0f0;
 }
-div#subtitle {
-	font-size: 1.5rem;
+main#main {
+	background-color: #ffffff;
 }
-ul#extra > li {
-	list-style-type: none;
-}
-nav#navi {
-	font-size: 2rem;
-	margin: 0.5rem 0rem;
-}
-h2, h3, h4, h5, h6 {
-	padding: 1rem 0;
-}
-ul#toc > li {
-	line-height: 1.5em;
-}
-li.toc_h2 {
-	margin-left: 0rem;
-}
-li.toc_h3 {
-	margin-left: 1rem;
-}
-li.toc_h4 {
-	margin-left: 2rem;
-}
-li.toc_h5 {
-	margin-left: 3rem;
-}
-li.toc_h6 {
-	margin-left: 4rem;
-}
-blockquote {
-	padding: 1.5rem 1rem 1rem;
-	background-color: #ffffcc;
-}
-blockquote > footer {
-	text-align: right;
+nav#sidenav {
+	background-color: #ffffff;
 }
 dl#note {
-	padding: 1rem;
 	background-color: #ccffff;
 }
-header.alert-heading {
-	text-align: center;
-	font-size: 1.2rem;
-	font-weight: bold;
+figure > blockquote.blockquote {
+	background-color: #ffffcc;
 }
-pre {
-	padding: 0.5rem;
-	line-height: 2.0em;
+figure > figcaption.blockquote-footer {
+	background-color: #ffffcc;
+}
+pre.code {
 	background-color: #f0f0f0;
+}
+span.attention {
+	font-size: 1.7rem;
+	line-height: 1.7rem;
 }
 span.dot {
 	text-emphasis-style: dot;
@@ -80,18 +56,23 @@ span.dot {
 }
 -->
 </style>
-<title>${headTitle}</title>
+<title><%= clmap.cl('/thtml.textize').cl('#meta').call(bltxt, 'タイトル', '（無題）') %></title>
 </head>
 <body class="container">
 
-<header class="row px-3 py-5">
+<header id="header" class="row justify-content-center py-3">
 <div class="col-lg-8">
-${title}
+<h1><%= clmap.cl('/thtml.htmlize').cl('#meta').call(bltxt, 'タイトル', '（無題）') %></h1>
+<% if (onedoc.cl('need#subtitle').call(bltxt)){ %>
+<ul id="subtitle" class="list-unstyled fs-5">
+<%= onedoc.cl('#subtitle').call(bltxt) %>
+</ul>
+<% } %>
 </div>
-<% if (!extra.empty){ %>
+<% if (onedoc.cl('need#extra').call(bltxt)){ %>
 <div class="col-lg-4 text-end">
-<ul id="extra">
-${extra}
+<ul id="extra" class="list-unstyled fs-6">
+<%= onedoc.cl('#extra').call(bltxt) %>
 </ul>
 </div>
 <% } %>
@@ -99,28 +80,30 @@ ${extra}
 
 <div class="row justify-content-center">
 
-<% if (!toc.empty){ %>
-<nav class="col-lg-4">
-<ul id="toc" class="nav flex-column">
-${toc}
+<% if (onedoc.cl('need#toc').call(bltxt)){ %>
+<nav id="sidenav" class="col-lg-4 py-3">
+<ul id="toc" class="nav flex-column sticky-top">
+<%= onedoc.cl('#toc').call(bltxt) %>
 </ul>
 </nav>
 <% } %>
 
-<main class="col-lg-8">
-${bodytext}
-<% if (!note.empty){ %><aside>
-<dl id="note">
-${note}
+<main id="main" class="col-lg-8 bg-white py-3">
+<%= clmap.cl('/thtml.htmlize').call(bltxt.root) %>
+<% if (onedoc.cl('need#note').call(bltxt)){ %>
+<aside id="appendix">
+<dl id="note" class="px-3">
+<%= onedoc.cl('#note').call(bltxt) %>
 </dl>
-</aside><% } %>
+</aside>
+<% } %>
 </main>
 
 </div><!-- end of row -->
 
-<footer class="row justify-content-center p-3">
+<footer id="footer" class="row justify-content-center py-3">
 <nav id="navi" class="col-lg-12 text-end">
-${navi}
+<%= navi.call(resultKey, appendMap.order) %>
 </nav>
 <hr/>
 </footer>

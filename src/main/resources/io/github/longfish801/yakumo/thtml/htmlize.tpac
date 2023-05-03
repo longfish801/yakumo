@@ -1,4 +1,5 @@
-#! clmap:htmlize
+#! clmap:thtml.htmlize
+#: BLtxt文書の各ノードを HTML化します。
 #-dec
 	import io.github.longfish801.bltxt.node.BLNode
 #>
@@ -15,7 +16,7 @@
 #> closure:meta
 #: 指定したBLtxt文書内から指定した名前の metaタグを抽出し、
 #: それぞれテキスト化した上で改行コードで結合した結果を返します。
-	List greped = clmap.cl('/util#grep').call(bltxt, 'meta', name, clmap.cl('/htmlize'))
+	List greped = clmap.cl('/tbase.bltxt#grep').call(bltxt, 'meta', name, clmap.cl('/thtml.htmlize'))
 	result = (greped.empty)? dflt : greped.join(System.lineSeparator())
 #-dec
 	import io.github.longfish801.bltxt.BLtxt
@@ -33,10 +34,10 @@
 #-return
 	String html
 #-prefix
-	clmap.cl('/util/log#trace').call("htmlize {} tag={}", [node.xmlTag, node.tag])
+	clmap.cl('/tbase.logging/log#trace').call("htmlize {} tag={}", [node.xmlTag, node.tag])
 	List lowers
 	if (node.nodes != null){
-		lowers = clmap.cl('/util#lowers').call(node, clmap.cl('/htmlize'))
+		lowers = clmap.cl('/tbase.bltxt#lowers').call(node, clmap.cl('/thtml.htmlize'))
 	}
 #>> closure
 	throw new UnsupportedOperationException("未対応のタグです。xmlTag=${node.xmlTag}, node=${node.toString()}")
@@ -51,11 +52,11 @@
 #>> closure:para
 	String parent = (node.parent.xmlTag == 'block')?
 		"${node.parent.xmlTag}_${node.parent.tag}" : node.parent.xmlTag
-	html = clmap.cl("/htmlize/para#${parent}").call(node, lowers)
+	html = clmap.cl("/thtml.htmlize/para#${parent}").call(node, lowers)
 #>> closure:block
-	html = clmap.cl("/htmlize/block#${node.tag}").call(node, lowers)
+	html = clmap.cl("/thtml.htmlize/block#${node.tag}").call(node, lowers)
 #>> closure:inline
-	html = clmap.cl("/htmlize/inline#${node.tag}").call(node, lowers)
+	html = clmap.cl("/thtml.htmlize/inline#${node.tag}").call(node, lowers)
 #>> closure:meta
 	html = lowers.join(System.lineSeparator())
 #>
@@ -98,10 +99,10 @@
 #-return
 	String html
 #-prefix
-	def templater = clmap.cl('/util#template')
+	def templater = clmap.cl('/tbase.template#apply')
 	String templateKey = "${clmap.path}/data:template#${node.tag}"
 #>> data:template
-#-見出し <h${level}><a name="${id}"></a>${text}</h${level}>
+#-見出し <h${level}><a name="${id}"></a>${text} <div class="float-end fs-6"><a href="#header"><i class="bi bi-chevron-double-up"></i></a></div></h${level}>
 #-箇条書き
 <ul>
 ${text}
@@ -115,26 +116,35 @@ ${text}
 #-説明 <dd>${text}</dd>
 #-コラム
 <aside class="alert alert-success" role="alert">
-<% if (title != null){ %><header class="alert-heading"><i class="bi bi-info-circle-fill"></i> ${title}</header><% } %>
+<% if (title != null){ %><header class="alert-heading text-center"><i class="bi bi-info-circle-fill"></i> ${title}</header><% } %>
 ${text}
 </aside>
 #-注意
 <aside class="alert alert-danger" role="alert">
-<% if (title != null){ %><header class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> ${title}</header><% } %>
+<% if (title != null){ %><header class="alert-heading text-center"><i class="bi bi-exclamation-triangle-fill"></i> ${title}</header><% } %>
 ${text}
 </aside>
 #-引用
-<blockquote>
+<figure>
+<blockquote class="blockquote p-3">
 ${text}
 </blockquote>
-#-引用元 <footer><cite>${text}</cite></footer>
-#-コード
-<pre>
+</figure>
+#-引用元あり引用
+<figure>
+<blockquote class="blockquote p-3">
 ${text}
-</pre>
+</blockquote>
+${source}
+</figure>
+#-引用元
+<figcaption class="blockquote-footer text-end">
+<cite>${text}</cite>
+</figcaption>
+#-コード <pre class="code px-3"><code>${text}</code></pre>
 #-画像
 <figure class="text-center">
-<img src="${path}" class="img-fluid" alt="${alt}">
+<a href="${path}"><img src="${path}" class="img-fluid" alt="${alt}"></a>
 <% if (text != null){ %><figcaption>${text}</figcaption><% } %>
 </figure>
 #-行範囲
@@ -142,10 +152,10 @@ ${text}
 ${text}
 </div>
 #>> closure
-	clmap.cl('/util/fprint#warn').call("未対応のブロック要素です。tag=%s, node=%s", [node.tag, node.toString()])
+	clmap.cl('/tbase.logging/fprint#warn').call("未対応のブロック要素です。tag=%s, node=%s", [node.tag, node.toString()])
 	html = lowers.join()
 #>> closure:見出し
-	int level = clmap.cl('/htmlize/headline#level').call(node)
+	int level = clmap.cl('/thtml.htmlize/headline#level').call(node)
 	html = templater.call(templateKey, [
 		text: lowers.join(),
 		level: level,
@@ -172,7 +182,18 @@ ${text}
 		title: (node.attrs.size() > 0)? node.attrs[0] : null
 	])
 #>> closure:引用
-	html = templater.call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
+	if (lowers.last().startsWith('<figcaption ')){
+		// 引用元の記述がある場合
+		html = templater.call("${clmap.path}/data:template#引用元あり引用", [
+			source: lowers.removeLast(),
+			text: lowers.join(System.lineSeparator()),
+		])
+	} else {
+		// 引用元の記述がない場合
+		html = templater.call(templateKey, [
+			text: lowers.join(System.lineSeparator())
+		])
+	}
 #>> closure:引用元
 	html = templater.call(templateKey, [ text: lowers.join() ])
 #>> closure:コード
@@ -184,7 +205,7 @@ ${text}
 		alt: node.attrs[0]
 	])
 #>> closure:変換済
-	html = (node.attrs[0] == 'html')? clmap.cl('/textize').call(node) : ''
+	html = (node.attrs[0] == 'html')? clmap.cl('/ttext').call(node) : ''
 #>> closure:行範囲
 	html = templater.call(templateKey, [
 		text: lowers.join(lsep),
@@ -199,20 +220,24 @@ ${text}
 #-return
 	String html
 #-prefix
-	def templater = clmap.cl('/util#template')
+	def templater = clmap.cl('/tbase.template#apply')
 	String templateKey = "${clmap.path}/data:template#${node.tag}"
 	String text = (lowers != null)? lowers.join() : ''
 #>> data:template
 #-註 <sup><a id="f${id}" href="#t${id}">*${id}</a></sup>
 #-リンク <a href="${url}">${text}</a>
+#-注目 <span class="attention">${text}</span>
 #-重要 <strong>${text}</strong>
 #-補足 <small>${text}</small>
+#-特記 <i>${text}</i>
 #-訂正 <s>${text}</s>
+#-上付き <sup>${text}</sup>
+#-下付き <sub>${text}</sub>
 #-傍点 <span class="dot">${text}</span>
 #-ルビ <ruby>${text}<rp>［</rp><rt>${ruby}</rt><rp>］</rp></ruby>
 #-範囲 <span class="${clazz}">${text}</span>
 #>> closure
-	clmap.cl('/util/fprint#warn').call("未対応のインライン要素です。tag=%s, node=%s", [node.tag, node.toString()])
+	clmap.cl('/tbase.logging/fprint#warn').call("未対応のインライン要素です。tag=%s, node=%s", [node.tag, node.toString()])
 	html = (node.nodes.size() == 0)? "【${node.tag}${node.attrs.toString()}】"
 		: "【｜${node.tag}${node.attrs.toString()}】${text}【${node.tag}｜】"
 #>> closure:註
@@ -225,11 +250,19 @@ ${text}
 		text: text,
 		url: node.attrs[0]
 	])
+#>> closure:注目
+	html = templater.call(templateKey, [ text: text ])
 #>> closure:重要
 	html = templater.call(templateKey, [ text: text ])
 #>> closure:補足
 	html = templater.call(templateKey, [ text: text ])
+#>> closure:特記
+	html = templater.call(templateKey, [ text: text ])
 #>> closure:訂正
+	html = templater.call(templateKey, [ text: text ])
+#>> closure:上付き
+	html = templater.call(templateKey, [ text: text ])
+#>> closure:下付き
 	html = templater.call(templateKey, [ text: text ])
 #>> closure:縦中横
 	html = text
@@ -255,7 +288,7 @@ increment = 1
 	def config = clmap.solve("${clmap.path}/config").config()
 	level = config.dflt
 	if (node.attrs.size() > 0){
-		level = clmap.cl('/util#parseInt').call(node.attrs[0], '見出しレベル') + config.increment
+		level = clmap.cl('/tbase.type#parseInt').call(node.attrs[0], '見出しレベル') + config.increment
 	}
 #-args
 	BLNode node

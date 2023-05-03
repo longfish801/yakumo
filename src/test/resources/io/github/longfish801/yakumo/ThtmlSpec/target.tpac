@@ -110,14 +110,26 @@ println "This is sample code of how to hello to all of the world, which is execu
 　詳しくは【｜リンク：https://www.google.com/】ネット検索【リンク｜】してください。
 　【｜リンク：https://www.google.com/】https://www.google.com/【リンク｜】でネット検索できます。
 
+#>> 注目
+　危ない！ それは【｜注目】自爆スイッチ【注目｜】だ！
+
 #>> 重要
 　間違えて【｜重要】自爆スイッチ【重要｜】を押さないでください。
 
 #>> 補足
 　もちろん本当【｜補足】かもしれない【補足｜】ですよ。
 
+#>> 特記
+　まあ、真実は【｜特記】in the bush【特記｜】ですが。
+
 #>> 訂正
 　富士山の標高は【｜訂正】３７７７メートル【訂正｜】３７７６メートルです。
+
+#>> 上付き
+　まあね、大人【｜上付き】2【上付き｜】があるんですよ。
+
+#>> 下付き
+　人生にはH【｜下付き】2【下付き｜】Oが不可欠だ。
 
 #>> 縦中横
 　シェイクスピア全集の第【｜縦中横】10【縦中横｜】巻に記述されています。
@@ -134,9 +146,8 @@ println "This is sample code of how to hello to all of the world, which is execu
 #>> nosuch
 　これは【未対応：未対応のインライン要素】です。
 
-#> bind
-#>> title
-【＃タイトル】円周率について
+#> onedoc
+#>> subtitle
 【＃サブタイトル】著名な語呂合わせ
 
 #>> extra

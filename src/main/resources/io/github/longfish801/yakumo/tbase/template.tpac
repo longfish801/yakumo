@@ -1,0 +1,29 @@
+#! clmap:tbase.template
+#: 汎用的な処理のためのクロージャを定義します。
+#>
+
+#> closure:apply
+#: テンプレートを適用した結果を返します。
+#: 指定されたテンプレートのクロージャパスからフォーマットを参照します。
+#: そこからテンプレートのインスタンスを作成し、キャッシュします。
+#: バインド引数をテンプレートに適用した結果を返します。
+#: io.github.longfish801.yakumo.TemplateHandlerのインスタンスが
+#: 大域変数templateHandlerとしてバインドされている必要があります。
+	if (templateHandler == null){
+		throw new YmoConvertException("templateHandlerがバインドされていません。", exc)
+	}
+	// フォーマットをテンプレートとして読みこみます
+	if (!templateHandler.map.containsKey(tmplClpath)){
+		String source = clmap.referAsString(tmplClpath)
+		templateHandler.set(tmplClpath, source)
+	}
+	// バインド引数をテンプレートを適用します
+	html = templateHandler.apply(tmplClpath, binds)
+#-dec
+	import io.github.longfish801.yakumo.YmoConvertException
+#-args
+	String tmplClpath
+	Map binds
+#-return
+	String html
+#>

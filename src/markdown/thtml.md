@@ -8,30 +8,29 @@
 　各処理と変換資材との対応は以下のとおりです。
 
 メタ要素（bltxt文書のmetaタグ）をHTMLに変換
-: 変換資材thtml内のthtml.tpac上のクロージャパス /thtml/bind, /thtml/navi
+: 変換資材thtml内のthtml.tpac上のクロージャパス /thtml.meta
 
 平文（bltxt文書のtextタグ）をHTMLに変換
-: 変換資材thtml内のhtmlize.tpac上のクロージャパス /htmlize/node#text
+: 変換資材thtml内のhtmlize.tpac上のクロージャパス /thtml.htmlize/node#text
 
 段落（bltxt文書のparaタグ）をHTMLに変換
-: 変換資材thtml内のhtmlize.tpac上のクロージャパス /htmlize/node#para
+: 変換資材thtml内のhtmlize.tpac上のクロージャパス /thtml.htmlize/node#para
 
 ブロック要素（bltxt文書のparaタグ）をHTMLに変換
-: 変換資材thtml内のhtmlize.tpac上のクロージャパス /htmlize/node#block
+: 変換資材thtml内のhtmlize.tpac上のクロージャパス /thtml.htmlize/node#block
 
 インライン要素（bltxt文書のparaタグ）をHTMLに変換
-: 変換資材thtml内のhtmlize.tpac上のクロージャパス /htmlize/node#inline
+: 変換資材thtml内のhtmlize.tpac上のクロージャパス /thtml.htmlize/node#inline
 
 ## メタ要素
 
 ### タイトル
 
-　タイトル、サブタイトルは、含意タグで指定します。
+　タイトルは、含意タグで指定します。
 　省略可能です。
 
 ```
 【＃タイトル】円周率について
-【＃サブタイトル】著名な語呂合わせ
 ```
 
 　以下のHTMLに変換します。
@@ -39,7 +38,21 @@
 
 ```
 <h1>円周率について</h1>
-<div id="subtitle">著名な語呂合わせ</div>
+```
+
+### サブタイトル
+
+　サブタイトルは、含意タグで指定します。
+　省略可能です。
+
+```
+【＃サブタイトル】著名な語呂合わせ
+```
+
+　以下のHTMLに変換します。
+
+```
+<li>著名な語呂合わせ</li>
 ```
 
 ### 付帯情報
@@ -73,9 +86,9 @@
 　以下のHTMLに変換します。
 
 ```
-<li class="nav-item toc_h2"><a href="#id2_1" class="nav-link">おいしいカレーの作り方</a></li>
-<li class="nav-item toc_h3"><a href="#id3_2" class="nav-link">材料の準備</a></li>
-<li class="nav-item toc_h4"><a href="#id4_3" class="nav-link">牛の飼い方</a></li>
+<li class="nav-item ps-0"><a href="#id2_1" class="nav-link">おいしいカレーの作り方</a></li>
+<li class="nav-item ps-1"><a href="#id3_2" class="nav-link">材料の準備</a></li>
+<li class="nav-item ps-2"><a href="#id4_3" class="nav-link">牛の飼い方</a></li>
 ```
 
 ### 註記
@@ -202,11 +215,12 @@
 　タイトルを h1とする関係上、レベル1が h2、レベル2が h3……となります。
 　目次からページ内リンクで移動できるよう、aタグを挿入します。
 　name属性は、bltxt文書を XML化したときの snum属性を利用します。
+　また行末に、ヘッダ(#header)へ戻るためのリンクを付与します。
 
 ```
-<h2><a name="1">おいしいカレーの作り方</a></h2>
-<h3><a name="2">材料の準備</a></h3>
-<h4><a name="3">牛の飼い方</a></h4>
+<h2><a name="id2_1"></a>おいしいカレーの作り方 <div class="float-end fs-6"><a href="#header"><i class="bi bi-chevron-double-up"></i></a></div></h2>
+<h3><a name="id3_2"></a>材料の準備 <div class="float-end fs-6"><a href="#header"><i class="bi bi-chevron-double-up"></i></a></div></h3>
+<h4><a name="id4_3"></a>牛の飼い方 <div class="float-end fs-6"><a href="#header"><i class="bi bi-chevron-double-up"></i></a></div></h4>
 ```
 
 ### 箇条書き
@@ -310,7 +324,7 @@
 
 ```
 <figure class="text-center">
-<img src="cutecat.png" class="img-fluid" alt="猫ちゃん">
+<a href="cutecat.png"><img src="cutecat.png" class="img-fluid" alt="猫ちゃん"></a>
 <figcaption>猫ちゃん、可愛い～</figcaption>
 </figure>
 ```
@@ -347,7 +361,7 @@
 
 ```
 <aside class="alert alert-success" role="alert">
-<header class="alert-heading"><i class="bi bi-info-circle-fill"></i> ８月３１日はなんの日？</header>
+<header class="alert-heading text-center"><i class="bi bi-info-circle-fill"></i> ８月３１日はなんの日？</header>
 <p>　８月３１日は野菜の日です。<br/>
 　野菜を食べましょう。</p>
 </aside>
@@ -369,7 +383,7 @@
 
 ```
 <aside class="alert alert-danger" role="alert">
-<header class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> 中火とは</header>
+<header class="alert-heading text-center"><i class="bi bi-exclamation-triangle-fill"></i> 中火とは</header>
 <p>　中火とは、フライパンの底に炎の先端がちょうど届くくらいの状態を指します。</p>
 </aside>
 ```
@@ -390,11 +404,15 @@
 　以下のHTMLに変換します。
 
 ```
-<blockquote>
+<figure>
+<blockquote class="blockquote p-3">
 <p>　山路を登りながら、こう考えた。<br/>
 　智に働けば角が立つ。情に棹させば流される。意地を通せば窮屈だ。とかくに人の世は住みにくい。</p>
-<footer><cite>夏目漱石『草枕』</cite></footer>
 </blockquote>
+<figcaption class="blockquote-footer text-end">
+<cite>夏目漱石『草枕』</cite>
+</figcaption>
+</figure>
 ```
 
 ### コード
@@ -412,10 +430,8 @@ println "This is sample code of how to hello to all of the world, which is execu
 　preタグを生成します。
 
 ```
-<pre>
-println &quot;Hello, World!&quot;;
-println &quot;This is sample code of how to hello to all of the world, which is executed &quot; + Date().format(&quot;yyyy-MM-dd'T'HH:mm:ss.SSSZ&quot;);
-</pre>
+<pre class="code px-3"><code>println &quot;Hello, World!&quot;;
+println &quot;This is sample code of how to hello to all of the world, which is executed &quot; + Date().format(&quot;yyyy-MM-dd'T'HH:mm:ss.SSSZ&quot;);</code></pre>
 ```
 
 ### 変換済
@@ -496,6 +512,21 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 　<a href="https://www.google.com/">https://www.google.com/</a>でネット検索できます。</p>
 ```
 
+### 注目
+
+　以下のbltxt文書があったとします。
+
+```
+　危ない！ それは【｜注目】自爆スイッチ【注目｜】だ！
+```
+
+　以下のHTMLに変換します。
+　ブラウザでの表示は .attentionセレクタの定義に依存します。
+
+```
+<p>　危ない！ それは<span class="attention">自爆スイッチ</span>だ！</p>
+```
+
 ### 重要
 
 　以下のbltxt文書があったとします。
@@ -505,6 +536,7 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 ```
 
 　以下のHTMLに変換します。
+　一般的なブラウザでは太字で表示されます。
 
 ```
 <p>　間違えて<strong>自爆スイッチ</strong>を押さないでください。</p>
@@ -519,9 +551,25 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 ```
 
 　以下のHTMLに変換します。
+　一般的なブラウザでは小さめの文字で表示されます。
 
 ```
 <p>　もちろん本当<small>かもしれない</small>ですよ。</p>
+```
+
+### 特記
+
+　以下のbltxt文書があったとします。
+
+```
+　まあ、真実は【｜特記】in the bush【特記｜】ですが。
+```
+
+　以下のHTMLに変換します。
+　一般的なブラウザでは斜体で表示されます。
+
+```
+<p>　まあ、真実は<i>in the bush</i>ですが。</p>
 ```
 
 ### 訂正
@@ -533,9 +581,40 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 ```
 
 　以下のHTMLに変換します。
+　一般的なブラウザでは打消し線で表示されます。
 
 ```
 <p>　富士山の標高は<s>３７７７メートル</s>３７７６メートルです。</p>
+```
+
+### 上付き
+
+　以下のbltxt文書があったとします。
+
+```
+　まあね、大人【｜上付き】2【上付き｜】があるんですよ。
+```
+
+　以下のHTMLに変換します。
+　一般的なブラウザでは上付き文字で表示されます。
+
+```
+<p>　まあね、大人<sup>2</sup>があるんですよ。</p>
+```
+
+### 下付き
+
+　以下のbltxt文書があったとします。
+
+```
+　人生にはH【｜下付き】2【下付き｜】Oが不可欠だ。
+```
+
+　以下のHTMLに変換します。
+　一般的なブラウザでは下付き文字で表示されます。
+
+```
+<p>　人生にはH<sub>2</sub>Oが不可欠だ。</p>
 ```
 
 ### 縦中横
@@ -561,7 +640,7 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 ```
 
 　以下のHTMLに変換します。
-　傍点のためのHTMLタグは無いため、spanタグを利用しています。
+　ブラウザでの表示は .dotセレクタの定義に依存します。
 
 ```
 <p>　まだ<span class="dot">午前三時</span>じゃないか。</p>
@@ -576,6 +655,7 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 ```
 
 　以下のHTMLに変換します。
+　一般的なブラウザではルビとして表示されます。
 
 ```
 <p>　<ruby>出納<rp>［</rp><rt>すいとう</rt><rp>］</rp></ruby>係は言った。</p>
@@ -592,7 +672,7 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 
 　以下のHTMLに変換します。
 　スタイルシートと組み合わせることで期待する表示ができます。
-　class属性の値には属性に指定した値が使われます。
+　属性に指定した値は class属性に使われます。
 
 ```
 <p>　今夜は<span class="small">チキンカレー</span>よ。</p>

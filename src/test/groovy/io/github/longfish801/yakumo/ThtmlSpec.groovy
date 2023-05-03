@@ -28,7 +28,7 @@ class ThtmlSpec extends Specification implements GropedResource {
 	/** HTML化のためのクロージャ */
 	@Shared Closure getHtmlized
 	/** bind変数取得のためクロージャ */
-	@Shared Closure getBind
+	@Shared Closure getOnedoc
 	/** ナビゲーションリンク取得のためクロージャ */
 	@Shared Closure getNavi
 	/** 期待する結果を取得するクロージャ */
@@ -54,21 +54,21 @@ class ThtmlSpec extends Specification implements GropedResource {
 			clmap.properties[cnst.clmap.footprint] = fprint
 		}
 		def clmap = loader.yakumo.material.clmapServer['clmap:thtml']
-		clmap.cl('/util').properties['resultKey'] = 'ThtmlSpec'
+		clmap.cl('/tbase.logging').properties['resultKey'] = 'ThtmlSpec'
 		
 		// HTML化のためクロージャです
 		getHtmlized = { String parentKey, String childKey ->
 			String text = decTarget.solve("${parentKey}/${childKey}").dflt.join(System.lineSeparator())
-			return clmap.cl('/htmlize').call(new BLtxt(text).root).denormalize()
+			return clmap.cl('/thtml.htmlize').call(new BLtxt(text).root).denormalize()
 		}
-		// bind変数取得のためクロージャです
-		getBind = { String parentKey, String childKey ->
+		// onedoc変数取得のためクロージャです
+		getOnedoc = { String parentKey, String childKey ->
 			String text = decTarget.solve("${parentKey}/${childKey}").dflt.join(System.lineSeparator())
-			return clmap.cl("bind#${childKey}").call(new BLtxt(text)).denormalize()
+			return clmap.cl("/thtml.meta/onedoc#${childKey}").call(new BLtxt(text)).denormalize()
 		}
 		// ナビゲーションリンク取得のためクロージャです
 		getNavi = { String childKey, String resultKey, List order ->
-			return clmap.cl("navi#${resultKey}").call(resultKey, order).denormalize()
+			return clmap.cl("/thtml.meta/navi#${resultKey}").call(resultKey, order).denormalize()
 		}
 		// 期待する変換結果を返すクロージャです
 		getExpect = { String parentKey, String childKey ->
@@ -99,9 +99,13 @@ class ThtmlSpec extends Specification implements GropedResource {
 		'block'	| '行範囲'
 		'inline'	| '註'
 		'inline'	| 'リンク'
+		'inline'	| '注目'
 		'inline'	| '重要'
 		'inline'	| '補足'
+		'inline'	| '特記'
 		'inline'	| '訂正'
+		'inline'	| '上付き'
+		'inline'	| '下付き'
 		'inline'	| '縦中横'
 		'inline'	| '傍点'
 		'inline'	| 'ルビ'
@@ -111,16 +115,16 @@ class ThtmlSpec extends Specification implements GropedResource {
 	
 	@Timeout(10)
 	@Unroll
-	def 'bind'(){
+	def 'onedoc'(){
 		expect:
-		getBind(parentKey, childKey) == getExpect(parentKey, childKey)
+		getOnedoc(parentKey, childKey) == getExpect(parentKey, childKey)
 		
 		where:
 		parentKey	| childKey
-		'bind'	| 'title'
-		'bind'	| 'extra'
-		'bind'	| 'toc'
-		'bind'	| 'note'
+		'onedoc'	| 'subtitle'
+		'onedoc'	| 'extra'
+		'onedoc'	| 'toc'
+		'onedoc'	| 'note'
 	}
 	
 	@Timeout(10)

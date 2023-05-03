@@ -1,0 +1,20 @@
+#! clmap:tbase.type
+#: データ型に関する汎用的な処理です。
+#>
+
+#> closure:parseInt
+#: 文字列を整数に変換します。
+#: 変換に失敗する（NumberFormatException）場合は例外をスローします。
+	try {
+		num = Integer.parseInt(numstr)
+	} catch (NumberFormatException exc){
+		throw new YmoConvertException("${name}を整数に変換できません。半角数字を指定してください。${name}=${numstr}", exc)
+	}
+#-dec
+	import io.github.longfish801.yakumo.YmoConvertException
+#-args
+	String numstr
+	String name
+#-return
+	int num
+#>
