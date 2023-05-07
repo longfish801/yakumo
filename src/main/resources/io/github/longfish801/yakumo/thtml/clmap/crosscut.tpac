@@ -1,0 +1,196 @@
+#! clmap:thtml.crosscut
+#: 見出しへの参照など複数の変換結果に関する横断的な処理をします。
+#-dec
+	import io.github.longfish801.bltxt.node.BLNode
+	import io.github.longfish801.yakumo.YmoConvertException
+#>
+
+#> map:filename
+#-return
+	String filename
+#>> closure:target
+#: 変換対象キーに対応する変換結果のファイル名を返します。
+#: 変換対象と変換結果が一対一とみなし、変換対象キーに拡張子htmlを付与した文字列を返します。
+#: 必要に応じて処理を上書きしてください。
+	filename = "${targetKey}.html"
+#-args
+	String targetKey
+#>> closure:result
+#: 変換結果キーに対応する変換結果のファイル名を返します。
+#: 変換結果キーに拡張子htmlを付与した文字列を返します。
+#: 必要に応じて処理を上書きしてください。
+	filename = "${resultKey}.html"
+#-args
+	String resultKey
+#>
+
+#> map:headline
+#>> closure:level
+#: 見出しのノードから見出しレベルを参照して返します。
+#: 見出しの htmlタグに合わせてインクリメントしています。
+#: たとえばレベルとして 1が指定されたなら h2タグ相当のため 2を返します。
+	if (node.attrs.size() == 0){
+		throw new YmoConvertException("見出しにレベルが指定されていません。 node=${node.toString()}")
+	}
+	level = clmap.cl('/tbase.type#parseInt').call(node.attrs[0], '見出しレベル') + 1
+#-dec
+	import io.github.longfish801.yakumo.YmoConvertException
+#-args
+	BLNode node
+#-return
+	int level
+#>
+
+#>> closure:anchor
+#: 見出しのアンカーを返します。
+	anchor = "id${clmap.cl('#level').call(node)}_${node.serialNo}"
+#-args
+	BLNode node
+#-return
+	String anchor
+#>
+
+#>> closure:headermap
+#: 見出しとアンカーとのマップを生成します。
+	headerMap = [:]
+	bltxtMap.each { String targetKey, def bltxt ->
+		def headerMapEach = [:]
+		bltxt.grepNodes('block', '見出し').each { def node ->
+			String alias = (node.attrs.size() < 2)
+				? clmap.cl('/ttext').call(node)
+				: node.attrs[1]
+			headerMapEach[alias] = clmap.cl('/thtml.crosscut/headline#anchor').call(node)
+		}
+		headerMap[targetKey] = headerMapEach
+	}
+#-args
+	Map bltxtMap
+#-return
+	Map headerMap
+#>
+
+#>> closure:path
+#: 見出しへリンクするための URLパスを生成します。
+	// 見出しのアンカーを参照します
+	String anchor
+	if (alias != null){
+		Map headerMapEach = headerMap[targetKey]
+		if (headerMapEach == null){
+			clmap.cl('/tbase.logging/fprint#warn').call("変換対象キーに対応する見出しとアンカーのマップがありません。targetKey=%s", [ targetKey ])
+			return ''
+		}
+		anchor = headerMapEach[alias]
+		if (anchor == null){
+			clmap.cl('/tbase.logging/fprint#warn').call("見出しの別名に対応するアンカーがありません。targetKey=%s, alias=%s", [ targetKey, alias ])
+			return ''
+		}
+	}
+	// URLパスを生成します
+	path = (anchor == null)? '' : '#' + anchor
+	// 他のファイルへのリンクならばファイル名を先頭に付与します
+	if (!internal) path = clmap.cl('../filename#target').call(targetKey) + path
+#-args
+	String targetKey
+	String alias
+	boolean internal
+#-return
+	String path
+#-prefix
+	if (headerMap == null) throw new YmoConvertException('headerMapがバインドされていません。')
+#>
+
+#> map:navi
+#: ナビゲーションのHTMLを生成します。
+#-args
+	String resultKey
+#-return
+	String html
+#-prefix
+	def templater = clmap.cl('/tbase.template#apply')
+	String templateKey = "${clmap.path}/data:template#"
+#>> data:template
+#-upper <a href=".."><i class="bi bi-arrow-up-circle"></i></a>
+#-index <a href="index.html#tocAll"><i class="bi bi-arrow-up-circle"></i></a>
+#-back <a href="${href}"><i class="bi bi-arrow-left-circle"></i></a>
+#-next <a href="${href}"><i class="bi bi-arrow-right-circle"></i></a>
+#>> closure
+	// 変換対象がひとつのみならば上位へのリンクのみとします
+	if (resultKeys.size() == 1){
+		return templater.call(templateKey + 'upper', [:])
+	}
+	
+	// 現在のページの位置を参照しておきます
+	int idx = resultKeys.indexOf(resultKey)
+	if (idx < 0) throw new YmoConvertException("変換結果のファイル名がリストにありません resultKey=${resultKey}, resultKeys=${resultKeys}")
+	
+	// 戻るリンクを追加します
+	List links = []
+	if (resultKeys[idx - 1] != 'index'){
+		links << templater.call(templateKey + 'back', [
+			href: clmap.cl('/thtml.crosscut/filename#result').call(resultKeys[idx - 1]),
+		])
+	}
+	
+	// 中央に表示するリンクを追加します
+	String centerLink = (resultKey == 'index')
+		? templater.call(templateKey + 'upper', [:])
+		: templater.call(templateKey + 'index', [:])
+	links << centerLink
+	
+	// 次へのリンクを追加します
+	if (idx < resultKeys.size() -  1){
+		links << templater.call(templateKey + 'next', [
+			href: clmap.cl('/thtml.crosscut/filename#result').call(resultKeys[idx + 1]),
+		])
+	}
+	html = links.join(System.lineSeparator())
+#-prefix
+	if (resultKeys == null) throw new YmoConvertException('resultKeysがバインドされていません。')
+#>
+
+#> map:toc
+#-args
+	Map bltxtMap
+#-return
+	String html
+#>> closure
+#: h1～h6を対象とした総目次を生成します。
+	html = clmap.cl('level#').call(bltxtMap, 0)
+#>> closure:h1
+#: h1のみを対象とした総目次を生成します。
+	html = clmap.cl('level#').call(bltxtMap, 1)
+#>> map:need
+#>>> closure
+	List targetKeys = bltxtMap.keySet() as List
+	targetKeys.remove('index')
+	judge = (targetKeys.size() > 0)? true : false
+#-return
+	boolean judge
+#>> map:level
+#>>> data:template
+#-title <li class="nav-item toc-h1"><a href="${href}" class="nav-link">${title}</a></li>${lower}
+#>>> config
+title {
+	dflt = '（無題）'
+}
+#>>> closure
+#: 総目次を生成します。
+#: 変換対象と変換結果が一対一であることが前提となります。
+#: 変換対象キー "index"は目次の対象として除外します。
+	def config = clmap.solve("${clmap.path}/config").config()
+	html = bltxtMap.findAll {
+		it.key != 'index'
+	}.collect { String targetKey, def bltxt ->
+		return templater.call(templateKey + 'title', [
+			href: clmap.cl('/thtml.crosscut/filename#target').call(targetKey),
+			title: clmap.cl('/thtml.htmlize').cl('#meta').call(bltxt, 'タイトル', config.title.dflt),
+			lower: (maxLevel != 1)? System.lineSeparator() + clmap.cl('/thtml.meta/onedoc/toc#').call(bltxt, maxLevel, targetKey) : '',
+		])
+	}.join(System.lineSeparator())
+#-args
+	Map bltxtMap
+	int maxLevel
+#-prefix
+	def templater = clmap.cl('/tbase.template#apply')
+	String templateKey = "${clmap.path}/data:template#"
+#>

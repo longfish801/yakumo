@@ -1,0 +1,313 @@
+#! clmap:thtml.htmlize
+#: BLtxt文書の各ノードを HTML化します。
+#-dec
+	import io.github.longfish801.bltxt.node.BLNode
+#>
+
+#> closure
+#: BLNodeをHTML化して返します。
+	html = clmap.cl("node#${node.xmlTag}").call(node)
+#-args
+	BLNode node
+#-return
+	String html
+#>
+
+#> closure:meta
+#: 指定したBLtxt文書内から指定した名前の metaタグを抽出し、
+#: それぞれテキスト化した上で改行コードで結合した結果を返します。
+	List greped = clmap.cl('/tbase.bltxt#grep').call(bltxt, 'meta', name, clmap.cl('/thtml.htmlize'))
+	result = (greped.empty)? dflt : greped.join(System.lineSeparator())
+#-dec
+	import io.github.longfish801.bltxt.BLtxt
+#-args
+	BLtxt bltxt
+	String name
+	String dflt
+#-return
+	String result
+#>
+
+#> map:node
+#-args
+	BLNode node
+#-return
+	String html
+#-prefix
+	clmap.cl('/tbase.logging/log#trace').call("htmlize {} tag={}", [node.xmlTag, node.tag])
+	List lowers
+	if (node.nodes != null){
+		lowers = clmap.cl('/tbase.bltxt#lowers').call(node, clmap.cl('/thtml.htmlize'))
+	}
+#>> closure
+	throw new UnsupportedOperationException("未対応のタグです。xmlTag=${node.xmlTag}, node=${node.toString()}")
+#>> closure:bltxt
+	html = lowers.join(System.lineSeparator() * 2)
+#>> closure:line
+	html = lowers.join()
+#>> closure:text
+	html = StringEscapeUtils.escapeHtml4(node.text)
+#-dec
+	import org.apache.commons.text.StringEscapeUtils
+#>> closure:para
+	String parent = (node.parent.xmlTag == 'block')?
+		"${node.parent.xmlTag}_${node.parent.tag}" : node.parent.xmlTag
+	html = clmap.cl("/thtml.htmlize/para#${parent}").call(node, lowers)
+#>> closure:block
+	html = clmap.cl("/thtml.htmlize/block#${node.tag}").call(node, lowers)
+#>> closure:inline
+	html = clmap.cl("/thtml.htmlize/inline#${node.tag}").call(node, lowers)
+#>> closure:meta
+	html = lowers.join(System.lineSeparator())
+#>
+
+#> map:para
+#-args
+	BLNode node
+	List lowers
+#-return
+	String html
+#>> closure
+	html = '<p>' + lowers.join("<br/>" + System.lineSeparator()) + '</p>'
+#>> closure:bltxt
+	html = '<p>' + lowers.join("<br/>" + System.lineSeparator()) + '</p>'
+#>> closure:meta
+	html = (node.parent.single)? lowers.join("<br/>" + System.lineSeparator())
+		: '<p>' + lowers.join("<br/>" + System.lineSeparator()) + '</p>'
+#>> closure:block_見出し
+	html = lowers.join("<br/>" + System.lineSeparator())
+#>> closure:block_項目
+	html = lowers.join("<br/>" + System.lineSeparator())
+#>> closure:block_用語
+	html = lowers.join("<br/>" + System.lineSeparator())
+#>> closure:block_説明
+	html = lowers.join("<br/>" + System.lineSeparator())
+#>> closure:block_画像
+	html = lowers.join("<br/>" + System.lineSeparator())
+#>> closure:block_引用元
+	html = lowers.join("<br/>" + System.lineSeparator())
+#>> closure:block_コード
+	html = lowers.join(System.lineSeparator())
+#>> closure:block_変換済
+	html = lowers.join(System.lineSeparator())
+#>
+
+#> map:block
+#-args
+	BLNode node
+	List lowers
+#-return
+	String html
+#-prefix
+	def templater = clmap.cl('/tbase.template#apply')
+	String templateKey = "${clmap.path}/data:template#${node.tag}"
+#>> data:template
+#-見出し <h${level}><a name="${id}"></a>${text} <div class="float-end fs-6"><a href="#header"><i class="bi bi-chevron-double-up"></i></a></div></h${level}>
+#-箇条書き
+<ul>
+${text}
+</ul>
+#-項目 <li>${text}</li>
+#-用語説明
+<dl>
+${text}
+</dl>
+#-用語 <dt>${text}</dt>
+#-説明 <dd>${text}</dd>
+#-コラム
+<aside class="alert alert-success" role="alert">
+<% if (title != null){ %><header class="alert-heading text-center"><i class="bi bi-info-circle-fill"></i> ${title}</header><% } %>
+${text}
+</aside>
+#-注意
+<aside class="alert alert-danger" role="alert">
+<% if (title != null){ %><header class="alert-heading text-center"><i class="bi bi-exclamation-triangle-fill"></i> ${title}</header><% } %>
+${text}
+</aside>
+#-引用
+<figure>
+<blockquote class="blockquote p-3">
+${text}
+</blockquote>
+</figure>
+#-引用元あり引用
+<figure>
+<blockquote class="blockquote p-3">
+${text}
+</blockquote>
+${source}
+</figure>
+#-引用元
+<figcaption class="blockquote-footer text-end">
+<cite>${text}</cite>
+</figcaption>
+#-コード <pre class="code px-3"><code>${text}</code></pre>
+#-画像
+<figure class="text-center">
+<a href="${path}"><img src="${path}" class="img-fluid" alt="${alt}"></a>
+<% if (text != null){ %><figcaption>${text}</figcaption><% } %>
+</figure>
+#-行範囲
+<div class="${clazz}">
+${text}
+</div>
+#>> closure
+	clmap.cl('/tbase.logging/fprint#warn').call("未対応のブロック要素です。tag=%s, node=%s", [node.tag, node.toString()])
+	html = lowers.join()
+#>> closure:見出し
+	html = templater.call(templateKey, [
+		text: lowers.join(),
+		level: clmap.cl('/thtml.crosscut/headline#level').call(node),
+		id: clmap.cl('/thtml.crosscut/headline#anchor').call(node),
+	])
+#>> closure:箇条書き
+	html = templater.call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
+#>> closure:項目
+	html = templater.call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
+#>> closure:用語説明
+	html = templater.call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
+#>> closure:用語
+	html = templater.call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
+#>> closure:説明
+	html = templater.call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
+#>> closure:コラム
+	html = templater.call(templateKey, [
+		text: lowers.join(System.lineSeparator()),
+		title: (node.attrs.size() > 0)? node.attrs[0] : null
+	])
+#>> closure:注意
+	html = templater.call(templateKey, [
+		text: lowers.join(System.lineSeparator()),
+		title: (node.attrs.size() > 0)? node.attrs[0] : null
+	])
+#>> closure:引用
+	if (lowers.last().startsWith('<figcaption ')){
+		// 引用元の記述がある場合
+		html = templater.call("${clmap.path}/data:template#引用元あり引用", [
+			source: lowers.removeLast(),
+			text: lowers.join(System.lineSeparator()),
+		])
+	} else {
+		// 引用元の記述がない場合
+		html = templater.call(templateKey, [
+			text: lowers.join(System.lineSeparator())
+		])
+	}
+#>> closure:引用元
+	html = templater.call(templateKey, [ text: lowers.join() ])
+#>> closure:コード
+	html = templater.call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
+#>> closure:画像
+	html = templater.call(templateKey, [
+		text: (lowers.size() > 0)? lowers.join() : null,
+		path: node.attrs[1],
+		alt: node.attrs[0]
+	])
+#>> closure:変換済
+	html = (node.attrs[0] == 'html')? clmap.cl('/ttext').call(node) : ''
+#>> closure:行範囲
+	html = templater.call(templateKey, [
+		text: lowers.join(lsep),
+		clazz: (node.attrs.size() > 0)? node.attrs[0] : 'base'
+	])
+#>
+
+#> map:inline
+#-dec
+	import io.github.longfish801.yakumo.YmoConvertException
+#-args
+	BLNode node
+	List lowers
+#-return
+	String html
+#-prefix
+	def templater = clmap.cl('/tbase.template#apply')
+	String templateKey = "${clmap.path}/data:template#${node.tag}"
+	String text = (lowers != null)? lowers.join() : ''
+#>> data:template
+#-註 <sup><a id="f${id}" href="#t${id}">*${id}</a></sup>
+#-リンク <a href="${url}">${text}</a>
+#-参照 <a href="${url}">${text}</a>
+#-注目 <span class="attention">${text}</span>
+#-重要 <strong>${text}</strong>
+#-補足 <small>${text}</small>
+#-特記 <i>${text}</i>
+#-訂正 <s>${text}</s>
+#-上付き <sup>${text}</sup>
+#-下付き <sub>${text}</sub>
+#-傍点 <span class="dot">${text}</span>
+#-ルビ <ruby>${text}<rp>［</rp><rt>${ruby}</rt><rp>］</rp></ruby>
+#-範囲 <span class="${clazz}">${text}</span>
+#>> closure
+	clmap.cl('/tbase.logging/fprint#warn').call("未対応のインライン要素です。tag=%s, node=%s", [node.tag, node.toString()])
+	html = (node.nodes.size() == 0)? "【${node.tag}${node.attrs.toString()}】"
+		: "【｜${node.tag}${node.attrs.toString()}】${text}【${node.tag}｜】"
+#>> closure:註
+	html = templater.call(templateKey, [
+		id: node.serialNo,
+		url: node.attrs[0]
+	])
+#>> closure:リンク
+	html = templater.call(templateKey, [
+		text: text,
+		url: node.attrs[0]
+	])
+#>> closure:参照
+	String aliasAttr = (node.attrs.size() == 0)
+		? '＃' + clmap.cl('/ttext').call(node)
+		: node.attrs[0]
+	int idxDiv = aliasAttr.indexOf('＃')
+	String targetKey
+	String alias
+	boolean internal = false
+	switch (idxDiv){
+		case { it < 0 }:
+			// 他の BLtxt文書への参照の場合
+			targetKey = aliasAttr
+			break
+		case { it == 0 }:
+			// 自 BLtxt文書内の見出しへの参照の場合
+			targetKey = targetMap[node.root]
+			alias = aliasAttr.substring(idxDiv + 1)
+			internal = true
+			break
+		default:
+			// 他の BLtxt文書内の見出しへの参照の場合
+			targetKey = aliasAttr.substring(0, idxDiv)
+			alias = aliasAttr.substring(idxDiv + 1)
+	}
+	html = templater.call(templateKey, [
+		text: text,
+		url: clmap.cl('/thtml.crosscut/headline#path').call(targetKey, alias, internal)
+	])
+#-prefix
+	if (targetMap == null) throw new YmoConvertException('targetMapがバインドされていません。')
+#>> closure:注目
+	html = templater.call(templateKey, [ text: text ])
+#>> closure:重要
+	html = templater.call(templateKey, [ text: text ])
+#>> closure:補足
+	html = templater.call(templateKey, [ text: text ])
+#>> closure:特記
+	html = templater.call(templateKey, [ text: text ])
+#>> closure:訂正
+	html = templater.call(templateKey, [ text: text ])
+#>> closure:上付き
+	html = templater.call(templateKey, [ text: text ])
+#>> closure:下付き
+	html = templater.call(templateKey, [ text: text ])
+#>> closure:縦中横
+	html = text
+#>> closure:傍点
+	html = templater.call(templateKey, [ text: text ])
+#>> closure:ルビ
+	html = templater.call(templateKey, [
+		text: text,
+		ruby: node.attrs[0]
+	])
+#>> closure:範囲
+	html = templater.call(templateKey, [
+		text: text,
+		clazz: node.attrs[0]
+	])
+#>

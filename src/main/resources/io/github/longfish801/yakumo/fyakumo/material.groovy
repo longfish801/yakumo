@@ -8,4 +8,5 @@
 material {
 	// switemスクリプトを設定します
 	switem grope("${convName}/fyakumo.tpac")
+	baseSwitemName 'fyakumo'
 }

@@ -27,10 +27,12 @@ class ThtmlSpec extends Specification implements GropedResource {
 	static final Class clazz = ThtmlSpec.class
 	/** HTML化のためのクロージャ */
 	@Shared Closure getHtmlized
-	/** bind変数取得のためクロージャ */
+	/** ひとつの BLtxt文書に基づく HTML部品取得のためクロージャ */
 	@Shared Closure getOnedoc
 	/** ナビゲーションリンク取得のためクロージャ */
 	@Shared Closure getNavi
+	/** 複数の変換結果に関する横断的な処理結果取得のためクロージャ */
+	@Shared Closure getCross
 	/** 期待する結果を取得するクロージャ */
 	@Shared Closure getExpect
 	
@@ -49,26 +51,40 @@ class ThtmlSpec extends Specification implements GropedResource {
 		// 変換資材を読み込みます
 		MaterialLoader loader = new MaterialLoader(new Yakumo())
 		loader.material('thtml')
-		Footprints fprint = new Footprints()
-		loader.yakumo.material.clmapServer.decs.values().each { Clmap clmap ->
-			clmap.properties[cnst.clmap.footprint] = fprint
-		}
 		def clmap = loader.yakumo.material.clmapServer['clmap:thtml']
-		clmap.cl('/tbase.logging').properties['resultKey'] = 'ThtmlSpec'
+		
+		ConvertScript script = new ConvertScript()
+		script.results {
+			result 'some', new StringWriter()
+		}
+		clmap.cl('/thtml#prepare').call(['some': new BLtxt('')], script)
 		
 		// HTML化のためクロージャです
 		getHtmlized = { String parentKey, String childKey ->
 			String text = decTarget.solve("${parentKey}/${childKey}").dflt.join(System.lineSeparator())
-			return clmap.cl('/thtml.htmlize').call(new BLtxt(text).root).denormalize()
+			BLtxt bltxt = new BLtxt(text)
+			if (childKey == '参照'){
+				Map bltxtMap = [ 'some': bltxt ]
+				clmap.cl('/thtml.htmlize/inline').properties['targetMap'] = bltxtMap.collectEntries { [ it.value.root, it.key ] }
+				clmap.cl('/thtml.crosscut/headline').properties['headerMap'] = clmap.cl('/thtml.crosscut/headline#headermap').call(bltxtMap)
+			}
+			return clmap.cl('/thtml.htmlize').call(bltxt.root).denormalize()
 		}
-		// onedoc変数取得のためクロージャです
+		// ひとつの BLtxt文書に基づく HTML部品取得のためクロージャです
 		getOnedoc = { String parentKey, String childKey ->
 			String text = decTarget.solve("${parentKey}/${childKey}").dflt.join(System.lineSeparator())
 			return clmap.cl("/thtml.meta/onedoc#${childKey}").call(new BLtxt(text)).denormalize()
 		}
 		// ナビゲーションリンク取得のためクロージャです
-		getNavi = { String childKey, String resultKey, List order ->
-			return clmap.cl("/thtml.meta/navi#${resultKey}").call(resultKey, order).denormalize()
+		getNavi = { String childKey, String resultKey, List resultKeys ->
+			clmap.cl('/thtml.crosscut/navi').properties['resultKeys'] = resultKeys
+			clmap.cl('/thtml.crosscut/navi#').closure = null
+			return clmap.cl('/thtml.crosscut/navi#').call(resultKey).denormalize()
+		}
+		// 複数の変換結果に関する横断的な処理結果のためクロージャです
+		getCross = { String parentKey, String childKey, String clname ->
+			String text = decTarget.solve("${parentKey}/${childKey}-${clname}").dflt.join(System.lineSeparator())
+			return clmap.cl("/thtml.crosscut/${childKey}#${clname}").call([ 'some': new BLtxt(text) ]).denormalize()
 		}
 		// 期待する変換結果を返すクロージャです
 		getExpect = { String parentKey, String childKey ->
@@ -99,6 +115,7 @@ class ThtmlSpec extends Specification implements GropedResource {
 		'block'	| '行範囲'
 		'inline'	| '註'
 		'inline'	| 'リンク'
+		'inline'	| '参照'
 		'inline'	| '注目'
 		'inline'	| '重要'
 		'inline'	| '補足'
@@ -131,15 +148,29 @@ class ThtmlSpec extends Specification implements GropedResource {
 	@Unroll
 	def 'navi'(){
 		expect:
-		getNavi(childKey, resultKey, order) == getExpect('navi', childKey)
+		getNavi(childKey, resultKey, resultKeys) == getExpect('navi', childKey)
 		
 		where:
-		childKey		| resultKey	| order
-		'index-noorder'	| 'index'	| null
-		'some-noorder'	| 'some'	| null
-		'index-order'	| 'index'	| [ 'some1.html', 'some2.html', 'some3.html' ]
-		'bgn-order'		| 'some1'	| [ 'some1.html', 'some2.html', 'some3.html' ]
-		'mdl-order'		| 'some2'	| [ 'some1.html', 'some2.html', 'some3.html' ]
-		'end-order'		| 'some3'	| [ 'some1.html', 'some2.html', 'some3.html' ]
+		childKey			| resultKey	| resultKeys
+		'onefile'			| 'some'	| [ 'some' ]
+		'onefile-index'		| 'index'	| [ 'index' ]
+		'twofile'			| 'some'	| [ 'index', 'some' ]
+		'twofile-index'		| 'index'	| [ 'index', 'some' ]
+		'moreFile-index'	| 'index'	| [ 'index', 'some1', 'some2', 'some3' ]
+		'moreFile-first'	| 'some1'	| [ 'index', 'some1', 'some2', 'some3' ]
+		'moreFile-middle'	| 'some2'	| [ 'index', 'some1', 'some2', 'some3' ]
+		'moreFile-last'		| 'some3'	| [ 'index', 'some1', 'some2', 'some3' ]
+	}
+	
+	@Timeout(10)
+	@Unroll
+	def 'cross'(){
+		expect:
+		getCross(parentKey, childKey, clname) == getExpect(parentKey, "${childKey}-${clname}")
+		
+		where:
+		parentKey	| childKey	| clname
+		'cross'		| 'toc'		| ''
+		'cross'		| 'toc'		| 'h1'
 	}
 }

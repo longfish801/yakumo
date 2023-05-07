@@ -12,4 +12,5 @@ load {
 material {
 	// clmapスクリプトを設定します
 	clmap grope("${convName}/ttext.tpac")
+	baseClmapName 'ttext'
 }

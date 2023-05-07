@@ -1,0 +1,122 @@
+#! clmap:thtml.meta
+#: 目次や註記といった本文以外の HTML部品を生成します。
+#>
+
+#> map:onedoc
+#: ひとつの BLtxt文書に基づく HTML部品を生成します。
+#-dec
+	import io.github.longfish801.bltxt.BLtxt
+#-args
+	BLtxt bltxt
+#-return
+	String html
+#-prefix
+	Closure htmlizerMeta = { String name, String dflt ->
+		return clmap.cl('/thtml.htmlize#meta').call(bltxt, name, dflt)
+	}
+	def templater = clmap.cl('/tbase.template#apply')
+	String templateKey = "${clmap.path}/data:template#"
+#>> config
+subtitle = [ 'サブタイトル' ]
+extra = [ '公開日', '著者名' ]
+#>> data:template
+#-サブタイトル <li>${text}</li>
+#-公開日 <li>公開日 ${text}</li>
+#-著者名 <li>${text}</li>
+#-toc <li class="nav-item toc-h${level}"><a href="${filename}#${id}" class="nav-link">${text}</a></li>
+#-note
+<dt><a name="t${id}" href="#f${id}">[*${id}]</a></dt>
+<dd>${text}</dd>
+#>> closure:subtitle
+#: サブタイトルのHTMLを生成します。
+	def config = clmap.solve("${clmap.path}/config").config()
+	html = config.subtitle.collect { String target ->
+		String text = htmlizerMeta.call(target, '')
+		return (text.empty)? '' : templater.call(templateKey + target, [text: text])
+	}.findAll { !it.empty }.join(System.lineSeparator())
+#>> closure:extra
+#: 付帯情報のHTMLを生成します。
+	def config = clmap.solve("${clmap.path}/config").config()
+	html = config.extra.collect { String target ->
+		String text = htmlizerMeta.call(target, '')
+		return (text.empty)? '' : templater.call(templateKey + target, [text: text])
+	}.findAll { !it.empty }.join(System.lineSeparator())
+#>> closure:toc
+#: 目次のHTMLを生成します。
+	html = clmap.cl('toc#').call(bltxt, 0, null)
+#>> map:toc
+#-args
+	BLtxt bltxt
+	int maxLevel
+	String targetKey
+#>>> closure
+	List list = []
+	bltxt.grepNodes('block', '見出し').each { def node ->
+		int level = clmap.cl('/thtml.crosscut/headline#level').call(node)
+		if (level <= maxLevel || maxLevel == 0){
+			String elem = templater.call('/clmap:thtml.meta/map:onedoc/data:template#toc', [
+				text: clmap.cl('/thtml.textize').call(node),
+				level: level,
+				id: clmap.cl('/thtml.crosscut/headline#anchor').call(node),
+				filename: (targetKey == null)? '' : clmap.cl('/thtml.crosscut/filename#target').call(targetKey),
+			])
+			list << elem
+		}
+	}
+	html = list.join(System.lineSeparator())
+#>> closure:note
+#: 註記のHTMLを生成します。
+	// 註のノードと、そのキーを収集します
+	List noteList = bltxt.grepNodes('inline', '註')
+	List noteKeys = []
+	noteList.each { noteKeys << it.attrs[0] }
+	if (noteKeys.size() == 0) return ''
+	// 註記のノードと、そのキーを収集します
+	List cmntList = bltxt.grepNodes('meta', '註記')
+	List cmntKeys = []
+	Map cmntMap = [:]
+	cmntList.each {
+		cmntKeys << it.attrs[0]
+		cmntMap[it.attrs[0]] = it
+	}
+	// キーの重複や過不足をチェックします
+	if (noteKeys.unique(false).size() < noteKeys.size()){
+		Map map = [:]
+		noteKeys.each { map[it] = (map.containsKey(it))? ++ map[it] : 1 }
+		clmap.cl('/tbase.logging/fprint#warn').call("註のキーに重複があります。重複キー=%s", [map.findAll { it.value > 1 }.keySet()])
+		return ''
+	}
+	List diff1 = noteKeys - cmntKeys
+	if (diff1.size() > 0){
+		clmap.cl('/tbase.logging/fprint#warn').call("註に対する註記の記述漏れがあります。diff=%s", [diff1])
+		return ''
+	}
+	List diff2 = cmntKeys - noteKeys
+	if (diff2.size() > 0){
+		clmap.cl('/tbase.logging/fprint#warn').call("不要な註記あるいは註の記述漏れがあります。diff=%s", [diff2])
+		return ''
+	}
+	// 註記を生成します
+	List list = []
+	noteKeys.eachWithIndex { String noteKey, int cnt ->
+		list << templater.call(templateKey + 'note', [
+			text: clmap.cl('/thtml.htmlize').call(cmntMap[noteKey]),
+			id: cnt + 1
+		])
+	}
+	html = list.join(System.lineSeparator())
+#>> map:need
+#: HTML部品の生成が必要か判定します。
+#-return
+	boolean judge
+#>>> closure:subtitle
+	def config = clmap.solve("../config").config()
+	judge = config.subtitle.any { bltxt.grepNodes('meta', it).size() > 0 }
+#>>> closure:extra
+	def config = clmap.solve("../config").config()
+	judge = config.extra.any { bltxt.grepNodes('meta', it).size() > 0 }
+#>>> closure:toc
+	judge = (bltxt.grepNodes('block', '見出し').size() > 0)? true : false
+#>>> closure:note
+	judge = (bltxt.grepNodes('inline', '註').size() > 0)? true : false
+#>

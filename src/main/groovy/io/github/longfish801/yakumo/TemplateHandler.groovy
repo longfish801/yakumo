@@ -27,6 +27,9 @@ class TemplateHandler {
 	 * @param source テンプレート文字列（Reader, String, File, URLのいずれか）
 	 */
 	void set(String key, def source){
+		if (source == null){
+			throw new YmoConvertException(String.format(msgs.exc.noTemplateStr, key))
+		}
 		map[key] = templateEngine.createTemplate(source)
 	}
 	

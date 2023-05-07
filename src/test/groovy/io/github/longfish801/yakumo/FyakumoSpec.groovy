@@ -60,6 +60,7 @@ class FyakumoSpec extends Specification implements GropedResource {
 		where:
 		parentKey | childKey
 		'block' | '見出し'
+		'block' | '見出し:別名'
 		'block' | '箇条書き'
 		'block' | '箇条書き:入れ子'
 		'block' | '引用'
@@ -77,6 +78,7 @@ class FyakumoSpec extends Specification implements GropedResource {
 		parentKey | childKey
 		'inline' | 'リンク'
 		'inline' | 'リンク:一行'
+		'inline' | '参照'
 		'inline' | '注目'
 		'inline' | '重要'
 		'inline' | '補足'
@@ -87,5 +89,7 @@ class FyakumoSpec extends Specification implements GropedResource {
 		'inline' | '縦中横'
 		'inline' | '傍点'
 		'inline' | 'ルビ'
+		'inline' | 'カクヨム記法のルビ'
+		'inline' | 'カクヨム記法の傍点'
 	}
 }

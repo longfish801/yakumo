@@ -12,16 +12,16 @@
 #-dec
 	import org.slf4j.LoggerFactory
 #-prefix
-	if (resultKey == null) throw new YmoConvertException("resultKeyがバインドされていません。")
+	if (logid == null) throw new YmoConvertException("logidがバインドされていません。")
 	def LOG = LoggerFactory.getLogger('io.github.longfish801.yakumo.thtml.util')
 #>> closure:trace
-	LOG.trace("[${resultKey}] ${message}", *embeddeds)
+	LOG.trace("[${logid}] ${message}", *embeddeds)
 #>> closure:debug
-	LOG.debug("[${resultKey}] ${message}", *embeddeds)
+	LOG.debug("[${logid}] ${message}", *embeddeds)
 #>> closure:info
-	LOG.info("[${resultKey}] ${message}", *embeddeds)
+	LOG.info("[${logid}] ${message}", *embeddeds)
 #>> closure:warn
-	LOG.warn("[${resultKey}] ${message}", *embeddeds)
+	LOG.warn("[${logid}] ${message}", *embeddeds)
 #>
 
 #> map:fprint
@@ -30,8 +30,9 @@
 	String message
 	List embeddeds
 #-prefix
-	if (resultKey == null) throw new YmoConvertException("resultKeyがバインドされていません。")
-	message = String.format("[${resultKey}] ${message}", *embeddeds)
+	if (logid == null) throw new YmoConvertException("logidがバインドされていません。")
+	if (fprint == null) throw new YmoConvertException("fprintがバインドされていません。")
+	message = String.format("[${logid}] ${message}", *embeddeds)
 #>> closure:trace
 	fprint.trace(message)
 #>> closure:debug

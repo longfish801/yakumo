@@ -5,143 +5,9 @@
 ## 概要
 
 　yakumo記法から bltxt文書へ変換された後、HTML5へ変換するサンプルとして変換資材 thtmlが用意されています。
-　各処理と変換資材との対応は以下のとおりです。
+　詳細は [resources/io/github/longfish801/yakumo](https://github.com/longfish801/yakumo/tree/main/src/main/resources/io/github/longfish801/yakumo/thtml) 配下にある変換資材の各ファイルのコメントなどを参照してください。
 
-メタ要素（bltxt文書のmetaタグ）をHTMLに変換
-: 変換資材thtml内のthtml.tpac上のクロージャパス /thtml.meta
-
-平文（bltxt文書のtextタグ）をHTMLに変換
-: 変換資材thtml内のhtmlize.tpac上のクロージャパス /thtml.htmlize/node#text
-
-段落（bltxt文書のparaタグ）をHTMLに変換
-: 変換資材thtml内のhtmlize.tpac上のクロージャパス /thtml.htmlize/node#para
-
-ブロック要素（bltxt文書のparaタグ）をHTMLに変換
-: 変換資材thtml内のhtmlize.tpac上のクロージャパス /thtml.htmlize/node#block
-
-インライン要素（bltxt文書のparaタグ）をHTMLに変換
-: 変換資材thtml内のhtmlize.tpac上のクロージャパス /thtml.htmlize/node#inline
-
-## メタ要素
-
-### タイトル
-
-　タイトルは、含意タグで指定します。
-　省略可能です。
-
-```
-【＃タイトル】円周率について
-```
-
-　以下のHTMLに変換します。
-　タイトルの指定がないときはデフォルトで「（無題）」とします。
-
-```
-<h1>円周率について</h1>
-```
-
-### サブタイトル
-
-　サブタイトルは、含意タグで指定します。
-　省略可能です。
-
-```
-【＃サブタイトル】著名な語呂合わせ
-```
-
-　以下のHTMLに変換します。
-
-```
-<li>著名な語呂合わせ</li>
-```
-
-### 付帯情報
-
-　付帯情報として公開日、著者名を含意タグで指定します。
-　省略可能です。
-
-```
-【＃公開日】2022.02.03
-【＃著者名】山田太郎
-```
-
-　以下のHTMLに変換します。
-
-```
-<li>公開日 2022.02.03</li>
-<li>山田太郎</li>
-```
-
-### 目次
-
-　見出しから目次を生成します。
-　以下のbltxt文書があったとします。
-
-```
-【＝見出し】おいしいカレーの作り方
-【＝見出し：2】材料の準備
-【＝見出し：3】牛の飼い方
-```
-
-　以下のHTMLに変換します。
-
-```
-<li class="nav-item ps-0"><a href="#id2_1" class="nav-link">おいしいカレーの作り方</a></li>
-<li class="nav-item ps-1"><a href="#id3_2" class="nav-link">材料の準備</a></li>
-<li class="nav-item ps-2"><a href="#id4_3" class="nav-link">牛の飼い方</a></li>
-```
-
-### 註記
-
-　註は文中タグで、註記は含意範囲タグで記述します。
-　一番目の属性に、紐付けのため共通する文字列を指定してください。
-　以下のbltxt文書があったとします。
-
-```
-　XML【註：XML】をHTML【註：HTML】に変換します。
-
-【＊註記：XML】
-　eXtensible Markup Languageの略です。
-【註記＊】
-【＊註記：HTML】
-　Hyper Text Markup Languageの略です。
-【註記＊】
-```
-
-　以下のHTMLに変換します。
-
-```
-<dt><a name="t1" href="#f1">[*1]</a></dt>
-<dd>　eXtensible Markup Languageの略です。</dd>
-<dt><a name="t2" href="#f2">[*2]</a></dt>
-<dd>　Hyper Text Markup Languageの略です。</dd>
-```
-
-### ナビゲーションリンク
-
-　他のページへのナビゲーションリンクを生成します。
-
-　補足情報になにも指定しない場合、以下のリンクを生成します。
-
-* 変換結果キーの値が "index"の場合
-    -  ".."へのリンクを生成します。
-* 変換結果キーの値が "index"以外の場合
-    -  "index.html"へのリンクを生成します。
-
-　補足情報にキー orderで変換結果の HTMLファイル名（変換結果キー.html）のリストが指定されている場合、以下のリンクを生成します。
-
-* 変換結果キーの値が "index"の場合
-    -  ".."へのリンクを生成します。
-* 変換結果キーの値が "index"以外の場合
-    -  前のページ、次のページ、そして"index.html"へのリンクを生成します。
-
-　たとえばキー orderに [ "some1.html", "some2.html", "some3.html" ]が指定されており、変換結果キーが "some2"のときには以下のリンクを出力します。
-
-```
-<a href="some1.html"><i class="bi bi-arrow-left-circle"></i></a>
-<a href="index.html#toc"><i class="bi bi-arrow-up-circle"></i></a>
-<a href="some3.html"><i class="bi bi-arrow-right-circle"></i></a>
-```
+　デフォルトのテンプレート default.htmlは変換対象と変換結果が一対一であることを前提としています。一対一にしない場合はテンプレートの記述を見直してください。
 
 ## 平文
 
@@ -200,13 +66,158 @@
 
 　上記以外では brタグ、pタグを挿入します。
 
+## 横断的要素
+
+　複数の変換対象から横断的に生成する要素です。
+
+### ナビゲーションリンク
+
+　他のページへのナビゲーションリンクを生成します。
+　ページの順番は、変換スクリプトで変換結果キーを設定した順番です。
+
+* 変換結果キーが "index"のとき
+    - 上位コンテンツへのリンク
+    - 次のページ（先頭ページ）へのリンク
+    - 前のページ（最終ページ）へのリンク
+* 変換結果キーが "index"以外のとき
+    - 目次ページ(index.html)へのリンク
+    - 次のページへのリンク
+    - 前のページへのリンク
+
+　たとえば変換結果キーの順番が [ "some1", "some2", "some3" ]で、現在の変換結果キーが "some2"のときには以下のリンクを出力します。
+
+```
+<a href="some1.html"><i class="bi bi-arrow-left-circle"></i></a>
+<a href="index.html#tocAll"><i class="bi bi-arrow-up-circle"></i></a>
+<a href="some3.html"><i class="bi bi-arrow-right-circle"></i></a>
+```
+
+### 総目次
+
+　たとえば目次ページ（index.html）に各ページおよび各ページ内の見出しへのリンクを生成したいときに使用します。
+
+　変換対象キー "some"に以下のタイトル、見出しが記述されていたとします。
+
+```
+【＃タイトル】カレーを食べよう
+【＝見出し：1】おいしいカレーの作り方
+【＝見出し：2】材料の準備
+【＝見出し：3】牛の飼い方
+```
+
+　以下の HTMLを生成します。
+
+```
+<li class="nav-item toc-h1"><a href="some.html" class="nav-link">カレーを食べよう</a></li>
+<li class="nav-item toc-h2"><a href="some.html#id2_1" class="nav-link">おいしいカレーの作り方</a></li>
+<li class="nav-item toc-h3"><a href="some.html#id3_2" class="nav-link">材料の準備</a></li>
+<li class="nav-item toc-h4"><a href="some.html#id4_3" class="nav-link">牛の飼い方</a></li>
+```
+
+
+## メタ要素
+
+### タイトル
+
+　タイトルは、含意タグで指定します。
+　省略可能です。
+
+```
+【＃タイトル】円周率について
+```
+
+　以下のHTMLに変換します。
+　タイトルの指定がないときはデフォルトで「（無題）」とします。
+
+```
+<h1>円周率について</h1>
+```
+
+### サブタイトル
+
+　サブタイトルは、含意タグで指定します。
+　省略可能です。
+
+```
+【＃サブタイトル】著名な語呂合わせ
+```
+
+　以下のHTMLに変換します。
+
+```
+<li>著名な語呂合わせ</li>
+```
+
+### 付帯情報
+
+　付帯情報として公開日、著者名を含意タグで指定します。
+　省略可能です。
+
+```
+【＃公開日】2022.02.03
+【＃著者名】山田太郎
+```
+
+　以下のHTMLに変換します。
+
+```
+<li>公開日 2022.02.03</li>
+<li>山田太郎</li>
+```
+
+### 目次
+
+　見出しから目次を生成します。
+　以下のbltxt文書があったとします。
+
+```
+【＝見出し：1】おいしいカレーの作り方
+【＝見出し：2】材料の準備
+【＝見出し：3】牛の飼い方
+```
+
+　以下のHTMLに変換します。
+
+```
+<li class="nav-item ps-0"><a href="#id2_1" class="nav-link">おいしいカレーの作り方</a></li>
+<li class="nav-item ps-1"><a href="#id3_2" class="nav-link">材料の準備</a></li>
+<li class="nav-item ps-2"><a href="#id4_3" class="nav-link">牛の飼い方</a></li>
+```
+
+### 註記
+
+　註は文中タグで、註記は含意範囲タグで記述します。
+　一番目の属性に、紐付けのため共通する文字列を指定してください。
+　以下のbltxt文書があったとします。
+
+```
+　XML【註：XML】をHTML【註：HTML】に変換します。
+
+【＊註記：XML】
+　eXtensible Markup Languageの略です。
+【註記＊】
+【＊註記：HTML】
+　Hyper Text Markup Languageの略です。
+【註記＊】
+```
+
+　以下のHTMLに変換します。
+
+```
+<dt><a name="t1" href="#f1">[*1]</a></dt>
+<dd>　eXtensible Markup Languageの略です。</dd>
+<dt><a name="t2" href="#f2">[*2]</a></dt>
+<dd>　Hyper Text Markup Languageの略です。</dd>
+```
+
 ## ブロック要素
 ### 見出し
 
 　行タグで見出しを表現できます。
+　属性にレベルを半角数字 1～5で指定してください。
 
 ```
-【＝見出し】おいしいカレーの作り方
+【＝見出し：1】おいしいカレーの作り方
 【＝見出し：2】材料の準備
 【＝見出し：3】牛の飼い方
 ```
@@ -221,6 +232,14 @@
 <h2><a name="id2_1"></a>おいしいカレーの作り方 <div class="float-end fs-6"><a href="#header"><i class="bi bi-chevron-double-up"></i></a></div></h2>
 <h3><a name="id3_2"></a>材料の準備 <div class="float-end fs-6"><a href="#header"><i class="bi bi-chevron-double-up"></i></a></div></h3>
 <h4><a name="id4_3"></a>牛の飼い方 <div class="float-end fs-6"><a href="#header"><i class="bi bi-chevron-double-up"></i></a></div></h4>
+```
+
+　二番目の属性に見出しの別名を指定することができます。省略可です。
+　これはページ内リンクに用います。
+　詳細は [参照](#参照) を参照してください。
+
+```
+【＝見出し：1：ごちさま】ごちそうさまでした
 ```
 
 ### 箇条書き
@@ -511,6 +530,48 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 <p>　詳しくは<a href="https://www.google.com/">ネット検索</a>してください。<br/>
 　<a href="https://www.google.com/">https://www.google.com/</a>でネット検索できます。</p>
 ```
+
+### 参照
+
+　見出しへのリンクを作成できます。
+
+　タグ内にリンク先としたい見出しの文字列を記述してください。
+　この場合は属性は不要です。
+
+　もしくは一番目の属性にリンク先を指定します。
+　以下の三種類を指定できます。
+
+・全角シャープ（＃）＋見出し文字列あるいは別名
+  ・同じ変換対象上の見出しにリンクします。
+・変換対象キー
+  ・他の変換対象にリンクします。
+・変換対象キー＋全角シャープ（＃）＋見出し文字列あるいは別名
+  ・他の変換対象上の見出しにリンクします。
+
+　以下のbltxt文書があったとします。
+
+```
+【＝見出し：1】おいしいカレーの作り方
+　もう満腹ですか？ それでは【｜参照：＃ごちさま】さようなら【参照｜】。
+
+【＝見出し：1：ごちさま】ごちそうさまでした
+　詳細は【｜参照】おいしいカレーの作り方【参照｜】を参照してください。
+```
+
+　以下のHTMLに変換します。
+
+```
+<h2><a name="id2_1"></a>おいしいカレーの作り方 <div class="float-end fs-6"><a href="#header"><i class="bi bi-chevron-double-up"></i></a></div></h2>
+
+<p>　もう満腹ですか？ それでは<a href="#id2_2">さようなら</a>。</p>
+
+<h2><a name="id2_2"></a>ごちそうさまでした <div class="float-end fs-6"><a href="#header"><i class="bi bi-chevron-double-up"></i></a></div></h2>
+
+<p>　詳細は<a href="#id2_1">おいしいカレーの作り方</a>を参照してください。</p>
+```
+
+　変換対象キーは変換資材 thmlの clmapでファイル名などに置き換えます。デフォルトでは変換対象キーの後ろに拡張子htmlを付与した文字列となります。
+　変換対象と変換結果が一対一ではない場合はクロージャパス /thtml.crosscut#filename上のクロージャを上書きしてください。
 
 ### 注目
 

@@ -37,11 +37,35 @@ class Yakumo implements GropedResource {
 	 * @return 変換スクリプトの実行結果
 	 */
 	def run(File file, Map vars){
+		// 変換スクリプトを実行します
 		DelegatingScript script = (DelegatingScript) loader.shell.parse(file)
 		script.setDelegate(this)
 		script.setProperty(cnst.convert.scriptFile, file)
 		vars?.each { script.setProperty(it.key, it.value) }
-		return script.run()
+		def result = script.run()
+		// 変換を実行します
+		convert()
+		return result
+	}
+	
+	/**
+	 * 変換を実行します。<br/>
+	 * 資材スクリプトや変換スクリプトを実行し、各種設定が済んでいることを
+	 * 前提に変換を実行します。
+	 */
+	void convert(){
+		// 変換前の処理を実行します
+		script.doFirst?.call()
+		// 変換対象を解析します
+		Map bltxtMap = material.parse(script)
+		// 変換中の処理を実行します
+		script.doBetween?.call(bltxtMap)
+		// 変換結果を生成します
+		material.format(script, bltxtMap)
+		// 関連ファイルをコピーします
+		relatedSources.copy()
+		// 変換後の処理を実行します
+		script.doLast?.call()
 	}
 	
 	/**
@@ -99,17 +123,5 @@ class Yakumo implements GropedResource {
 		closure.delegate = script
 		closure.resolveStrategy = Closure.DELEGATE_FIRST
 		closure()
-		// 変換前の処理を実行します
-		script.doFirst?.call()
-		// 変換対象を解析します
-		Map bltxtMap = material.parse(script)
-		// 変換中の処理を実行します
-		script.doBetween?.call(bltxtMap)
-		// 変換結果を生成します
-		material.format(script, bltxtMap)
-		// 関連ファイルをコピーします
-		relatedSources.copy()
-		// 変換後の処理を実行します
-		script.doLast?.call()
 	}
 }
