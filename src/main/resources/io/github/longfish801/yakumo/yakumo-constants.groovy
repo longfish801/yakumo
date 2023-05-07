@@ -1,14 +1,8 @@
 
 // clmap文書関連
 clmap {
-	// 事前準備のためのクロージャパス
-	clpathPrepare = '#prepare'
-	// テンプレートに適用するバインド変数取得のためのクロージャパス
-	clpathBind = '#'
 	// 足跡の変数名
 	footprint = 'fprint'
-	// テンプレート利用の変数名
-	templateHandler = 'templateHandler'
 }
 
 // 資材スクリプト
@@ -27,16 +21,8 @@ convert {
 	scriptFile = 'scriptFile'
 }
 
-// 変換対象
-target {
-	// switem宣言の名前の基底値
-	baseSwitemName = 'fyakumo'
-}
-
 // 変換結果
 results {
-	// clmap宣言の名前の基底値
-	baseClmapName = 'thtml'
 	// デフォルトのテンプレートキー
 	templateKey = 'default'
 }

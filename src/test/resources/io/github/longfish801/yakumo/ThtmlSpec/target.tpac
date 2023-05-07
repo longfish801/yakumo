@@ -13,7 +13,7 @@
 
 #> block
 #>> 見出し
-【＝見出し】おいしいカレーの作り方
+【＝見出し：1】おいしいカレーの作り方
 【＝見出し：2】材料の準備
 【＝見出し：3】牛の飼い方
 
@@ -110,6 +110,13 @@ println "This is sample code of how to hello to all of the world, which is execu
 　詳しくは【｜リンク：https://www.google.com/】ネット検索【リンク｜】してください。
 　【｜リンク：https://www.google.com/】https://www.google.com/【リンク｜】でネット検索できます。
 
+#>> 参照
+【＝見出し：1】おいしいカレーの作り方
+　もう満腹ですか？ それでは【｜参照：＃ごちさま】さようなら【参照｜】。
+
+【＝見出し：1：ごちさま】ごちそうさまでした
+　詳細は【｜参照】おいしいカレーの作り方【参照｜】を参照してください。
+
 #>> 注目
 　危ない！ それは【｜注目】自爆スイッチ【注目｜】だ！
 
@@ -155,7 +162,7 @@ println "This is sample code of how to hello to all of the world, which is execu
 【＃著者名】山田太郎
 
 #>> toc
-【＝見出し】おいしいカレーの作り方
+【＝見出し：1】おいしいカレーの作り方
 【＝見出し：2】材料の準備
 【＝見出し：3】牛の飼い方
 
@@ -168,3 +175,18 @@ println "This is sample code of how to hello to all of the world, which is execu
 【＊註記：HTML】
 　Hyper Text Markup Languageの略です。
 【註記＊】
+
+#> cross
+#>> toc-
+【＃タイトル】カレーを食べよう
+【＝見出し：1】おいしいカレーの作り方
+【＝見出し：2】材料の準備
+【＝見出し：3】牛の飼い方
+#>
+
+#>> toc-h1
+【＃タイトル】カレーを食べよう
+【＝見出し：1】おいしいカレーの作り方
+【＝見出し：2】材料の準備
+【＝見出し：3】牛の飼い方
+#>

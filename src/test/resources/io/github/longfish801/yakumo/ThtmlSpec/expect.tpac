@@ -118,6 +118,16 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 　<a href="https://www.google.com/">https://www.google.com/</a>でネット検索できます。</p>
 #>
 
+#>> 参照
+<h2><a name="id2_1"></a>おいしいカレーの作り方 <div class="float-end fs-6"><a href="#header"><i class="bi bi-chevron-double-up"></i></a></div></h2>
+
+<p>　もう満腹ですか？ それでは<a href="#id2_2">さようなら</a>。</p>
+
+<h2><a name="id2_2"></a>ごちそうさまでした <div class="float-end fs-6"><a href="#header"><i class="bi bi-chevron-double-up"></i></a></div></h2>
+
+<p>　詳細は<a href="#id2_1">おいしいカレーの作り方</a>を参照してください。</p>
+#>
+
 #>> 注目
 <p>　危ない！ それは<span class="attention">自爆スイッチ</span>だ！</p>
 #>
@@ -177,9 +187,9 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 #>
 
 #>> toc
-<li class="nav-item ps-0"><a href="#id2_1" class="nav-link">おいしいカレーの作り方</a></li>
-<li class="nav-item ps-1"><a href="#id3_2" class="nav-link">材料の準備</a></li>
-<li class="nav-item ps-2"><a href="#id4_3" class="nav-link">牛の飼い方</a></li>
+<li class="nav-item toc-h2"><a href="#id2_1" class="nav-link">おいしいカレーの作り方</a></li>
+<li class="nav-item toc-h3"><a href="#id3_2" class="nav-link">材料の準備</a></li>
+<li class="nav-item toc-h4"><a href="#id4_3" class="nav-link">牛の飼い方</a></li>
 #>
 
 #>> note
@@ -190,30 +200,54 @@ println &quot;This is sample code of how to hello to all of the world, which is 
 #>
 
 #> navi
-#>> index-noorder
+#>> onefile
 <a href=".."><i class="bi bi-arrow-up-circle"></i></a>
 #>
 
-#>> some-noorder
-<a href="index.html"><i class="bi bi-arrow-up-circle"></i></a>
-#>
-
-#>> index-order
+#>> onefile-index
 <a href=".."><i class="bi bi-arrow-up-circle"></i></a>
 #>
 
-#>> bgn-order
-<a href="index.html#toc"><i class="bi bi-arrow-up-circle"></i></a>
+#>> twofile
+<a href="index.html#tocAll"><i class="bi bi-arrow-up-circle"></i></a>
+#>
+
+#>> twofile-index
+<a href="some.html"><i class="bi bi-arrow-left-circle"></i></a>
+<a href=".."><i class="bi bi-arrow-up-circle"></i></a>
+<a href="some.html"><i class="bi bi-arrow-right-circle"></i></a>
+#>
+
+#>> moreFile-index
+<a href="some3.html"><i class="bi bi-arrow-left-circle"></i></a>
+<a href=".."><i class="bi bi-arrow-up-circle"></i></a>
+<a href="some1.html"><i class="bi bi-arrow-right-circle"></i></a>
+#>
+
+#>> moreFile-first
+<a href="index.html#tocAll"><i class="bi bi-arrow-up-circle"></i></a>
 <a href="some2.html"><i class="bi bi-arrow-right-circle"></i></a>
 #>
 
-#>> mdl-order
+#>> moreFile-middle
 <a href="some1.html"><i class="bi bi-arrow-left-circle"></i></a>
-<a href="index.html#toc"><i class="bi bi-arrow-up-circle"></i></a>
+<a href="index.html#tocAll"><i class="bi bi-arrow-up-circle"></i></a>
 <a href="some3.html"><i class="bi bi-arrow-right-circle"></i></a>
 #>
 
-#>> end-order
+#>> moreFile-last
 <a href="some2.html"><i class="bi bi-arrow-left-circle"></i></a>
-<a href="index.html#toc"><i class="bi bi-arrow-up-circle"></i></a>
+<a href="index.html#tocAll"><i class="bi bi-arrow-up-circle"></i></a>
+#>
+
+#> cross
+#>> toc-
+<li class="nav-item toc-h1"><a href="some.html" class="nav-link">カレーを食べよう</a></li>
+<li class="nav-item toc-h2"><a href="some.html#id2_1" class="nav-link">おいしいカレーの作り方</a></li>
+<li class="nav-item toc-h3"><a href="some.html#id3_2" class="nav-link">材料の準備</a></li>
+<li class="nav-item toc-h4"><a href="some.html#id4_3" class="nav-link">牛の飼い方</a></li>
+#>
+
+#>> toc-h1
+<li class="nav-item toc-h1"><a href="some.html" class="nav-link">カレーを食べよう</a></li>
 #>

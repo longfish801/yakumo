@@ -10,6 +10,7 @@ import groovyx.gpars.GParsPool
 import io.github.longfish801.bltxt.BLtxt
 import io.github.longfish801.clmap.ClmapClosure
 import io.github.longfish801.clmap.Clmap
+import io.github.longfish801.clmap.ClmapMap
 import io.github.longfish801.clmap.ClmapServer
 import io.github.longfish801.switem.Switem
 import io.github.longfish801.switem.SwitemServer
@@ -25,8 +26,14 @@ import java.lang.Thread as JavaThread
 class ConvertMaterial {
 	/** SwitemServer */
 	SwitemServer switemServer = new SwitemServer()
+	/** switem宣言の名前の基底値 */
+	String baseSwitemName
 	/** ClmapServer */
 	ClmapServer clmapServer = new ClmapServer()
+	/** clmap宣言の名前の基底値 */
+	String baseClmapName
+	/** clmap宣言の名前と事前準備のクロージャのパスとのマップ */
+	Map prepareMap = [:]
 	/** テンプレート操作 */
 	TemplateHandler templateHandler = new TemplateHandler()
 	
@@ -39,11 +46,37 @@ class ConvertMaterial {
 	}
 	
 	/**
+	 * switem宣言の名前の基底値を設定します。<br/>
+	 * 設定しない場合は "fyakumo"です。
+	 * @param name switem宣言の名前の基底値
+	 */
+	void baseSwitemName(String switemName){
+		baseSwitemName = switemName
+	}
+	
+	/**
 	 * clmapスクリプトを設定します。
 	 * @param script clmapスクリプト（File、URL、String、BufferedReaderのいずれか）
 	 */
 	void clmap(def script){
 		clmapServer.soak(script)
+	}
+	
+	/**
+	 * clmap宣言の名前の基底値を設定します。
+	 * @param name clmap宣言の名前の基底値
+	 */
+	void baseClmapName(String clmapName){
+		baseClmapName = clmapName
+	}
+	
+	/**
+	 * 事前準備として実行するクロージャのパスを設定します。
+	 * @param clmapName clmap宣言の名前
+	 * @param clpath 事前準備のクロージャのパス
+	 */
+	void prepare(String clmapName, String clpath){
+		prepareMap[clmapName] = clpath
 	}
 	
 	/**
@@ -79,7 +112,7 @@ class ConvertMaterial {
 		GParsPool.withPool {
 			script.targets.map.values().eachParallel { def target ->
 				// switemスクリプトを参照します
-				String switemName = target.switemName ?: script.targets.baseSwitemName
+				String switemName = target.switemName ?: baseSwitemName
 				Switem switem = switemServer["switem:${switemName}"]
 				if (switem == null) throw new YmoConvertException(String.format(msgs.exc.noSwitem, target.key, switemName))
 				
@@ -130,36 +163,40 @@ class ConvertMaterial {
 		clmapServer.decs.values().each { Clmap clmap ->
 			clmap.properties[cnst.clmap.footprint] = script.fprint
 		}
-		// clmapスクリプトを参照し、そのクローンを取得します
-		script.results.map.values().each { def result ->
-			String clmapName = result.clmapName ?: script.results.baseClmapName
-			if (clmapServer["clmap:${clmapName}"] == null){
-				throw new IllegalStateException(String.format(msgs.exc.noClmapForResult, result.key, clmapName))
+		
+		// 事前準備のためのクロージャを実行します
+		Map appendMapCl = [:]
+		prepareMap.each { String clmapName, String clpath ->
+			ClmapClosure prepareCl = clmapServer.cl(clpath)
+			if (prepareCl == null){
+				throw new YmoConvertException(String.format(msgs.exc.noClmapForPrepare, clmapName, clpath))
 			}
-			result.clmap = clmapServer["clmap:${clmapName}"].clone()
+			try {
+				appendMapCl[clmapName] = prepareCl.call(bltxtMap, script)
+			} catch (exc){
+				throw new YmoConvertException(msgs.exc.errorCallPrepare, exc)
+			}
 		}
+		
 		GParsPool.withPool {
-			// 事前準備のためのクロージャを実行します
 			script.results.map.values().eachParallel { def result ->
-				ClmapClosure cl = result.clmap.cl(cnst.clmap.clpathPrepare)
-				if (cl != null && cl.clpath.endsWith(cnst.clmap.clpathPrepare)){
-					try {
-						cl.call(result.key, bltxtMap, script.appendMap)
-					} catch (exc){
-						throw new YmoConvertException(String.format(msgs.exc.errorCallPrepare, result.key), exc)
-					}
+				// clmapスクリプトを参照し、変換結果毎にクローンを格納します
+				String clmapName = result.clmapName ?: baseClmapName
+				if (clmapServer["clmap:${clmapName}"] == null){
+					throw new IllegalStateException(String.format(msgs.exc.noClmapForResult, result.key, clmapName))
 				}
-			}
-			// クロージャを実行してバインド変数を取得し、テンプレートに適用します
-			script.results.map.values().eachParallel { def result ->
-				ClmapClosure cl = result.clmap.cl(cnst.clmap.clpathBind)
-				if (cl == null) throw new IllegalStateException(String.format(msgs.exc.noClosure, result.key))
+				result.clmap = clmapServer["clmap:${clmapName}"].clone()
+				
+				// クロージャを実行してバインド変数を取得します
 				Map binds
+				Map appendMap = (appendMapCl[clmapName] == null)? script.appendMap : appendMapCl[clmapName] + script.appendMap
 				try {
-					binds = cl.call(result.key, bltxtMap, script.appendMap)
+					binds = result.clmap.call(result.key, bltxtMap, appendMap)
 				} catch (exc){
 					throw new YmoConvertException(String.format(msgs.exc.errorCallClmap, result.key), exc)
 				}
+				
+				// バインド変数をテンプレートに適用します
 				try {
 					templateHandler.apply(result.templateKey, result.writer, binds)
 				} catch (exc){

@@ -68,7 +68,8 @@ class RelatedSources {
 	}
 	
 	/**
-	 * コピーモードを設定します。
+	 * コピーモードを設定します。<br/>
+	 * デフォルトでは "overwrite"（常に上書きコピー）です。
 	 * @param mode コピーモード
 	 * @throws IllegalArgumentException コピーモードが不正です。
 	 */

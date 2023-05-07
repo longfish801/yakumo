@@ -62,6 +62,7 @@ class ConvertMaterialSpec extends Specification implements GropedResource {
 		
 		when:
 		material.switem(grope('fyakumo/fyakumo.tpac'))
+		material.baseSwitemName('fyakumo')
 		script = new ConvertScript()
 		script.targets {
 			target 'key1', '■こんにちは。'
@@ -69,9 +70,9 @@ class ConvertMaterialSpec extends Specification implements GropedResource {
 		}
 		bltxtMap = material.parse(script)
 		then:
-		bltxtMap.key1.toString() == '【＝見出し】こんにちは。'
+		bltxtMap.key1.toString() == '【＝見出し：1】こんにちは。'
 		bltxtMap.key2.toString() == '【＝見出し：2】さようなら。'
-		script.targets.key1.bltxt.toString() == '【＝見出し】こんにちは。' + System.lineSeparator()
+		script.targets.key1.bltxt.toString() == '【＝見出し：1】こんにちは。' + System.lineSeparator()
 		script.targets.key2.bltxt.toString() == '【＝見出し：2】さようなら。' + System.lineSeparator()
 	}
 	
@@ -85,6 +86,7 @@ class ConvertMaterialSpec extends Specification implements GropedResource {
 		script.targets {
 			target 'key1', '■こんにちは。'
 		}
+		material.baseSwitemName('fyakumo')
 		material.parse(script)
 		then:
 		exc = thrown(UndeclaredThrowableException)
@@ -112,6 +114,7 @@ class ConvertMaterialSpec extends Specification implements GropedResource {
 			'''.stripIndent())
 		
 		material.template('default', '${text}')
+		material.baseClmapName('thtml')
 		writer1 = new StringWriter()
 		writer2 = new StringWriter()
 		script = new ConvertScript()
@@ -120,12 +123,12 @@ class ConvertMaterialSpec extends Specification implements GropedResource {
 			result 'key2', writer2
 		}
 		bltxtMap = [
-			'key1': new BLtxt('【＝見出し】こんにちは。'),
+			'key1': new BLtxt('【＝見出し：1】こんにちは。'),
 			'key2': new BLtxt('【＝見出し：2】さようなら。')
 		]
 		material.format(script, bltxtMap)
 		then:
-		writer1.toString() == '【＝見出し】こんにちは。'
+		writer1.toString() == '【＝見出し：1】こんにちは。'
 		writer2.toString() == '【＝見出し：2】さようなら。'
 	}
 	
@@ -133,18 +136,7 @@ class ConvertMaterialSpec extends Specification implements GropedResource {
 		given:
 		ConvertScript script
 		IllegalStateException exc
-		
-		when:
-		material.clmap('#! clmap:thtml')
-		script = new ConvertScript()
-		script.results {
-			baseClmapName 'noSuch'
-			result 'key1', new StringWriter()
-		}
-		material.format(script, [:])
-		then:
-		exc = thrown(IllegalStateException)
-		exc.message == String.format(msgs.exc.noClmapForResult, 'key1', 'noSuch')
+		UndeclaredThrowableException exc2
 		
 		when:
 		material.clmap('#! clmap:thtml')
@@ -152,9 +144,32 @@ class ConvertMaterialSpec extends Specification implements GropedResource {
 		script.results {
 			result 'key1', new StringWriter()
 		}
+		material.baseClmapName('noSuch')
 		material.format(script, [:])
 		then:
 		exc = thrown(IllegalStateException)
-		exc.message == 'java.lang.IllegalStateException: ' + String.format(msgs.exc.noClosure, 'key1', 'thtml')
+		exc.message == 'java.lang.IllegalStateException: ' + String.format(msgs.exc.noClmapForResult, 'key1', 'noSuch')
+		
+		when:
+		material.clmap('''\
+			#! clmap:thtml
+			#> closure
+				throw new Exception('Something Error!')
+			#-args
+				String resultKey
+				Map bltxtMap
+				Map appendMap
+			#-return
+				Map binds
+			'''.stripIndent())
+		script = new ConvertScript()
+		script.results {
+			result 'key1', new StringWriter()
+		}
+		material.baseClmapName('thtml')
+		material.format(script, [:])
+		then:
+		exc2 = thrown(UndeclaredThrowableException)
+		exc2.cause.cause.message == String.format(msgs.exc.errorCallClmap, 'key1')
 	}
 }

@@ -20,9 +20,13 @@
 #: 指定したBLtxt文書内から指定した名前の metaタグを抽出し、
 #: それぞれテキスト化した上で改行コードで結合した結果を返します。
 	List greped = clmap.cl('/tbase.bltxt#grep').call(bltxt, 'meta', name, clmap.cl('/ttext'))
-	result = (greped.empty)? dflt : greped.join(System.lineSeparator())
+	if (greped.size() > 1){
+		throw new YmoConvertException("指定された名前の metaタグが複数あります。 name=${name}, size=${greped.size()}")
+	}
+	result = (greped.empty)? dflt : greped[0]
 #-dec
 	import io.github.longfish801.bltxt.BLtxt
+	import io.github.longfish801.yakumo.YmoConvertException
 #-args
 	BLtxt bltxt
 	String name

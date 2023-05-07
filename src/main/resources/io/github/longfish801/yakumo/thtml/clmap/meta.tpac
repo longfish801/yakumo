@@ -23,7 +23,7 @@ extra = [ '公開日', '著者名' ]
 #-サブタイトル <li>${text}</li>
 #-公開日 <li>公開日 ${text}</li>
 #-著者名 <li>${text}</li>
-#-toc <li class="nav-item ps-${level - 2}"><a href="#id${id}" class="nav-link">${text}</a></li>
+#-toc <li class="nav-item toc-h${level}"><a href="${filename}#${id}" class="nav-link">${text}</a></li>
 #-note
 <dt><a name="t${id}" href="#f${id}">[*${id}]</a></dt>
 <dd>${text}</dd>
@@ -43,14 +43,25 @@ extra = [ '公開日', '著者名' ]
 	}.findAll { !it.empty }.join(System.lineSeparator())
 #>> closure:toc
 #: 目次のHTMLを生成します。
+	html = clmap.cl('toc#').call(bltxt, 0, null)
+#>> map:toc
+#-args
+	BLtxt bltxt
+	int maxLevel
+	String targetKey
+#>>> closure
 	List list = []
 	bltxt.grepNodes('block', '見出し').each { def node ->
-		int level = clmap.cl('/thtml.htmlize/headline#level').call(node)
-		list << templater.call(templateKey + 'toc', [
-			text: clmap.cl('/thtml.textize').call(node),
-			level: level,
-			id: "${level}_${node.serialNo}"
-		])
+		int level = clmap.cl('/thtml.crosscut/headline#level').call(node)
+		if (level <= maxLevel || maxLevel == 0){
+			String elem = templater.call('/clmap:thtml.meta/map:onedoc/data:template#toc', [
+				text: clmap.cl('/thtml.textize').call(node),
+				level: level,
+				id: clmap.cl('/thtml.crosscut/headline#anchor').call(node),
+				filename: (targetKey == null)? '' : clmap.cl('/thtml.crosscut/filename#target').call(targetKey),
+			])
+			list << elem
+		}
 	}
 	html = list.join(System.lineSeparator())
 #>> closure:note
@@ -109,58 +120,3 @@ extra = [ '公開日', '著者名' ]
 #>>> closure:note
 	judge = (bltxt.grepNodes('inline', '註').size() > 0)? true : false
 #>
-
-#> map:navi
-#: ナビゲーションのHTMLを生成します。
-#-args
-	String resultKey
-	List order
-#-return
-	String html
-#-dec
-	import io.github.longfish801.yakumo.YmoConvertException
-#-prefix
-	def templater = clmap.cl('/tbase.template#apply')
-	String templateKey = "${clmap.path}/data:template#"
-#>> data:template
-#-upper
-<a href=".."><i class="bi bi-arrow-up-circle"></i></a>
-#-index
-<a href="index.html"><i class="bi bi-arrow-up-circle"></i></a>
-#-middle
-<a href="${back}"><i class="bi bi-arrow-left-circle"></i></a>
-<a href="index.html#toc"><i class="bi bi-arrow-up-circle"></i></a>
-<a href="${next}"><i class="bi bi-arrow-right-circle"></i></a>
-#-first
-<a href="index.html#toc"><i class="bi bi-arrow-up-circle"></i></a>
-<a href="${next}"><i class="bi bi-arrow-right-circle"></i></a>
-#-last
-<a href="${back}"><i class="bi bi-arrow-left-circle"></i></a>
-<a href="index.html#toc"><i class="bi bi-arrow-up-circle"></i></a>
-#>> closure
-	if (order == null){
-		return templater.call(templateKey + 'index', [:])
-	}
-	int idx = order.indexOf("${resultKey}.html" as String)
-	if (idx < 0) throw new YmoConvertException("変換結果のファイル名がリストにありません resultKey=${resultKey}, order=${order}")
-	switch (idx){
-		case 0:
-			html = templater.call(templateKey + 'first', [
-				next: order[idx + 1],
-			])
-			break
-		case { it == order.size() - 1 }:
-			html = templater.call(templateKey + 'last', [
-				back: order[idx - 1],
-			])
-			break
-		default:
-			html = templater.call(templateKey + 'middle', [
-				back: order[idx - 1],
-				next: order[idx + 1],
-			])
-	}
-#>> closure:index
-	html = templater.call(templateKey + 'upper', [:])
-#>
-

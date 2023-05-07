@@ -53,26 +53,31 @@ class YakumoSpec extends Specification {
 				#-return
 					Map binds
 				#> closure:prepare
-					appendMap[resultKey] = resultKey.toUpperCase()
+					appendMap = ['key1': 'KEY1', 'key2': 'KEY2' ]
+				#-dec
+					import io.github.longfish801.yakumo.ConvertScript
 				#-args
-					String resultKey
 					Map bltxtMap
+					ConvertScript script
+				#-return
 					Map appendMap
 				'''.stripIndent())
+			baseSwitemName 'sampleSwitem'
+			baseClmapName 'sampleClmap'
+			prepare 'sampleClmap', '/sampleClmap#prepare'
 			template('default', '<h1>${bodytext}</h1>')
 		}
 		yakumo.script {
 			targets {
-				baseSwitemName 'sampleSwitem'
 				target 'key1', 'Hello, World.'
 				target 'key2', 'Bye, World.'
 			}
 			results {
-				baseClmapName 'sampleClmap'
 				result 'key1', writer1
 				result 'key2', writer2
 			}
 		}
+		yakumo.convert()
 		then:
 		writer1.toString() == '<h1>[KEY1] Hello, Groovy.</h1>'
 		writer2.toString() == '<h1>[KEY2] Hi, Groovy.</h1>'

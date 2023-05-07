@@ -155,11 +155,10 @@ ${text}
 	clmap.cl('/tbase.logging/fprint#warn').call("未対応のブロック要素です。tag=%s, node=%s", [node.tag, node.toString()])
 	html = lowers.join()
 #>> closure:見出し
-	int level = clmap.cl('/thtml.htmlize/headline#level').call(node)
 	html = templater.call(templateKey, [
 		text: lowers.join(),
-		level: level,
-		id: "id${level}_${node.serialNo}"
+		level: clmap.cl('/thtml.crosscut/headline#level').call(node),
+		id: clmap.cl('/thtml.crosscut/headline#anchor').call(node),
 	])
 #>> closure:箇条書き
 	html = templater.call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
@@ -214,6 +213,8 @@ ${text}
 #>
 
 #> map:inline
+#-dec
+	import io.github.longfish801.yakumo.YmoConvertException
 #-args
 	BLNode node
 	List lowers
@@ -226,6 +227,7 @@ ${text}
 #>> data:template
 #-註 <sup><a id="f${id}" href="#t${id}">*${id}</a></sup>
 #-リンク <a href="${url}">${text}</a>
+#-参照 <a href="${url}">${text}</a>
 #-注目 <span class="attention">${text}</span>
 #-重要 <strong>${text}</strong>
 #-補足 <small>${text}</small>
@@ -250,6 +252,36 @@ ${text}
 		text: text,
 		url: node.attrs[0]
 	])
+#>> closure:参照
+	String aliasAttr = (node.attrs.size() == 0)
+		? '＃' + clmap.cl('/ttext').call(node)
+		: node.attrs[0]
+	int idxDiv = aliasAttr.indexOf('＃')
+	String targetKey
+	String alias
+	boolean internal = false
+	switch (idxDiv){
+		case { it < 0 }:
+			// 他の BLtxt文書への参照の場合
+			targetKey = aliasAttr
+			break
+		case { it == 0 }:
+			// 自 BLtxt文書内の見出しへの参照の場合
+			targetKey = targetMap[node.root]
+			alias = aliasAttr.substring(idxDiv + 1)
+			internal = true
+			break
+		default:
+			// 他の BLtxt文書内の見出しへの参照の場合
+			targetKey = aliasAttr.substring(0, idxDiv)
+			alias = aliasAttr.substring(idxDiv + 1)
+	}
+	html = templater.call(templateKey, [
+		text: text,
+		url: clmap.cl('/thtml.crosscut/headline#path').call(targetKey, alias, internal)
+	])
+#-prefix
+	if (targetMap == null) throw new YmoConvertException('targetMapがバインドされていません。')
 #>> closure:注目
 	html = templater.call(templateKey, [ text: text ])
 #>> closure:重要
@@ -278,20 +310,4 @@ ${text}
 		text: text,
 		clazz: node.attrs[0]
 	])
-#>
-
-#> map:headline
-#>> config
-dflt = 2
-increment = 1
-#>> closure:level
-	def config = clmap.solve("${clmap.path}/config").config()
-	level = config.dflt
-	if (node.attrs.size() > 0){
-		level = clmap.cl('/tbase.type#parseInt').call(node.attrs[0], '見出しレベル') + config.increment
-	}
-#-args
-	BLNode node
-#-return
-	int level
 #>

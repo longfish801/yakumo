@@ -10,7 +10,7 @@
 #: io.github.longfish801.yakumo.TemplateHandlerのインスタンスが
 #: 大域変数templateHandlerとしてバインドされている必要があります。
 	if (templateHandler == null){
-		throw new YmoConvertException("templateHandlerがバインドされていません。", exc)
+		throw new YmoConvertException('templateHandlerがバインドされていません。', exc)
 	}
 	// フォーマットをテンプレートとして読みこみます
 	if (!templateHandler.map.containsKey(tmplClpath)){

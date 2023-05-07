@@ -1,7 +1,6 @@
 <%
 	def bltxt = bltxtMap[resultKey]
 	def onedoc = clmap.cl('/thtml.meta/onedoc')
-	def navi = clmap.cl("/thtml.meta/navi#${resultKey}")
 %>
 <!doctype html>
 <html lang="ja">
@@ -12,6 +11,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
 <style type="text/css">
 <!--
+// ブロック要素
 body {
 	font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
 	letter-spacing: 0.1rem;
@@ -44,6 +44,23 @@ figure > figcaption.blockquote-footer {
 pre.code {
 	background-color: #f0f0f0;
 }
+// 目次
+ul#toc > li.toc-h2 {
+	padding-left: 0rem;
+}
+ul#toc > li.toc-h3 {
+	padding-left: 1rem;
+}
+ul#toc > li.toc-h4 {
+	padding-left: 2rem;
+}
+ul#toc > li.toc-h5 {
+	padding-left: 3rem;
+}
+ul#toc > li.toc-h6 {
+	padding-left: 4rem;
+}
+// インライン要素
 span.attention {
 	font-size: 1.7rem;
 	line-height: 1.7rem;
@@ -56,11 +73,12 @@ span.dot {
 }
 -->
 </style>
-<title><%= clmap.cl('/thtml.textize').cl('#meta').call(bltxt, 'タイトル', '（無題）') %></title>
+<title><%= clmap.cl('/thtml.textize#meta').call(bltxt, 'タイトル', '（無題）') %></title>
 </head>
 <body class="container">
 
-<header id="header" class="row justify-content-center py-3">
+<!-- ヘッダー -->
+<header id="header" class="row py-3">
 <div class="col-lg-8">
 <h1><%= clmap.cl('/thtml.htmlize').cl('#meta').call(bltxt, 'タイトル', '（無題）') %></h1>
 <% if (onedoc.cl('need#subtitle').call(bltxt)){ %>
@@ -80,6 +98,7 @@ span.dot {
 
 <div class="row justify-content-center">
 
+<!-- 目次 -->
 <% if (onedoc.cl('need#toc').call(bltxt)){ %>
 <nav id="sidenav" class="col-lg-4 py-3">
 <ul id="toc" class="nav flex-column sticky-top">
@@ -88,8 +107,10 @@ span.dot {
 </nav>
 <% } %>
 
-<main id="main" class="col-lg-8 bg-white py-3">
+<main id="main" class="col-lg-8 py-3">
+<!-- 本文 -->
 <%= clmap.cl('/thtml.htmlize').call(bltxt.root) %>
+<!-- 註記 -->
 <% if (onedoc.cl('need#note').call(bltxt)){ %>
 <aside id="appendix">
 <dl id="note" class="px-3">
@@ -101,9 +122,10 @@ span.dot {
 
 </div><!-- end of row -->
 
+<!-- フッター -->
 <footer id="footer" class="row justify-content-center py-3">
 <nav id="navi" class="col-lg-12 text-end">
-<%= navi.call(resultKey, appendMap.order) %>
+<%= clmap.cl("/thtml.crosscut/navi#").call(resultKey) %>
 </nav>
 <hr/>
 </footer>

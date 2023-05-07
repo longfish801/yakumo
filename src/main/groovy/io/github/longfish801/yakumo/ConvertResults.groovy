@@ -18,8 +18,6 @@ import io.github.longfish801.yakumo.YmoMsg as msgs
 class ConvertResults {
 	/** 変換結果キーと変換結果とのマップ */
 	Map map = [:]
-	/** clmap宣言の名前の基底値 */
-	String baseClmapName = cnst.results.baseClmapName
 	
 	/**
 	 * 変換結果キーに対応する変換結果を参照します。
@@ -43,10 +41,9 @@ class ConvertResults {
 	 * 変換結果を追加します。
 	 * @param key 変換結果キー
 	 * @param file 出力ファイル
-	 * @see #result(String, Writer, String)
 	 */
 	void result(String key, File file){
-		result(key, new FileWriter(file))
+		map[key] = new Result(key: key, source: file)
 	}
 	
 	/**
@@ -55,16 +52,7 @@ class ConvertResults {
 	 * @param writer 出力子
 	 */
 	void result(String key, Writer writer){
-		map[key] = new Result(key: key, writer: writer)
-	}
-	
-	/**
-	 * clmap宣言の名前の基底値を設定します。<br/>
-	 * 設定しない場合は "thtml"です。
-	 * @param name clmap宣言の名前の基底値
-	 */
-	void baseClmapName(String clmapName){
-		baseClmapName = clmapName
+		map[key] = new Result(key: key, source: writer)
 	}
 	
 	/**
@@ -96,8 +84,8 @@ class ConvertResults {
 	class Result {
 		/** 変換結果キー */
 		String key
-		/** 出力子 */
-		Writer writer
+		/** 出力先 */
+		def source
 		/** clmap宣言の名前 */
 		String clmapName
 		/** テンプレートキー */
@@ -106,5 +94,22 @@ class ConvertResults {
 		Footprints fprint
 		/** clmapスクリプト */
 		Clmap clmap
+		
+		/**
+		 * 出力先となる Writerインスタンスを返します。<br/>
+		 * @return Writer
+		 */
+		Writer getWriter(){
+			Writer writer
+			switch (source){
+				case File:
+					writer = new FileWriter(source)
+					break
+				case Writer:
+					writer = source
+					break
+			}
+			return writer
+		}
 	}
 }
