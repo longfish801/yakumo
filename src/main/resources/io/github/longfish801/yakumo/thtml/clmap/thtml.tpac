@@ -40,7 +40,7 @@
 	// もし "index"があれば必ず先頭にします
 	List resultKeys = script.results.map.keySet() as List
 	if (resultKeys.remove('index')) resultKeys.add(0, 'index')
-	clmap.cl('/thtml.crosscut/navi').properties['resultKeys'] = resultKeys
+	clmap.cl('/thtml.crosscut').properties['resultKeys'] = resultKeys
 	
 	// 見出しとアンカーとのマップを生成し、大域変数として格納します
 	clmap.cl('/thtml.crosscut/headline').properties['headerMap'] = clmap.cl('/thtml.crosscut/headline#headermap').call(bltxtMap)

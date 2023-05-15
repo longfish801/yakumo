@@ -5,6 +5,17 @@
 	import io.github.longfish801.yakumo.YmoConvertException
 #>
 
+#> closure:target
+#: 変換結果キーに対応する変換対象キーを返します。
+#: 変換対象と変換結果が一対一とみなし、変換結果キーの値をそのまま返します。
+#: 必要に応じて処理を上書きしてください。
+	targetKey = resultKey
+#-args
+	String resultKey
+#-return
+	String targetKey
+#>
+
 #> map:filename
 #-return
 	String filename
@@ -17,9 +28,9 @@
 	String targetKey
 #>> closure:result
 #: 変換結果キーに対応する変換結果のファイル名を返します。
-#: 変換結果キーに拡張子htmlを付与した文字列を返します。
+#: 変換対象キーに拡張子htmlを付与した文字列を返します。
 #: 必要に応じて処理を上書きしてください。
-	filename = "${resultKey}.html"
+	filename = clmap.cl('/thtml.crosscut#target').call(resultKey) + '.html'
 #-args
 	String resultKey
 #>
@@ -178,9 +189,11 @@ title {
 #: 変換対象と変換結果が一対一であることが前提となります。
 #: 変換対象キー "index"は目次の対象として除外します。
 	def config = clmap.solve("${clmap.path}/config").config()
-	html = bltxtMap.findAll {
-		it.key != 'index'
-	}.collect { String targetKey, def bltxt ->
+	html = resultKeys.findAll {
+		it != 'index'
+	}.collect { String resultKey ->
+		String targetKey = clmap.cl('/thtml.crosscut#target').call(resultKey)
+		def bltxt = bltxtMap[targetKey]
 		return templater.call(templateKey + 'title', [
 			href: clmap.cl('/thtml.crosscut/filename#target').call(targetKey),
 			title: clmap.cl('/thtml.htmlize').cl('#meta').call(bltxt, 'タイトル', config.title.dflt),
