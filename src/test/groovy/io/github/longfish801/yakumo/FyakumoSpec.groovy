@@ -91,5 +91,6 @@ class FyakumoSpec extends Specification implements GropedResource {
 		'inline' | 'ルビ'
 		'inline' | 'カクヨム記法のルビ'
 		'inline' | 'カクヨム記法の傍点'
+		'inline' | '組合せ'
 	}
 }

@@ -42,9 +42,9 @@
 { def hndl ->
 	String alias = ''
 	String headline = hndl.dflt[0]
-	int divIdx = headline.lastIndexOf('：')
+	int divIdx = headline.lastIndexOf('＃')
 	if (divIdx > 1){
-		alias = headline.substring(divIdx)
+		alias = "：${headline.substring(divIdx + 1)}"
 		headline = headline.substring(0, divIdx)
 	}
 	return [ "【＝見出し${hndl.upper.attr}${alias}】${headline}" ]
