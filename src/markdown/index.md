@@ -190,3 +190,6 @@ dependencies {
 
 1.2.10
 : yakumo記法で見出しに別名を与える場合の区切り記号を全角コロンから全角シャープに修正しました。
+: ConvertMaterialクラスのログ出力を強化しました。
+: ConvertMaterial#formatでのストリームのクローズ漏れを修正しました。
+: fyakumo資材の reprexハンドルでの正規表現を厳密なものに見直しました。

@@ -120,47 +120,51 @@ class ConvertMaterial {
 				// 対象のテキストをswitemスクリプトで整形します
 				Writer pipedWriter = new PipedWriter()
 				PipedReader pipedReader = new PipedReader(pipedWriter)
-				Exception switemExc = null
-				JavaThread switemThread = Thread.start {
-					LOG.debug('ConvertMaterial#parse BGN switemThread targetKey={}', target.key)
-					try {
-						switem.run(new BufferedReader(target.reader), new BufferedWriter(pipedWriter))
-					} catch (exc){
-						LOG.warn(msgs.exc.failSwitemRun, target.key, switemName, exc)
-						switemExc = exc
-						target.reader.close()
-						pipedWriter.close()
-						pipedReader.close()
-					}
-					LOG.debug('ConvertMaterial#parse END switemThread targetKey={}', target.key)
-				}
-				
-				// 整形されたテキストをbltxt文書とみなして読みこみます
-				LOG.debug('ConvertMaterial#parse BGN BLtxt targetKey={}', target.key)
-				BLtxt bltxt
-				try {
-					bltxt = new BLtxt(pipedReader)
-				} catch (exc){
-					LOG.warn(msgs.exc.failBltxtParse, target.key, exc)
+				Closure closeStream = { ->
 					target.reader.close()
 					pipedWriter.close()
 					pipedReader.close()
-					throw new YmoConvertException(String.format(msgs.exc.failBltxtParse, target.key), exc)
 				}
-				LOG.debug('ConvertMaterial#parse END BLtxt targetKey={}', target.key)
-				// 整形の完了を待機します
-				switemThread.join()
-				if (switemExc != null){
-					throw new YmoConvertException(String.format(msgs.exc.failSwitemRun, target.key, switemName), switemExc)
+				try {
+					Exception switemExc = null
+					JavaThread switemThread = Thread.start {
+						LOG.debug('ConvertMaterial#parse BGN switemThread targetKey={}', target.key)
+						try {
+							switem.run(new BufferedReader(target.reader), new BufferedWriter(pipedWriter))
+						} catch (exc){
+							LOG.warn(msgs.exc.failSwitemRun, target.key, switemName, exc)
+							switemExc = exc
+							closeStream.call()
+						}
+						LOG.debug('ConvertMaterial#parse END switemThread targetKey={}', target.key)
+					}
+					
+					// 整形されたテキストをbltxt文書とみなして読みこみます
+					LOG.debug('ConvertMaterial#parse BGN BLtxt targetKey={}', target.key)
+					BLtxt bltxt
+					try {
+						bltxt = new BLtxt(pipedReader)
+					} catch (exc){
+						LOG.warn(msgs.exc.failBltxtParse, target.key, exc)
+						closeStream.call()
+						throw new YmoConvertException(String.format(msgs.exc.failBltxtParse, target.key), exc)
+					}
+					LOG.debug('ConvertMaterial#parse END BLtxt targetKey={}', target.key)
+					
+					// 整形の完了を待機します
+					switemThread.join()
+					if (switemExc != null){
+						throw new YmoConvertException(String.format(msgs.exc.failSwitemRun, target.key, switemName), switemExc)
+					}
+					
+					// bltxt文書と bltxtインスタンスを格納します
+					target.bltxt = bltxt.leakedWriter
+					LOG.trace('ConvertMaterial#parse parse result targetKey={} bltxt={}', target.key, target.bltxt.toString())
+					bltxtMap[target.key] = bltxt
+				} finally {
+					closeStream.call()
+					LOG.debug('ConvertMaterial#parse END pararellel targetKey={}', target.key)
 				}
-				// bltxt文書を格納します
-				target.bltxt = bltxt.leakedWriter
-				LOG.trace('ConvertMaterial#parse parse result targetKey={} bltxt={}', target.key, target.bltxt.toString())
-				bltxtMap[target.key] = bltxt
-				target.reader.close()
-				pipedWriter.close()
-				pipedReader.close()
-				LOG.debug('ConvertMaterial#parse END pararellel targetKey={}', target.key)
 			}
 		}
 		return bltxtMap
