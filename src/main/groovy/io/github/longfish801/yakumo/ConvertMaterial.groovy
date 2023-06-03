@@ -126,7 +126,9 @@ class ConvertMaterial {
 					try {
 						switem.run(new BufferedReader(target.reader), new BufferedWriter(pipedWriter))
 					} catch (exc){
+						LOG.warn(msgs.exc.failSwitemRun, target.key, switemName, exc)
 						switemExc = exc
+						target.reader.close()
 						pipedWriter.close()
 						pipedReader.close()
 					}
@@ -139,6 +141,10 @@ class ConvertMaterial {
 				try {
 					bltxt = new BLtxt(pipedReader)
 				} catch (exc){
+					LOG.warn(msgs.exc.failBltxtParse, target.key, exc)
+					target.reader.close()
+					pipedWriter.close()
+					pipedReader.close()
 					throw new YmoConvertException(String.format(msgs.exc.failBltxtParse, target.key), exc)
 				}
 				LOG.debug('ConvertMaterial#parse END BLtxt targetKey={}', target.key)
@@ -151,6 +157,9 @@ class ConvertMaterial {
 				target.bltxt = bltxt.leakedWriter
 				LOG.trace('ConvertMaterial#parse parse result targetKey={} bltxt={}', target.key, target.bltxt.toString())
 				bltxtMap[target.key] = bltxt
+				target.reader.close()
+				pipedWriter.close()
+				pipedReader.close()
 				LOG.debug('ConvertMaterial#parse END pararellel targetKey={}', target.key)
 			}
 		}
