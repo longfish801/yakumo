@@ -111,6 +111,7 @@ class ConvertMaterial {
 		Map bltxtMap = [:].asSynchronized()
 		GParsPool.withPool {
 			script.targets.map.values().eachParallel { def target ->
+				LOG.debug('ConvertMaterial#parse BGN pararellel targetKey={}', target.key)
 				// switemスクリプトを参照します
 				String switemName = target.switemName ?: baseSwitemName
 				Switem switem = switemServer["switem:${switemName}"]
@@ -121,6 +122,7 @@ class ConvertMaterial {
 				PipedReader pipedReader = new PipedReader(pipedWriter)
 				Exception switemExc = null
 				JavaThread switemThread = Thread.start {
+					LOG.debug('ConvertMaterial#parse BGN switemThread targetKey={}', target.key)
 					try {
 						switem.run(new BufferedReader(target.reader), new BufferedWriter(pipedWriter))
 					} catch (exc){
@@ -128,16 +130,28 @@ class ConvertMaterial {
 						pipedWriter.close()
 						pipedReader.close()
 					}
+					LOG.debug('ConvertMaterial#parse END switemThread targetKey={}', target.key)
 				}
 				
 				// 整形されたテキストをbltxt文書とみなして読みこみます
-				BLtxt bltxt = new BLtxt(pipedReader)
+				LOG.debug('ConvertMaterial#parse BGN BLtxt targetKey={}', target.key)
+				BLtxt bltxt
+				try {
+					bltxt = new BLtxt(pipedReader)
+				} catch (exc){
+					throw new YmoConvertException(String.format(msgs.exc.failBltxtParse, target.key), exc)
+				}
+				LOG.debug('ConvertMaterial#parse END BLtxt targetKey={}', target.key)
 				// 整形の完了を待機します
 				switemThread.join()
-				if (switemExc != null) throw switemExc
+				if (switemExc != null){
+					throw new YmoConvertException(String.format(msgs.exc.failSwitemRun, target.key, switemName), switemExc)
+				}
 				// bltxt文書を格納します
 				target.bltxt = bltxt.leakedWriter
+				LOG.trace('ConvertMaterial#parse parse result targetKey={} bltxt={}', target.key, target.bltxt.toString())
 				bltxtMap[target.key] = bltxt
+				LOG.debug('ConvertMaterial#parse END pararellel targetKey={}', target.key)
 			}
 		}
 		return bltxtMap
@@ -167,6 +181,7 @@ class ConvertMaterial {
 		// 事前準備のためのクロージャを実行します
 		Map appendMapCl = [:]
 		prepareMap.each { String clmapName, String clpath ->
+			LOG.debug('ConvertMaterial#format BGN prepare clmapName={} clpath={}', clmapName, clpath)
 			ClmapClosure prepareCl = clmapServer.cl(clpath)
 			if (prepareCl == null){
 				throw new YmoConvertException(String.format(msgs.exc.noClmapForPrepare, clmapName, clpath))
@@ -176,10 +191,12 @@ class ConvertMaterial {
 			} catch (exc){
 				throw new YmoConvertException(msgs.exc.errorCallPrepare, exc)
 			}
+			LOG.debug('ConvertMaterial#format END prepare clmapName={} clpath={}', clmapName, clpath)
 		}
 		
 		GParsPool.withPool {
 			script.results.map.values().eachParallel { def result ->
+				LOG.debug('ConvertMaterial#format BGN parallel resultKey={}', result.key)
 				// clmapスクリプトを参照し、変換結果毎にクローンを格納します
 				String clmapName = result.clmapName ?: baseClmapName
 				if (clmapServer["clmap:${clmapName}"] == null){
@@ -188,6 +205,7 @@ class ConvertMaterial {
 				result.clmap = clmapServer["clmap:${clmapName}"].clone()
 				
 				// クロージャを実行してバインド変数を取得します
+				LOG.debug('ConvertMaterial#format call clmap resultKey={}', result.key)
 				Map binds
 				Map appendMap = (appendMapCl[clmapName] == null)? script.appendMap : appendMapCl[clmapName] + script.appendMap
 				try {
@@ -197,11 +215,13 @@ class ConvertMaterial {
 				}
 				
 				// バインド変数をテンプレートに適用します
+				LOG.debug('ConvertMaterial#format apply template resultKey={}', result.key)
 				try {
 					templateHandler.apply(result.templateKey, result.writer, binds)
 				} catch (exc){
 					throw new YmoConvertException(String.format(msgs.exc.failApplyTemplate, result.key, result.templateKey), exc)
 				}
+				LOG.debug('ConvertMaterial#format END parallel resultKey={}', result.key)
 			}
 		}
 	}

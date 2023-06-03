@@ -11,6 +11,8 @@ exc {
 	noClmap = 'No clmap for specified clpath. clpath=%s'
 	noClmapForResult = 'No clmap for the specified clmap name. resultKey=%s, clmapName=%s'
 	noSwitem = 'No switem scrpit for the specified target key. targetKey=%s, switemName=%s'
+	failSwitemRun = 'Failed to run switem scrpit. targetKey=%s, switemName=%s'
+	failBltxtParse = 'Failed to parse BLtxt. targetKey=%s'
 	cannotSetTemplateKey = 'Cannot set template key, because no result is set. key=%s, templateKey=%s'
 	invalidOutDir = 'No such directory for outputting related files. path=%s'
 	noClmapForPrepare = 'No clmap for the specified clmap name. clmapName=%s, clpath=%s'
