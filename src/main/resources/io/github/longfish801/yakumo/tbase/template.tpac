@@ -17,7 +17,7 @@
 		String source = clmap.referAsString(tmplClpath)
 		templateHandler.set(tmplClpath, source)
 	}
-	// バインド引数をテンプレートを適用します
+	// バインド引数をテンプレートに適用します
 	html = templateHandler.apply(tmplClpath, binds)
 #-dec
 	import io.github.longfish801.yakumo.YmoConvertException

@@ -49,9 +49,9 @@ class ThtmlSpec extends Specification implements GropedResource {
 		def decExpect = teaServer['dec:expect']
 		
 		// 変換資材を読み込みます
-		MaterialLoader loader = new MaterialLoader(new Yakumo())
-		loader.material('thtml')
-		def clmap = loader.yakumo.material.clmapServer['clmap:thtml']
+		Yakumo yakumo = new Yakumo()
+		yakumo.loader.material('thtml')
+		def clmap = yakumo.material.clmapServer['clmap:thtml'].clone()
 		
 		ConvertScript script = new ConvertScript()
 		script.results {

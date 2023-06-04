@@ -31,8 +31,8 @@
 	String message
 	List embeddeds
 #-prefix
-	if (fprint == null) throw new YmoConvertException("fprintがバインドされていません。")
 	message = String.format("[${logid}] ${message}", *embeddeds)
+	if (fprint == null) throw new YmoConvertException("fprintがバインドされていません。 message=${message}")
 #>> closure:trace
 	fprint.trace(message)
 #>> closure:debug
