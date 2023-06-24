@@ -73,7 +73,7 @@ println "This is sample code of how to hello to all of the world, which is execu
 #> inline
 #>> リンク
 　詳しくは【｜リンク：https://www.google.com/】ネット検索【リンク｜】してください。
-　【｜リンク：https://www.google.com/】https://www.google.com/【リンク｜】でネット検索できます。
+　【｜リンク：https://www.google.com/】https://www.google.com/【リンク｜】や【｜リンク：https://www.yahoo.co.jp/】https://www.yahoo.co.jp/【リンク｜】でネット検索できます。
 
 #>> リンク:一行
 【｜リンク：https://www.google.com/】https://www.google.com/【リンク｜】
