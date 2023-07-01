@@ -63,8 +63,10 @@ class FyakumoSpec extends Specification implements GropedResource {
 		'block' | '見出し:別名'
 		'block' | '箇条書き'
 		'block' | '箇条書き:入れ子'
-		'block' | '引用'
-		'block' | 'コード'
+		'block' | '手順'
+		'block' | '用語説明'
+		'block' | '行範囲タグ'
+		'block' | '行範囲タグ:属性あり'
 		'block' | 'マスキング'
 	}
 	

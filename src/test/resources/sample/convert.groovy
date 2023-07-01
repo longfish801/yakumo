@@ -40,7 +40,6 @@ script {
 		keys.each { String key ->
 			result key, new File(outputDir, "${key}.html")
 		}
-		templateKey 'index', 'index'
 	}
 	
 	doLast {
