@@ -4,6 +4,8 @@
 
 #> closure
 #: BLtxt文書を HTMLに変換するメイン処理です。
+	// 変換結果キー大域変数として格納します
+	clmap.cl('/thtml.crosscut/prop').properties['resultKey'] = resultKey
 	// テンプレートに適用するバインド変数のマップを生成します
 	binds = [
 		clmap: clmap,
@@ -31,19 +33,19 @@
 	// 足跡を大域変数として格納します
 	clmap.cl('/tbase.logging').properties['fprint'] = script.fprint
 	
-	// BLtxtのルート要素と変換対象キーとのマップを大域変数として格納します
-	clmap.cl('/thtml.htmlize/inline').properties['targetMap'] = bltxtMap.collectEntries { String targetKey, def bltxt ->
-		[ bltxt.root, targetKey ]
-	}
-	
 	// 変換結果キーのリストを作成し、大域変数として格納します
 	// もし "index"があれば必ず先頭にします
 	List resultKeys = script.results.map.keySet() as List
 	if (resultKeys.remove('index')) resultKeys.add(0, 'index')
-	clmap.cl('/thtml.crosscut').properties['resultKeys'] = resultKeys
+	clmap.cl('/thtml.crosscut/prop').properties['resultKeys'] = resultKeys
+	
+	// 変換結果キーと出力先とのマップを作成し、大域変数として格納します
+	clmap.cl('/thtml.crosscut/prop').properties['sourceMap'] = script.results.map.collectEntries { String resultKey, def result ->
+		[ resultKey, result.source ]
+	}
 	
 	// 見出しとアンカーとのマップを生成し、大域変数として格納します
-	clmap.cl('/thtml.crosscut/headline').properties['headerMap'] = clmap.cl('/thtml.crosscut/headline#headermap').call(bltxtMap)
+	clmap.cl('/thtml.crosscut/prop').properties['headerMap'] = clmap.cl('/thtml.crosscut/headline#headermap').call(bltxtMap)
 #-dec
 	import io.github.longfish801.yakumo.ConvertScript
 #-args

@@ -265,35 +265,13 @@ ${text}
 		url: node.attrs[0]
 	])
 #>> closure:参照
-	String aliasAttr = (node.attrs.size() == 0)
+	String alias = (node.attrs.size() == 0)
 		? '＃' + clmap.cl('/ttext').call(node)
 		: node.attrs[0]
-	int idxDiv = aliasAttr.indexOf('＃')
-	String targetKey
-	String alias
-	boolean internal = false
-	switch (idxDiv){
-		case { it < 0 }:
-			// 他の BLtxt文書への参照の場合
-			targetKey = aliasAttr
-			break
-		case { it == 0 }:
-			// 自 BLtxt文書内の見出しへの参照の場合
-			targetKey = targetMap[node.root]
-			alias = aliasAttr.substring(idxDiv + 1)
-			internal = true
-			break
-		default:
-			// 他の BLtxt文書内の見出しへの参照の場合
-			targetKey = aliasAttr.substring(0, idxDiv)
-			alias = aliasAttr.substring(idxDiv + 1)
-	}
 	html = templater.call(templateKey, [
 		text: text,
-		url: clmap.cl('/thtml.crosscut/headline#path').call(targetKey, alias, internal)
+		url: clmap.cl('/thtml.crosscut/headline#path').call(alias)
 	])
-#-prefix
-	if (targetMap == null) throw new YmoConvertException('targetMapがバインドされていません。')
 #>> closure:注目
 	html = templater.call(templateKey, [ text: text ])
 #>> closure:重要

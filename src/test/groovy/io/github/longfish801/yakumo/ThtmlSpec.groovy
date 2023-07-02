@@ -64,9 +64,10 @@ class ThtmlSpec extends Specification implements GropedResource {
 			String text = decTarget.solve("${parentKey}/${childKey}").dflt.join(System.lineSeparator())
 			BLtxt bltxt = new BLtxt(text)
 			if (childKey == '参照'){
-				Map bltxtMap = [ 'some': bltxt ]
-				clmap.cl('/thtml.htmlize/inline').properties['targetMap'] = bltxtMap.collectEntries { [ it.value.root, it.key ] }
-				clmap.cl('/thtml.crosscut/headline').properties['headerMap'] = clmap.cl('/thtml.crosscut/headline#headermap').call(bltxtMap)
+				clmap.cl('/thtml.crosscut/prop').properties['resultKey'] = 'some'
+				clmap.cl('/thtml.crosscut/prop').properties['headerMap'] = clmap.cl('/thtml.crosscut/headline#headermap').call([ 'some': bltxt ])
+				clmap.cl('/thtml.crosscut/prop#resultKeys').closure = null
+				clmap.cl('/thtml.crosscut/prop#headerMap').closure = null
 			}
 			return clmap.cl('/thtml.htmlize').call(bltxt.root).denormalize()
 		}
@@ -77,13 +78,21 @@ class ThtmlSpec extends Specification implements GropedResource {
 		}
 		// ナビゲーションリンク取得のためクロージャです
 		getNavi = { String childKey, String resultKey, List resultKeys ->
-			clmap.cl('/thtml.crosscut/navi').properties['resultKeys'] = resultKeys
-			clmap.cl('/thtml.crosscut/navi#').closure = null
+			clmap.cl('/thtml.crosscut/prop').properties['resultKeys'] = resultKeys
+			clmap.cl('/thtml.crosscut/prop').properties['sourceMap'] = resultKeys.collectEntries {
+				[ it, new File("${it}.html") ]
+			}
+			clmap.cl('/thtml.crosscut/prop#resultKeys').closure = null
+			clmap.cl('/thtml.crosscut/prop#sourceMap').closure = null
 			return clmap.cl('/thtml.crosscut/navi#').call(resultKey).denormalize()
 		}
 		// 複数の変換結果に関する横断的な処理結果のためクロージャです
 		getCross = { String parentKey, String childKey, String clname ->
 			String text = decTarget.solve("${parentKey}/${childKey}-${clname}").dflt.join(System.lineSeparator())
+			clmap.cl('/thtml.crosscut/prop').properties['resultKeys'] = [ 'some' ]
+			clmap.cl('/thtml.crosscut/prop').properties['sourceMap'] = [ 'some': new File('some.html') ]
+			clmap.cl('/thtml.crosscut/prop#resultKeys').closure = null
+			clmap.cl('/thtml.crosscut/prop#sourceMap').closure = null
 			return clmap.cl("/thtml.crosscut/${childKey}#${clname}").call([ 'some': new BLtxt(text) ]).denormalize()
 		}
 		// 期待する変換結果を返すクロージャです

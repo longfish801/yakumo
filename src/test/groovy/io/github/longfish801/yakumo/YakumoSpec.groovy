@@ -102,10 +102,10 @@ class YakumoSpec extends Specification implements GropedResource {
 		}
 		yakumo.script {
 			targets {
-				target 'key', new File(parentDir, 'target.txt').text
+				target 'scriptMaterial', new File(parentDir, 'target.txt').text
 			}
 			results {
-				result 'key', writer
+				result 'scriptMaterial', writer
 			}
 		}
 		yakumo.convert()
