@@ -107,6 +107,10 @@
 <ul>
 ${text}
 </ul>
+#-手順
+<ol>
+${text}
+</ol>
 #-項目 <li>${text}</li>
 #-用語説明
 <dl>
@@ -114,7 +118,7 @@ ${text}
 </dl>
 #-用語 <dt>${text}</dt>
 #-説明 <dd>${text}</dd>
-#-コラム
+#-案内
 <aside class="alert alert-success" role="alert">
 <% if (title != null){ %><header class="alert-heading text-center"><i class="bi bi-info-circle-fill"></i> ${title}</header><% } %>
 ${text}
@@ -124,6 +128,10 @@ ${text}
 <% if (title != null){ %><header class="alert-heading text-center"><i class="bi bi-exclamation-triangle-fill"></i> ${title}</header><% } %>
 ${text}
 </aside>
+#-コラム
+<div class="column">
+${text}
+</div>
 #-引用
 <figure>
 <blockquote class="blockquote p-3">
@@ -162,6 +170,8 @@ ${text}
 	])
 #>> closure:箇条書き
 	html = templater.call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
+#>> closure:手順
+	html = templater.call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
 #>> closure:項目
 	html = templater.call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
 #>> closure:用語説明
@@ -170,7 +180,7 @@ ${text}
 	html = templater.call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
 #>> closure:説明
 	html = templater.call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
-#>> closure:コラム
+#>> closure:案内
 	html = templater.call(templateKey, [
 		text: lowers.join(System.lineSeparator()),
 		title: (node.attrs.size() > 0)? node.attrs[0] : null
@@ -180,6 +190,8 @@ ${text}
 		text: lowers.join(System.lineSeparator()),
 		title: (node.attrs.size() > 0)? node.attrs[0] : null
 	])
+#>> closure:コラム
+	html = templater.call(templateKey, [ text: lowers.join(System.lineSeparator()) ])
 #>> closure:引用
 	if (lowers.last().startsWith('<figcaption ')){
 		// 引用元の記述がある場合
@@ -253,35 +265,13 @@ ${text}
 		url: node.attrs[0]
 	])
 #>> closure:参照
-	String aliasAttr = (node.attrs.size() == 0)
+	String alias = (node.attrs.size() == 0)
 		? '＃' + clmap.cl('/ttext').call(node)
 		: node.attrs[0]
-	int idxDiv = aliasAttr.indexOf('＃')
-	String targetKey
-	String alias
-	boolean internal = false
-	switch (idxDiv){
-		case { it < 0 }:
-			// 他の BLtxt文書への参照の場合
-			targetKey = aliasAttr
-			break
-		case { it == 0 }:
-			// 自 BLtxt文書内の見出しへの参照の場合
-			targetKey = targetMap[node.root]
-			alias = aliasAttr.substring(idxDiv + 1)
-			internal = true
-			break
-		default:
-			// 他の BLtxt文書内の見出しへの参照の場合
-			targetKey = aliasAttr.substring(0, idxDiv)
-			alias = aliasAttr.substring(idxDiv + 1)
-	}
 	html = templater.call(templateKey, [
 		text: text,
-		url: clmap.cl('/thtml.crosscut/headline#path').call(targetKey, alias, internal)
+		url: clmap.cl('/thtml.crosscut/headline#path').call(alias)
 	])
-#-prefix
-	if (targetMap == null) throw new YmoConvertException('targetMapがバインドされていません。')
 #>> closure:注目
 	html = templater.call(templateKey, [ text: text ])
 #>> closure:重要

@@ -49,9 +49,9 @@ class ThtmlSpec extends Specification implements GropedResource {
 		def decExpect = teaServer['dec:expect']
 		
 		// 変換資材を読み込みます
-		MaterialLoader loader = new MaterialLoader(new Yakumo())
-		loader.material('thtml')
-		def clmap = loader.yakumo.material.clmapServer['clmap:thtml']
+		Yakumo yakumo = new Yakumo()
+		yakumo.loader.material('thtml')
+		def clmap = yakumo.material.clmapServer['clmap:thtml'].clone()
 		
 		ConvertScript script = new ConvertScript()
 		script.results {
@@ -64,9 +64,10 @@ class ThtmlSpec extends Specification implements GropedResource {
 			String text = decTarget.solve("${parentKey}/${childKey}").dflt.join(System.lineSeparator())
 			BLtxt bltxt = new BLtxt(text)
 			if (childKey == '参照'){
-				Map bltxtMap = [ 'some': bltxt ]
-				clmap.cl('/thtml.htmlize/inline').properties['targetMap'] = bltxtMap.collectEntries { [ it.value.root, it.key ] }
-				clmap.cl('/thtml.crosscut/headline').properties['headerMap'] = clmap.cl('/thtml.crosscut/headline#headermap').call(bltxtMap)
+				clmap.cl('/thtml.crosscut/prop').properties['resultKey'] = 'some'
+				clmap.cl('/thtml.crosscut/prop').properties['headerMap'] = clmap.cl('/thtml.crosscut/headline#headermap').call([ 'some': bltxt ])
+				clmap.cl('/thtml.crosscut/prop#resultKeys').closure = null
+				clmap.cl('/thtml.crosscut/prop#headerMap').closure = null
 			}
 			return clmap.cl('/thtml.htmlize').call(bltxt.root).denormalize()
 		}
@@ -77,13 +78,21 @@ class ThtmlSpec extends Specification implements GropedResource {
 		}
 		// ナビゲーションリンク取得のためクロージャです
 		getNavi = { String childKey, String resultKey, List resultKeys ->
-			clmap.cl('/thtml.crosscut/navi').properties['resultKeys'] = resultKeys
-			clmap.cl('/thtml.crosscut/navi#').closure = null
+			clmap.cl('/thtml.crosscut/prop').properties['resultKeys'] = resultKeys
+			clmap.cl('/thtml.crosscut/prop').properties['sourceMap'] = resultKeys.collectEntries {
+				[ it, new File("${it}.html") ]
+			}
+			clmap.cl('/thtml.crosscut/prop#resultKeys').closure = null
+			clmap.cl('/thtml.crosscut/prop#sourceMap').closure = null
 			return clmap.cl('/thtml.crosscut/navi#').call(resultKey).denormalize()
 		}
 		// 複数の変換結果に関する横断的な処理結果のためクロージャです
 		getCross = { String parentKey, String childKey, String clname ->
 			String text = decTarget.solve("${parentKey}/${childKey}-${clname}").dflt.join(System.lineSeparator())
+			clmap.cl('/thtml.crosscut/prop').properties['resultKeys'] = [ 'some' ]
+			clmap.cl('/thtml.crosscut/prop').properties['sourceMap'] = [ 'some': new File('some.html') ]
+			clmap.cl('/thtml.crosscut/prop#resultKeys').closure = null
+			clmap.cl('/thtml.crosscut/prop#sourceMap').closure = null
 			return clmap.cl("/thtml.crosscut/${childKey}#${clname}").call([ 'some': new BLtxt(text) ]).denormalize()
 		}
 		// 期待する変換結果を返すクロージャです
@@ -104,11 +113,13 @@ class ThtmlSpec extends Specification implements GropedResource {
 		'other'	| '段落'
 		'block'	| '見出し'
 		'block'	| '箇条書き'
+		'block'	| '手順'
 		'block'	| '用語説明'
 		'block'	| '画像'
-		'block'	| 'コラム'
-		'block'	| 'コラム:小見出し'
+		'block'	| '案内'
+		'block'	| '案内:小見出し'
 		'block'	| '注意'
+		'block'	| 'コラム'
 		'block'	| '引用'
 		'block'	| 'コード'
 		'block'	| '変換済'

@@ -12,11 +12,16 @@
 #-bullet ・
 #-more   
 
-#>> enclose:引用
-#-bgn _=====
+#>> indent:手順
+#-bullet ＃
+#-more   
 
-#>> enclose:コード
-#-bgn -----
+#>> indent:用語説明
+#-bullet :^：{1,2}
+#-more :^ {2}
+
+#>> enclose:行範囲タグ
+#-bgn :＝＝＝([^\n＝【】]+)＝＝＝
 
 #>> enclose:マスキング
 #-refer null
@@ -42,42 +47,86 @@
 { def hndl ->
 	String alias = ''
 	String headline = hndl.dflt[0]
-	int divIdx = headline.lastIndexOf('：')
+	int divIdx = headline.lastIndexOf('＃')
 	if (divIdx > 1){
-		alias = headline.substring(divIdx)
+		alias = "：${headline.substring(divIdx + 1)}"
 		headline = headline.substring(0, divIdx)
 	}
 	return [ "【＝見出し${hndl.upper.attr}${alias}】${headline}" ]
 }
 
-#>> call 箇条書き
+#>> call:箇条書き
 #-include 箇条書き
 #-cover
 { def hndl ->
-	hndl.tops = []
-	hndl.top = '【－項目】'
-	if (hndl.tagnum == 1) hndl.top = [ '【－箇条書き】', hndl.top ]
-	hndl.btm = '【項目－】'
-	if (hndl.tagnum == hndl.tagtotal) hndl.btm = [ hndl.btm, '【箇条書き－】' ]
-	hndl.bullet = null
+	List tops = []
+	List btms = []
+	if (hndl.tagnum == 1) tops << '【－箇条書き】'
+	if (hndl.lowers.size() == 1 && hndl.lowers.values().first().dflt.size() == 1){
+		hndl.bullet = '【＝項目】'
+	} else {
+		hndl.bullet = null
+		tops << '【－項目】'
+		btms << '【項目－】'
+	}
+	if (hndl.tagnum == hndl.tagtotal) btms <<  '【箇条書き－】'
+	if (tops.size() > 0) hndl.top = tops
+	if (btms.size() > 0) hndl.btm = btms
 	hndl.more = null
 	hndl.nogap = true
 }
 
-#>> call:引用
-#-include 引用
+#>> call:手順
+#-include 手順
 #-cover
 { def hndl ->
-	hndl.top = '【－引用】'
-	hndl.btm = '【引用－】'
+	List tops = []
+	List btms = []
+	if (hndl.tagnum == 1) tops << '【－手順】'
+	if (hndl.lowers.size() == 1 && hndl.lowers.values().first().dflt.size() == 1){
+		hndl.bullet = '【＝項目】'
+	} else {
+		hndl.bullet = null
+		tops << '【－項目】'
+		btms << '【項目－】'
+	}
+	if (hndl.tagnum == hndl.tagtotal) btms <<  '【手順－】'
+	if (tops.size() > 0) hndl.top = tops
+	if (btms.size() > 0) hndl.btm = btms
+	hndl.more = null
+	hndl.nogap = true
 }
 
-#>> call:コード
-#-include コード
+#>> call:用語説明
+#-include 用語説明
 #-cover
 { def hndl ->
-	hndl.top = '【－コード】'
-	hndl.btm = '【コード－】'
+	String tagName = (hndl.bullet == '：：')? '用語': '説明'
+	List tops = []
+	List btms = []
+	if (hndl.tagnum == 1) tops << '【－用語説明】'
+	if (hndl.lowers.size() == 1 && hndl.lowers.values().first().dflt.size() == 1){
+		hndl.bullet = "【＝${tagName}】"
+	} else {
+		hndl.bullet = null
+		tops << "【－${tagName}】"
+		btms << "【${tagName}－】"
+	}
+	if (hndl.tagnum == hndl.tagtotal) btms <<  '【用語説明－】'
+	if (tops.size() > 0) hndl.top = tops
+	if (btms.size() > 0) hndl.btm = btms
+	hndl.more = null
+	hndl.nogap = true
+}
+
+#>> call:行範囲タグ
+#-include 行範囲タグ
+#-cover
+{ def hndl ->
+	String tag = hndl.top.replaceAll(/＝＝＝([^\n＝【】]+)＝＝＝/, '$1')
+	String tagname = tag.split('：').first()
+	hndl.top = "【－${tag}】"
+	hndl.btm = "【${tagname}－】"
 }
 
 #>> call:マスキング
@@ -91,13 +140,13 @@
 #>> reprex
 #-exclude マスキング
 // 文範囲タグ
-【(リンク|参照|ルビ)：([^：]+)：([^】]+)】	【｜$1：$3】$2【$1｜】
-【(参照|注目|重要|補足|特記|訂正|上付き|下付き|縦中横|傍点)：([^】]+)】	【｜$1】$2【$1｜】
+【(リンク|参照|ルビ)：([^：【】\n]+?)：([^：【】\n]+?)】	【｜$1：$3】$2【$1｜】
+【(参照|注目|重要|補足|特記|訂正|上付き|下付き|縦中横|傍点)：([^：【】\n]+?)】	【｜$1】$2【$1｜】
 
 // リンク
-【リンク：([^】]+)】	【｜リンク：$1】$1【リンク｜】
+【リンク：([^：【】\n]+?)】	【｜リンク：$1】$1【リンク｜】
 ^(http:\/\/|https:\/\/){1}[\w\.\-\/:\#\?\=\&\;\%\~\+]+$	【｜リンク：$0】$0【リンク｜】
 
 // カクヨム記法
-｜([^《]+)《([^》]+)》	【｜ルビ：$2】$1【ルビ｜】
-《《([^》]+)》》	【｜傍点】$1【傍点｜】
+｜([^《【】\n]+?)《([^》【】\n]+?)》	【｜ルビ：$2】$1【ルビ｜】
+《《([^》【】\n]+?)》》	【｜傍点】$1【傍点｜】

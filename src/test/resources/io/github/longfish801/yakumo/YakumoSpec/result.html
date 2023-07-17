@@ -1,7 +1,4 @@
-<%
-	def bltxt = bltxtMap[resultKey]
-	def onedoc = clmap.cl('/thtml.meta/onedoc')
-%>
+
 <!doctype html>
 <html lang="ja">
 <head>
@@ -73,27 +70,7 @@ ul#toc > li.toc-h5 {
 ul#toc > li.toc-h6 {
 	padding-left: 4rem;
 }
-<% if (resultKey == 'index'){ %>
-/* 総目次 */
-ul#tocAll > li.toc-h1 {
-	padding-left: 0rem;
-}
-ul#tocAll > li.toc-h2 {
-	padding-left: 1rem;
-}
-ul#tocAll > li.toc-h3 {
-	padding-left: 2rem;
-}
-ul#tocAll > li.toc-h4 {
-	padding-left: 3rem;
-}
-ul#tocAll > li.toc-h5 {
-	padding-left: 4rem;
-}
-ul#tocAll > li.toc-h6 {
-	padding-left: 5rem;
-}
-<% } %>
+
 /* インライン要素 */
 span.attention {
 	font-size: 1.7rem;
@@ -107,57 +84,37 @@ span.dot {
 }
 -->
 </style>
-<title><%= clmap.cl('/thtml.textize#meta').call(bltxt, 'タイトル', '（無題）') %></title>
+<title>テスト</title>
 </head>
 <body class="container">
 
 <!-- ヘッダー -->
 <header id="header" class="row py-3">
 <div class="col-lg-8">
-<h1><%= clmap.cl('/thtml.htmlize').cl('#meta').call(bltxt, 'タイトル', '（無題）') %></h1>
-<% if (onedoc.cl('need#subtitle').call(bltxt)){ %>
-<ul id="subtitle" class="list-unstyled fs-5">
-<%= onedoc.cl('#subtitle').call(bltxt) %>
-</ul>
-<% } %>
+<h1>テスト</h1>
+
 </div>
-<% if (onedoc.cl('need#extra').call(bltxt)){ %>
-<div class="col-lg-4 text-end">
-<ul id="extra" class="list-unstyled fs-6">
-<%= onedoc.cl('#extra').call(bltxt) %>
-</ul>
-</div>
-<% } %>
+
 </header>
 
 <div class="row justify-content-center">
 
-<% if (onedoc.cl('need#toc').call(bltxt)){ %>
+
 <nav id="sidenav" class="col-lg-4 py-3">
 <!-- 目次 -->
 <ul id="toc" class="nav flex-column sticky-top">
-<%= onedoc.cl('#toc').call(bltxt) %>
+<li class="nav-item toc-h2"><a href="#id2_1" class="nav-link">見出し</a></li>
 </ul>
 </nav>
-<% } %>
+
 
 <main id="main" class="col-lg-8 py-3">
 <!-- 本文 -->
-<%= clmap.cl('/thtml.htmlize').call(bltxt.root) %>
-<% if (resultKey == 'index' && clmap.cl("/thtml.crosscut/toc/need#").call(bltxtMap)){ %>
-<!-- 総目次 -->
-<ul id="tocAll" class="list-unstyled">
-<%= clmap.cl("/thtml.crosscut/toc#").call(bltxtMap) %>
-</ul>
-<% } %>
-<% if (onedoc.cl('need#note').call(bltxt)){ %>
-<!-- 註記 -->
-<aside id="appendix">
-<dl id="note" class="px-3">
-<%= onedoc.cl('#note').call(bltxt) %>
-</dl>
-</aside>
-<% } %>
+<h2><a name="id2_1"></a>見出し <div class="float-end fs-6"><a href="#header"><i class="bi bi-chevron-double-up"></i></a></div></h2>
+
+<p>　これはサンプルです。</p>
+
+
 </main>
 
 </div><!-- end of row -->
@@ -165,7 +122,7 @@ span.dot {
 <!-- フッター -->
 <footer id="footer" class="row justify-content-center py-3">
 <nav id="navi" class="col-lg-12 text-end">
-<%= clmap.cl("/thtml.crosscut/navi#").call(resultKey) %>
+<a href=".."><i class="bi bi-arrow-up-circle"></i></a>
 </nav>
 <hr/>
 </footer>

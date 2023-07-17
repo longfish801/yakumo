@@ -38,6 +38,15 @@
 </ul>
 #>
 
+#>> 手順
+<ol>
+<li>まずマスクをつけます。</li>
+<li>手をよく洗ってください。<br/>
+指と指の間や爪の隙間もね。</li>
+<li>それでは、いただきます！</li>
+</ol>
+#>
+
 #>> 用語説明
 <dl>
 <dt>甘口</dt>
@@ -56,14 +65,14 @@
 </figure>
 #>
 
-#>> コラム
+#>> 案内
 <aside class="alert alert-success" role="alert">
 
 <p>　日本人の四割は血液型がＯ型です。</p>
 </aside>
 #>
 
-#>> コラム:小見出し
+#>> 案内:小見出し
 <aside class="alert alert-success" role="alert">
 <header class="alert-heading text-center"><i class="bi bi-info-circle-fill"></i> ８月３１日はなんの日？</header>
 <p>　８月３１日は野菜の日です。<br/>
@@ -76,6 +85,13 @@
 <header class="alert-heading text-center"><i class="bi bi-exclamation-triangle-fill"></i> 中火とは</header>
 <p>　中火とは、フライパンの底に炎の先端がちょうど届くくらいの状態を指します。</p>
 </aside>
+#>
+
+#>> コラム
+<div class="column">
+<p>　飲むヨーグルトは美味しい。<br/>
+　飲まないヨーグルトは味がしない。</p>
+</div>
 #>
 
 #>> 引用

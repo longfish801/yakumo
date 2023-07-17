@@ -21,5 +21,4 @@ material {
 	
 	// テンプレートを設定します
 	template 'default', grope("${convName}/template/default.html")
-	template 'index', grope("${convName}/template/index.html")
 }

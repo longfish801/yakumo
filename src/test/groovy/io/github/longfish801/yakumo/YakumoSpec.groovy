@@ -5,6 +5,7 @@
  */
 package io.github.longfish801.yakumo
 
+import io.github.longfish801.gonfig.GropedResource
 import io.github.longfish801.yakumo.YmoConst as cnst
 import io.github.longfish801.yakumo.YmoMsg as msgs
 import spock.lang.Shared
@@ -14,7 +15,9 @@ import spock.lang.Specification
  * Yakumoのテスト。
  * @author io.github.longfish801
  */
-class YakumoSpec extends Specification {
+class YakumoSpec extends Specification implements GropedResource {
+	/** 自クラス */
+	static final Class clazz = YakumoSpec.class
 	/** Yakumo */
 	@Shared Yakumo yakumo
 	
@@ -83,5 +86,30 @@ class YakumoSpec extends Specification {
 		writer2.toString() == '<h1>[KEY2] Hi, Groovy.</h1>'
 		yakumo.script.fprint.logs.size() == 3
 		yakumo.script.fprint.warns.size() == 1
+	}
+	
+	def 'script - material'(){
+		given:
+		Writer writer
+		File parentDir
+		
+		when:
+		setBaseDir('src/test/resources')
+		parentDir = new File(deepDir, 'YakumoSpec')
+		writer = new StringWriter()
+		yakumo.load {
+			material 'fyakumo', 'thtml'
+		}
+		yakumo.script {
+			targets {
+				target 'scriptMaterial', new File(parentDir, 'target.txt').text
+			}
+			results {
+				result 'scriptMaterial', writer
+			}
+		}
+		yakumo.convert()
+		then:
+		writer.toString().normalize() == new File(parentDir, 'result.html').text
 	}
 }

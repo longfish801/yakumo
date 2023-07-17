@@ -2,6 +2,8 @@
 #: ログ出力に関する処理です。
 #-dec
 	import io.github.longfish801.yakumo.YmoConvertException
+#-prefix
+	if (logid == null) logid = 'UNKNOWN'
 #>
 
 #> map:log
@@ -12,7 +14,6 @@
 #-dec
 	import org.slf4j.LoggerFactory
 #-prefix
-	if (logid == null) throw new YmoConvertException("logidがバインドされていません。")
 	def LOG = LoggerFactory.getLogger('io.github.longfish801.yakumo.thtml.util')
 #>> closure:trace
 	LOG.trace("[${logid}] ${message}", *embeddeds)
@@ -30,9 +31,8 @@
 	String message
 	List embeddeds
 #-prefix
-	if (logid == null) throw new YmoConvertException("logidがバインドされていません。")
-	if (fprint == null) throw new YmoConvertException("fprintがバインドされていません。")
 	message = String.format("[${logid}] ${message}", *embeddeds)
+	if (fprint == null) throw new YmoConvertException("fprintがバインドされていません。 message=${message}")
 #>> closure:trace
 	fprint.trace(message)
 #>> closure:debug

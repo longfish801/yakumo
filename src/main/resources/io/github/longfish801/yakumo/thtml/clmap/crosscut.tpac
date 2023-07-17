@@ -5,21 +5,64 @@
 	import io.github.longfish801.yakumo.YmoConvertException
 #>
 
+#> map:prop
+#>> closure:resultKey
+	return resultKey
+#-prefix
+	if (resultKey == null) throw new YmoConvertException('resultKeyがバインドされていません。')
+#>> closure:resultKeys
+	return resultKeys
+#-prefix
+	if (resultKeys == null) throw new YmoConvertException('resultKeysがバインドされていません。')
+#>> closure:sourceMap
+	return sourceMap
+#-prefix
+	if (sourceMap == null) throw new YmoConvertException('sourceMapがバインドされていません。')
+#>> closure:headerMap
+	return headerMap
+#-prefix
+	if (headerMap == null) throw new YmoConvertException('headerMapがバインドされていません。')
+#>
+
+#> map:relation
+#: 変換対象と変換結果との対応関係を返します。
+#: ひとつの変換結果に複数の変換対象を含む事態を想定しています。
+#: ただしデフォルトでは、変換対象と変換結果が一対一とみなしています。
+#: 必要に応じて処理を上書きしてください。
+#>> closure:targets
+	targetKeys = [ resultKey ]
+#-args
+	String resultKey
+#-return
+	List targetKeys
+#>> closure:result
+	resultKey = targetKey
+#-args
+	String targetKey
+#-return
+	String resultKey
+#>
+
 #> map:filename
 #-return
 	String filename
 #>> closure:target
 #: 変換対象キーに対応する変換結果のファイル名を返します。
-#: 変換対象と変換結果が一対一とみなし、変換対象キーに拡張子htmlを付与した文字列を返します。
-#: 必要に応じて処理を上書きしてください。
-	filename = "${targetKey}.html"
+	String resultKey = clmap.cl('/thtml.crosscut/relation#result').call(targetKey)
+	filename = clmap.cl('#result').call(resultKey)
 #-args
 	String targetKey
 #>> closure:result
 #: 変換結果キーに対応する変換結果のファイル名を返します。
-#: 変換結果キーに拡張子htmlを付与した文字列を返します。
+#: 変換結果に設定された出力先が Fileであればファイル名を返します。
+#: そうでない場合は警告ログを出力して空文字を返します。
 #: 必要に応じて処理を上書きしてください。
-	filename = "${resultKey}.html"
+	Map sourceMap = clmap.cl('/thtml.crosscut/prop#sourceMap').call()
+	if (sourceMap[resultKey] == null || !(sourceMap[resultKey] instanceof File)){
+		clmap.cl('/tbase.logging/fprint#warn').call('変換結果の出力先がファイルではないためファイル名を取得できません。 resultKey=%s', [ resultKey ])
+		return ''
+	}
+	filename = sourceMap[resultKey].name
 #-args
 	String resultKey
 #>
@@ -54,14 +97,13 @@
 #: 見出しとアンカーとのマップを生成します。
 	headerMap = [:]
 	bltxtMap.each { String targetKey, def bltxt ->
-		def headerMapEach = [:]
 		bltxt.grepNodes('block', '見出し').each { def node ->
 			String alias = (node.attrs.size() < 2)
 				? clmap.cl('/ttext').call(node)
 				: node.attrs[1]
-			headerMapEach[alias] = clmap.cl('/thtml.crosscut/headline#anchor').call(node)
+			if (!headerMap.containsKey(alias)) headerMap[alias] = []
+			headerMap[alias] << clmap.cl('/thtml.crosscut/headline#anchor').call(node)
 		}
-		headerMap[targetKey] = headerMapEach
 	}
 #-args
 	Map bltxtMap
@@ -70,33 +112,61 @@
 #>
 
 #>> closure:path
-#: 見出しへリンクするための URLパスを生成します。
+#: 変換結果や見出しへリンクするための URLパスを生成します。
+	// 大域変数を参照します
+	String resultKey = clmap.cl('/thtml.crosscut/prop#resultKey').call()
+	Map sourceMap = clmap.cl('/thtml.crosscut/prop#sourceMap').call()
+	Map headerMap = clmap.cl('/thtml.crosscut/prop#headerMap').call()
+	// 参照タグに指定された属性値を変換結果キーとアンカーに分離します
+	int idxDiv = aliasAttr.indexOf('＃')
+	List splited = aliasAttr.split('＃')
+	String toResultKey = (idxDiv == 0)? null : splited[0]
+	if (toResultKey == resultKey) toResultKey = null
+	String alias = (idxDiv < 0)? null : splited[1]
 	// 見出しのアンカーを参照します
 	String anchor
 	if (alias != null){
-		Map headerMapEach = headerMap[targetKey]
-		if (headerMapEach == null){
-			clmap.cl('/tbase.logging/fprint#warn').call("変換対象キーに対応する見出しとアンカーのマップがありません。targetKey=%s", [ targetKey ])
+		if (headerMap[alias] == null){
+			clmap.cl('/tbase.logging/fprint#warn').call("別名に対応する見出しがありません。aliasAttr=%s", [ aliasAttr ])
 			return ''
 		}
-		anchor = headerMapEach[alias]
-		if (anchor == null){
-			clmap.cl('/tbase.logging/fprint#warn').call("見出しの別名に対応するアンカーがありません。targetKey=%s, alias=%s", [ targetKey, alias ])
+		if (headerMap[alias].size() > 1){
+			clmap.cl('/tbase.logging/fprint#warn').call("別名に対応する見出しが２つ以上あります。aliasAttr=%s", [ aliasAttr ])
 			return ''
 		}
+		anchor = headerMap[alias][0]
+	}
+	// 変換結果へのファイルパスを参照します
+	String relPath
+	if (toResultKey != null){
+		Closure getRelativePath
+		getRelativePath = { File base, File target ->
+			if (base.parentFile == null) {
+				throw new IOException("共通するフォルダが無いため相対パスを取得できません。 base=${base.path}")
+			}
+			if (target.canonicalPath.startsWith(base.canonicalPath)){
+				return target.canonicalPath.substring(base.canonicalPath.length() + 1)
+			} else {
+				return ('../' + getRelativePath(base.parentFile, target))
+			}
+		}
+		if (sourceMap[resultKey] == null || !(sourceMap[resultKey] instanceof File)){
+			clmap.cl('/tbase.logging/fprint#warn').call("現在の変換対象の出力先がファイルではないためファイルパスを取得できません。 resultKey=%s", [ resultKey ])
+			return ''
+		}
+		if (sourceMap[toResultKey] == null || !(sourceMap[toResultKey] instanceof File)){
+			clmap.cl('/tbase.logging/fprint#warn').call("参照先の変換対象の出力先がファイルではないためファイルパスを取得できません。 toResultKey=%s", [ toResultKey ])
+			return ''
+		}
+		relPath = getRelativePath(sourceMap[resultKey].parentFile, sourceMap[toResultKey])
 	}
 	// URLパスを生成します
 	path = (anchor == null)? '' : '#' + anchor
-	// 他のファイルへのリンクならばファイル名を先頭に付与します
-	if (!internal) path = clmap.cl('../filename#target').call(targetKey) + path
+	path = (relPath == null)? path : relPath + path
 #-args
-	String targetKey
-	String alias
-	boolean internal
+	String aliasAttr
 #-return
 	String path
-#-prefix
-	if (headerMap == null) throw new YmoConvertException('headerMapがバインドされていません。')
 #>
 
 #> map:navi
@@ -115,6 +185,7 @@
 #-next <a href="${href}"><i class="bi bi-arrow-right-circle"></i></a>
 #>> closure
 	// 変換対象がひとつのみならば上位へのリンクのみとします
+	List resultKeys = clmap.cl('/thtml.crosscut/prop#resultKeys').call()
 	if (resultKeys.size() == 1){
 		return templater.call(templateKey + 'upper', [:])
 	}
@@ -144,8 +215,6 @@
 		])
 	}
 	html = links.join(System.lineSeparator())
-#-prefix
-	if (resultKeys == null) throw new YmoConvertException('resultKeysがバインドされていません。')
 #>
 
 #> map:toc
@@ -178,14 +247,18 @@ title {
 #: 変換対象と変換結果が一対一であることが前提となります。
 #: 変換対象キー "index"は目次の対象として除外します。
 	def config = clmap.solve("${clmap.path}/config").config()
-	html = bltxtMap.findAll {
-		it.key != 'index'
-	}.collect { String targetKey, def bltxt ->
-		return templater.call(templateKey + 'title', [
-			href: clmap.cl('/thtml.crosscut/filename#target').call(targetKey),
-			title: clmap.cl('/thtml.htmlize').cl('#meta').call(bltxt, 'タイトル', config.title.dflt),
-			lower: (maxLevel != 1)? System.lineSeparator() + clmap.cl('/thtml.meta/onedoc/toc#').call(bltxt, maxLevel, targetKey) : '',
-		])
+	List resultKeys = clmap.cl('/thtml.crosscut/prop#resultKeys').call()
+	html = resultKeys.findAll {
+		it != 'index'
+	}.collect { String resultKey ->
+		clmap.cl('/thtml.crosscut/relation#targets').call(resultKey).collect { String targetKey ->
+			def bltxt = bltxtMap[targetKey]
+			return templater.call(templateKey + 'title', [
+				href: clmap.cl('/thtml.crosscut/filename#target').call(targetKey),
+				title: clmap.cl('/thtml.htmlize').cl('#meta').call(bltxt, 'タイトル', config.title.dflt),
+				lower: (maxLevel != 1)? System.lineSeparator() + clmap.cl('/thtml.meta/onedoc/toc#').call(bltxt, maxLevel, targetKey) : '',
+			])
+		}.join(System.lineSeparator())
 	}.join(System.lineSeparator())
 #-args
 	Map bltxtMap
